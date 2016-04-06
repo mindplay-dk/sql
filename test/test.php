@@ -4,6 +4,7 @@ use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Database;
+use mindplay\sql\framework\SQLException;
 use Mockery\MockInterface;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -44,6 +45,28 @@ test(
         );
 
         ok($db->getConnection()->getPDO() instanceof PDO, "can bootstrap with raw PDO connection object");
+    }
+);
+
+test(
+    'can generate human-readable SQL exceptions',
+    function () {
+        $previous = new RuntimeException();
+
+        $exception = new SQLException(
+            "SELECT :foo, :bar, :baz", [
+                'foo' => 'hello',
+                'bar' => 123,
+                'baz' => null
+            ],
+            "oops!",
+            99,
+            $previous
+        );
+
+        eq($exception->getMessage(), "oops!\nSELECT 'hello', 123, NULL");
+        eq($exception->getCode(), 99);
+        eq($exception->getPrevious(), $previous);
     }
 );
 
