@@ -1,0 +1,18 @@
+{
+    "type": "library",
+    "name": "mindplay/sql",
+    "autoload": {
+        "psr-4": {
+            "mindplay\\sql\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.5",
+        "mindplay/unbox": "^1.0.2"
+    },
+    "require-dev": {
+        "mindplay/testies": "dev-master",
+        "mockery/mockery": "~0.9.4",
+        "phpunit/php-code-coverage": "^3.0"
+    }
+}
