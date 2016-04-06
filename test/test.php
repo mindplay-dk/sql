@@ -7,6 +7,7 @@ use mindplay\sql\framework\Database;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\RecordSetMapper;
 use mindplay\sql\framework\SQLException;
+use mindplay\sql\framework\Statement;
 use Mockery\MockInterface;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -57,10 +58,10 @@ test(
 
         $exception = new SQLException(
             "SELECT :foo, :bar, :baz", [
-                'foo' => 'hello',
-                'bar' => 123,
-                'baz' => null
-            ],
+            'foo' => 'hello',
+            'bar' => 123,
+            'baz' => null,
+        ],
             "oops!",
             99,
             $previous
@@ -267,14 +268,70 @@ test(
     function () {
         $mapper = new RecordSetMapper(function ($records) {
             return array_map(
-               function ($record) {
-                   return ['a' => $record['a'] * 10];
-               },
-               $records
+                function ($record) {
+                    return ['a' => $record['a'] * 10];
+                },
+                $records
             );
         });
 
         eq($mapper->map([['a' => 1], ['a' => 2], ['a' => 3]]), [['a' => 10], ['a' => 20], ['a' => 30]]);
+    }
+);
+
+test(
+    'can bind statement parameters to values',
+    function () {
+        $st = new Statement("SELECT 1");
+
+        eq($st->getSQL(), "SELECT 1");
+
+        $st->bind('int', 1);
+        $st->bind('float', 1.2);
+        $st->bind('string', 'hello');
+        $st->bind('true', true);
+        $st->bind('false', false);
+        $st->bind('null', null);
+
+        $st->bind('int_list', [1, 2]);
+        $st->bind('float_list', [1.2, 3.4]);
+        $st->bind('string_list', ['hello', 'world']);
+        $st->bind('bools', [true, false]);
+        $st->bind('nulls', [null, null]);
+
+        $st->apply(['int' => 2, 'foo' => 'bar']); // overrides/adds values
+
+        eq($st->getParams(), [
+            'int'    => 2,
+            'float'  => 1.2,
+            'string' => 'hello',
+            'true'   => true,
+            'false'  => false,
+            'null'   => null,
+
+            'int_list'    => [1, 2],
+            'float_list'  => [1.2, 3.4],
+            'string_list' => ['hello', 'world'],
+            'bools'       => [true, false],
+            'nulls'       => [null, null],
+            'foo'         => 'bar',
+        ]);
+
+        expect(
+            RuntimeException::class,
+            "rejects non-scalar values",
+            function () use ($st) {
+                $st->bind('foo', (object) []);
+            }
+        );
+
+        expect(
+            RuntimeException::class,
+            "rejects nested arrays",
+            function () use ($st) {
+                $st->bind('foo', [[1]]);
+            }
+        );
     }
 );
 
