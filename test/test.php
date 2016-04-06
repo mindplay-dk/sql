@@ -335,6 +335,134 @@ test(
     }
 );
 
+test(
+    'can prepare statements and bind scalar values',
+    function () {
+        /** @var MockInterface|PDO $pdo */
+        $pdo = Mockery::mock(PDO::class);
+
+        /** @var MockInterface|PDOStatement $handle */
+        $handle = Mockery::mock(PDOStatement::class);
+
+        $params = [
+            'int'    => 1,
+            'float'  => 1.2,
+            'string' => 'hello',
+            'true'   => true,
+            'false'  => false,
+            'null'   => null,
+        ];
+
+        $pdo_types = [
+            'int' => PDO::PARAM_INT,
+            'float' => PDO::PARAM_STR,
+            'string' => PDO::PARAM_STR,
+            'true' => PDO::PARAM_BOOL,
+            'false' => PDO::PARAM_BOOL,
+            'null' => PDO::PARAM_NULL,
+        ];
+
+        $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
+
+        $connection = new Connection($pdo, create_driver());
+
+        $pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
+
+        foreach ($params as $name => $value) {
+            $handle->shouldReceive('bindValue')->once()->with($name, $value, $pdo_types[$name])->andReturn($handle);
+        }
+
+        $statement = new Statement($sql);
+
+        $statement->apply($params);
+
+        $connection->prepare($statement);
+
+        Mockery::close();
+
+        ok(true, "mock assertions completed");
+    }
+);
+
+test(
+    'can prepare statements and bind arrays of scalar values',
+    function () {
+        /** @var MockInterface|PDO $pdo */
+        $pdo = Mockery::mock(PDO::class);
+
+        /** @var MockInterface|PDOStatement $handle */
+        $handle = Mockery::mock(PDOStatement::class);
+
+        $params = [
+            'int'    => [1, 2],
+            'float'  => [1.2, 3.4],
+            'string' => ['hello', 'world'],
+            'bool'   => [true, false],
+        ];
+
+        $pdo_types = [
+            'int'    => PDO::PARAM_INT,
+            'float'  => PDO::PARAM_STR,
+            'string' => PDO::PARAM_STR,
+            'bool'   => PDO::PARAM_BOOL,
+            'null'   => PDO::PARAM_NULL,
+        ];
+
+        // the following conditions will assert that e.g. ":int" for an array with 2 elements expands to a set like "(:int_1, :int_2)"
+        // and that ":empty" for an array with zero elements expands to the empty set, e.g. "(null)" (and doesn't bind any value)
+
+        $sql = "SELECT * FROM foo WHERE empty = :empty AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN :{$name}"; }, array_keys($params)));
+
+        $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
+
+        $connection = new Connection($pdo, create_driver());
+
+        $pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
+
+        foreach ($params as $name => $values) {
+            $index = 1;
+
+            foreach ($values as $value) {
+                $handle->shouldReceive('bindValue')->once()->with("{$name}_{$index}", $value, $pdo_types[$name])->andReturn($handle);
+
+                $index += 1;
+            }
+        }
+
+        $statement = new Statement($sql);
+
+        $statement->apply($params);
+        $statement->bind('empty', []);
+
+        $connection->prepare($statement);
+
+        Mockery::close();
+
+        ok(true, "mock assertions completed");
+    }
+);
+
+test(
+    'Connection throws on internal error condition',
+    function () {
+        /** @var MockInterface|PDO $pdo */
+        $pdo = Mockery::mock(PDO::class);
+
+        /** @var MockInterface|PDOStatement $handle */
+        $handle = Mockery::mock(PDOStatement::class);
+
+        $connection = new Connection($pdo, create_driver());
+
+        expect(
+            InvalidArgumentException::class,
+            "internally throws on unexpected value",
+            function () use ($connection, $handle) {
+                invoke($connection, 'bind', [$handle, 'foo', [1, 2, 3]]);
+            }
+        );
+    }
+);
+
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 
 exit(run());

@@ -2,10 +2,11 @@
 
 namespace mindplay\sql\framework;
 
-use PDO;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use PDO;
+use PDOStatement;
 use UnexpectedValueException;
 
 /**
@@ -38,15 +39,15 @@ class Connection
     private $transaction_result;
 
     /**
-     * @param PDO      $pdo
-     * @param Driver   $driver
+     * @param PDO    $pdo
+     * @param Driver $driver
      */
     public function __construct(PDO $pdo, Driver $driver)
     {
         $this->pdo = $pdo;
         $this->driver = $driver;
     }
-    
+
     /**
      * @return PDO
      */
@@ -54,7 +55,94 @@ class Connection
     {
         return $this->pdo;
     }
-    
+
+    /**
+     * @param Statement $statement
+     *
+     * @return PDOStatement
+     */
+    public function prepare(Statement $statement)
+    {
+        $params = $statement->getParams();
+
+        $sql = $this->expandPlaceholders($statement->getSQL(), $params);
+
+        $handle = $this->getPDO()->prepare($sql);
+
+        foreach ($params as $name => $value) {
+            if (is_array($value)) {
+                $index = 1; // use a base-1 offset consistent with expandPlaceholders() 
+                
+                foreach ($value as $item) {
+                    // NOTE: we deliberately ignore the array indices here, as using them could result in broken SQL!
+                    
+                    $this->bind($handle, "{$name}_{$index}", $item);
+                    
+                    $index += 1;
+                }
+            } else {
+                $this->bind($handle, $name, $value);
+            }
+        }
+
+        return $handle;
+    }
+
+    /**
+     * Internally expand SQL placeholders (for array-types)
+     *
+     * @param string $sql    SQL with placeholders
+     * @param array  $params placeholder name/value pairs
+     *
+     * @return string SQL with expanded placeholders
+     */
+    private function expandPlaceholders($sql, array $params)
+    {
+        $replace_pairs = [];
+
+        foreach ($params as $name => $value) {
+            if (is_array($value)) {
+                // TODO: QA! For empty arrays, the resulting SQL is e.g.: "SELECT * FROM foo WHERE foo.bar IN (null)"
+                
+                $replace_pairs[":{$name}"] = count($value) === 0
+                    ? "(null)" // empty set
+                    : "(" . implode(', ', array_map(function ($i) use ($name) { return ":{$name}_{$i}"; }, range(1, count($value)))) . ")";
+            }
+        }
+        
+        return count($replace_pairs)
+            ? strtr($sql, $replace_pairs)
+            : $sql; // no arrays found in the given parameters
+    }
+
+    /**
+     * Internally bind a single scalar value against a single placeholder
+     *
+     * @param PDOStatement               $handle statement handle
+     * @param string                     $name   placeholder name
+     * @param int|float|string|bool|null $value  scalar value
+     *
+     * @return void
+     */
+    private function bind(PDOStatement $handle, $name, $value)
+    {
+        static $PDO_TYPE = [
+            'integer' => PDO::PARAM_INT,
+            'double'  => PDO::PARAM_STR, // bind as string, since there's no float type in PDO
+            'string'  => PDO::PARAM_STR,
+            'boolean' => PDO::PARAM_BOOL,
+            'NULL'    => PDO::PARAM_NULL,
+        ];
+
+        $value_type = gettype($value);
+
+        if (isset($PDO_TYPE[$value_type])) {
+            $handle->bindValue($name, $value, $PDO_TYPE[$value_type]);
+        } else {
+            throw new InvalidArgumentException("unexpected value type: {$value_type}");
+        }
+    }
+
     /**
      * @param callable $func function () : bool - must return TRUE to commit or FALSE to roll back
      *
