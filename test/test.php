@@ -4,6 +4,8 @@ use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Database;
+use mindplay\sql\framework\RecordMapper;
+use mindplay\sql\framework\RecordSetMapper;
 use mindplay\sql\framework\SQLException;
 use Mockery\MockInterface;
 
@@ -246,6 +248,33 @@ test(
         Mockery::close();
 
         eq($result, false, "transaction fails");
+    }
+);
+
+test(
+    'can map individual records',
+    function () {
+        $mapper = new RecordMapper(function ($record) {
+            return ['a' => $record['a'] * 10];
+        });
+
+        eq($mapper->map([['a' => 1], ['a' => 2], ['a' => 3]]), [['a' => 10], ['a' => 20], ['a' => 30]]);
+    }
+);
+
+test(
+    'can map sets of records',
+    function () {
+        $mapper = new RecordSetMapper(function ($records) {
+            return array_map(
+               function ($record) {
+                   return ['a' => $record['a'] * 10];
+               },
+               $records
+            );
+        });
+
+        eq($mapper->map([['a' => 1], ['a' => 2], ['a' => 3]]), [['a' => 10], ['a' => 20], ['a' => 30]]);
     }
 );
 
