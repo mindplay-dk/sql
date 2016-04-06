@@ -70,7 +70,7 @@ class Statement
                 $item_type = gettype($item);
 
                 if (! isset($SCALAR_TYPES[$item_type])) {
-                    throw new UnexpectedValueException("unexpected item type in array: {$value_type}");
+                    throw new UnexpectedValueException("unexpected item type in array: {$item_type}");
                 }
             }
         } else {
