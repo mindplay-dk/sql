@@ -57,6 +57,8 @@ class Connection
     }
 
     /**
+     * Prepare and bind a `Statement` and create a prepared `PDOStatement` handle.
+     * 
      * @param Statement $statement
      *
      * @return PDOStatement

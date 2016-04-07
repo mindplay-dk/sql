@@ -5,7 +5,7 @@ namespace mindplay\sql\framework;
 /**
  * Use this Mapper for quick, on-demand record-set mapping - as an alternative to implementing an actual Mapper class.
  */
-class RecordSetMapper implements MapperInterface
+class RecordSetMapper implements Mapper
 {
     /**
      * @var callable
