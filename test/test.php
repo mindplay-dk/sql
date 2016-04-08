@@ -58,11 +58,12 @@ test(
         $previous = new RuntimeException();
 
         $exception = new SQLException(
-            "SELECT :foo, :bar, :baz", [
-            'foo' => 'hello',
-            'bar' => 123,
-            'baz' => null,
-        ],
+            "SELECT :foo, :bar, :baz",
+            [
+                'foo' => 'hello',
+                'bar' => 123,
+                'baz' => null,
+            ],
             "oops!",
             99,
             $previous
@@ -339,8 +340,8 @@ test(
 test(
     'can prepare statements and bind scalar values',
     function () {
-        /** @var MockInterface|PDO $pdo */
-        $pdo = Mockery::mock(PDO::class);
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
 
         /** @var MockInterface|PDOStatement $handle */
         $handle = Mockery::mock(PDOStatement::class);
@@ -365,19 +366,19 @@ test(
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
 
-        $connection = new Connection($pdo, create_driver(), new Preparator($pdo));
-
-        $pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
-
-        foreach ($params as $name => $value) {
-            $handle->shouldReceive('bindValue')->once()->with($name, $value, $pdo_types[$name])->andReturn($handle);
-        }
+        $preparator = new Preparator($mock_pdo);
 
         $statement = new Statement($sql);
 
-        $statement->apply($params);
+        $mock_pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
 
-        $connection->prepare($statement);
+        foreach ($params as $name => $value) {
+            $statement->bind($name, $value);
+
+            $handle->shouldReceive('bindValue')->once()->with($name, $value, $pdo_types[$name])->andReturn($handle);
+        }
+
+        $preparator->prepareStatement($statement);
 
         Mockery::close();
 
@@ -388,8 +389,8 @@ test(
 test(
     'can prepare statements and bind arrays of scalar values',
     function () {
-        /** @var MockInterface|PDO $pdo */
-        $pdo = Mockery::mock(PDO::class);
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
 
         /** @var MockInterface|PDOStatement $handle */
         $handle = Mockery::mock(PDOStatement::class);
@@ -416,9 +417,9 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $connection = new Connection($pdo, create_driver(), new Preparator($pdo));
+        $preparator = new Preparator($mock_pdo);
 
-        $pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
+        $mock_pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
 
         foreach ($params as $name => $values) {
             $index = 1;
@@ -435,10 +436,10 @@ test(
         $statement->apply($params);
         $statement->bind('empty', []);
 
-        $connection->prepare($statement);
+        $preparator->prepareStatement($statement);
 
         Mockery::close();
-
+        
         ok(true, "mock assertions completed");
     }
 );
