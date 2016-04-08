@@ -30,6 +30,8 @@ class Database
         
         $this->container->set(Driver::class, $driver);
 
+        $this->container->register(Preparator::class);
+
         $this->container->register(Connection::class);
         
         // self-register:

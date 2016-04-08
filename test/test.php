@@ -4,6 +4,7 @@ use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Database;
+use mindplay\sql\framework\Preparator;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\RecordSetMapper;
 use mindplay\sql\framework\SQLException;
@@ -79,7 +80,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -100,7 +101,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -125,7 +126,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -146,7 +147,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -173,7 +174,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -200,7 +201,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -225,7 +226,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
         $driver = create_driver();
-        $connection = new Connection($mock_pdo, $driver);
+        $connection = new Connection($mock_pdo, $driver, new Preparator($mock_pdo));
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -364,7 +365,7 @@ test(
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
 
-        $connection = new Connection($pdo, create_driver());
+        $connection = new Connection($pdo, create_driver(), new Preparator($pdo));
 
         $pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
 
@@ -415,7 +416,7 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $connection = new Connection($pdo, create_driver());
+        $connection = new Connection($pdo, create_driver(), new Preparator($pdo));
 
         $pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
 
@@ -439,27 +440,6 @@ test(
         Mockery::close();
 
         ok(true, "mock assertions completed");
-    }
-);
-
-test(
-    'Connection throws on internal error condition',
-    function () {
-        /** @var MockInterface|PDO $pdo */
-        $pdo = Mockery::mock(PDO::class);
-
-        /** @var MockInterface|PDOStatement $handle */
-        $handle = Mockery::mock(PDOStatement::class);
-
-        $connection = new Connection($pdo, create_driver());
-
-        expect(
-            InvalidArgumentException::class,
-            "internally throws on unexpected value",
-            function () use ($connection, $handle) {
-                invoke($connection, 'bind', [$handle, 'foo', [1, 2, 3]]);
-            }
-        );
     }
 );
 
