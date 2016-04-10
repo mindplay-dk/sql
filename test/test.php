@@ -8,6 +8,7 @@ use mindplay\sql\framework\Preparator;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\RecordSetMapper;
+use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
 use Mockery\MockInterface;
@@ -524,6 +525,98 @@ test(
         eq($st->fetch(), ['a' => 1]);
         eq($st->fetch(), ['a' => 2]);
         eq($st->fetch(), null);
+    }
+);
+
+test(
+    'can fetch records and apply Mappers in batches',
+    function () {
+        foreach ([30,20] as $num_records) {
+            /** @var MockInterface|PreparedStatement $mock_statement */
+            $mock_statement = Mockery::mock(PreparedStatement::class);
+
+            $mock_statement
+                ->shouldReceive('fetch')
+                ->times($num_records)
+                ->andReturnValues(array_map(function ($id) use ($num_records) { return ['id' => $id]; }, range(1, $num_records)));
+
+            $mock_statement
+                ->shouldReceive('fetch')
+                ->once()
+                ->andReturn(null);
+
+            $batch_num = 0;
+
+            $mappers = [new RecordSetMapper(function (array $records) use (&$batch_num) {
+                $batch_num += 1;
+
+                foreach ($records as &$record) {
+                    $record['batch_num'] = $batch_num;
+                }
+
+                return $records;
+            })];
+
+            $result = new Result($mock_statement, 20, $mappers);
+
+            foreach ($result as $index => $record) {
+                eq($record['id'], $index + 1);
+                eq($record['batch_num'], (int) floor($index / 20) + 1, $record['batch_num']);
+            }
+        }
+    }
+);
+
+test(
+    'can fetch first row of a result set',
+    function () {
+        /** @var MockInterface|PreparedStatement $mock_statement */
+        $mock_statement = Mockery::mock(PreparedStatement::class);
+
+        $mock_statement->shouldReceive('fetch')->andReturn(['id' => 1])->once();
+
+        $calls = [];
+
+        $mappers = [new RecordMapper(function (array $record) use (&$calls) {
+            $calls[] = $record;
+
+            return $record;
+        })];
+
+        $result = new Result($mock_statement, 20, $mappers);
+
+        $record = $result->firstRow();
+
+        eq($record, ['id' => 1], 'should return first row');
+
+        eq($calls, [['id' => 1]], 'should process precisely one record (disregarding batch size)');
+    }
+);
+
+
+test(
+    'can fetch first column of a result set',
+    function () {
+        /** @var MockInterface|PreparedStatement $mock_statement */
+        $mock_statement = Mockery::mock(PreparedStatement::class);
+
+        $mock_statement->shouldReceive('fetch')->andReturn(['id' => 1])->once();
+
+        $calls = [];
+
+        $mappers = [new RecordMapper(function (array $record) use (&$calls) {
+            $calls[] = $record;
+
+            return $record;
+        })];
+
+        $result = new Result($mock_statement, 20, $mappers);
+
+        $record = $result->firstCol();
+
+        eq($record, 1, 'should return first column of first record');
+
+        eq($calls, [['id' => 1]], 'should process precisely one record (disregarding batch size)');
     }
 );
 
