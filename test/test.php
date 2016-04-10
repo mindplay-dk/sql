@@ -5,6 +5,7 @@ use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Database;
 use mindplay\sql\framework\Preparator;
+use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\RecordSetMapper;
 use mindplay\sql\framework\SQLException;
@@ -440,6 +441,46 @@ test(
         Mockery::close();
 
         ok(true, "mock assertions completed");
+    }
+);
+
+test(
+    'prepared statements can re-bind parameters to scalar values',
+    function () {
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->shouldReceive('bindValue')->with('int', 1, PDO::PARAM_INT)->once();
+        $mock_handle->shouldReceive('bindValue')->with('float', 1.2, PDO::PARAM_STR)->once();
+        $mock_handle->shouldReceive('bindValue')->with('string', 'hello', PDO::PARAM_STR)->once();
+        $mock_handle->shouldReceive('bindValue')->with('true', true, PDO::PARAM_BOOL)->once();
+        $mock_handle->shouldReceive('bindValue')->with('false', false, PDO::PARAM_BOOL)->once();
+        $mock_handle->shouldReceive('bindValue')->with('null', false, PDO::PARAM_NULL)->once();
+
+        $st = new PreparedStatement($mock_handle);
+
+        $st->bind('int', 1);
+        $st->bind('float', 1.2);
+        $st->bind('string', 'hello');
+        $st->bind('true', true);
+        $st->bind('false', false);
+        $st->bind('null', null);
+
+        expect(
+            InvalidArgumentException::class,
+            "rejects non-scalar values",
+            function () use ($st) {
+                $st->bind('foo', (object) []);
+            }
+        );
+
+        expect(
+            InvalidArgumentException::class,
+            "rejects arrays",
+            function () use ($st) {
+                $st->bind('foo', [1]);
+            }
+        );
     }
 );
 
