@@ -16,6 +16,10 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 require __DIR__ . '/fixtures.php';
 
+teardown(function () {
+    Mockery::close();
+});
+
 test(
     "can quote table-names",
     function () {
@@ -90,8 +94,6 @@ test(
             return true;
         });
 
-        Mockery::close();
-
         eq($result, true, "transaction succeeds");
     }
 );
@@ -115,8 +117,6 @@ test(
             return true; // outer transaction succeeds
         });
 
-        Mockery::close();
-
         eq($result, true, "transaction succeeds");
     }
 );
@@ -135,8 +135,6 @@ test(
         $result = $connection->transact(function () {
             return false;
         });
-
-        Mockery::close();
 
         eq($result, false, "transaction fails");
     }
@@ -163,8 +161,6 @@ test(
             }
         );
 
-        Mockery::close();
-
         ok(true, "transcation fails");
     }
 );
@@ -190,8 +186,6 @@ test(
             }
         );
 
-        Mockery::close();
-
         ok(true, "transaction fails");
     }
 );
@@ -214,8 +208,6 @@ test(
 
             return true; // outer transaction succeeds
         });
-
-        Mockery::close();
 
         eq($result, false, "transaction fails");
     }
@@ -247,8 +239,6 @@ test(
 
             return true; // outer transaction succeeds
         });
-
-        Mockery::close();
 
         eq($result, false, "transaction fails");
     }
@@ -380,8 +370,6 @@ test(
 
         $connection->prepare($statement);
 
-        Mockery::close();
-
         ok(true, "mock assertions completed");
     }
 );
@@ -438,8 +426,6 @@ test(
 
         $connection->prepare($statement);
 
-        Mockery::close();
-
         ok(true, "mock assertions completed");
     }
 );
@@ -481,6 +467,63 @@ test(
                 $st->bind('foo', [1]);
             }
         );
+    }
+);
+
+test(
+    'can execute prepared statement',
+    function () {
+        return; // TODO: unsure how to implement this test, because PDOStatement::$queryString is readonly!
+
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->queryString = "SELECT 1";
+
+        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
+
+        $st = new PreparedStatement($mock_handle);
+
+        $st->execute();
+
+        ok(true, 'it executes without error');
+
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->shouldReceive('execute')->andReturn(false)->once();
+        $mock_handle->shouldReceive('errorInfo')->andReturn(['XXXXXX', -1, 'ouch'])->once();
+
+        $st = new PreparedStatement($mock_handle);
+
+        try {
+            $st->execute();
+        } catch (SQLException $sql_exception) {
+            // caught
+        }
+
+        ok(isset($sql_exception));
+
+        eq($sql_exception->getCode(), -1);
+        eq($sql_exception->getMessage(), "XXXXXX: ouch");
+    }
+);
+
+test(
+    'can fetch; and auto-executes prepared statement on first fetch',
+    function () {
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
+        $mock_handle->shouldReceive('fetch')->andReturn(['a' => 1])->once();
+        $mock_handle->shouldReceive('fetch')->andReturn(['a' => 2])->once();
+        $mock_handle->shouldReceive('fetch')->andReturn(false);
+        
+        $st = new PreparedStatement($mock_handle);
+
+        eq($st->fetch(), ['a' => 1]);
+        eq($st->fetch(), ['a' => 2]);
+        eq($st->fetch(), null);
     }
 );
 
