@@ -64,40 +64,40 @@ class Connection
 
     /**
      * Fetch the `Result` of executing an SQL "SELECT" statement.
-     * 
+     *
      * Note that you can directly iterate over the `Result` instance.
-     * 
-     * @param Statement $statement
-     * @param int       $batch_size batch-size (when fetching large result sets)
-     * @param array     $mappers    list of Mappers to apply while fetching results
+     *
+     * @param Executable $statement
+     * @param int        $batch_size batch-size (when fetching large result sets)
+     * @param array      $mappers    list of Mappers to apply while fetching results
      *
      * @return Result
      */
-    public function fetch(Statement $statement, $batch_size = 1000, array $mappers = [])
+    public function fetch(Executable $statement, $batch_size = 1000, array $mappers = [])
     {
         return $this->preparator->prepareResult($statement, $batch_size, $mappers);
     }
 
     /**
      * Execute an SQL statement, which does not produce a result, e.g. an "INSERT", "UPDATE" or "DELETE" statement.
-     * 
-     * @param Statement $statement
+     *
+     * @param Executable $statement
      *
      * @return void
      */
-    public function execute(Statement $statement)
+    public function execute(Executable $statement)
     {
         $this->prepare($statement)->execute();
     }
 
     /**
      * Prepare an SQL statement.
-     * 
-     * @param Statement $statement
+     *
+     * @param Executable $statement
      *
      * @return PreparedStatement
      */
-    public function prepare(Statement $statement)
+    public function prepare(Executable $statement)
     {
         return $this->preparator->prepareStatement($statement);
     }

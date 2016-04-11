@@ -26,13 +26,13 @@ class Preparator
     /**
      * Prepare and bind a `Statement` and create a `Result` instance.
      *
-     * @param Statement $statement
-     * @param int       $batch_size batch-size (when fetching large result sets)
-     * @param array     $mappers    list of Mappers to apply while fetching results
+     * @param Executable $statement
+     * @param int        $batch_size batch-size (when fetching large result sets)
+     * @param array      $mappers    list of Mappers to apply while fetching results
      *
      * @return Result
      */
-    public function prepareResult(Statement $statement, $batch_size, array $mappers)
+    public function prepareResult(Executable $statement, $batch_size, array $mappers)
     {
         return new Result($this->prepareStatement($statement), $batch_size, $mappers);
     }
@@ -40,11 +40,11 @@ class Preparator
     /**
      * Prepare and bind a `Statement` and create a prepared `PDOStatement` handle.
      *
-     * @param Statement $statement
+     * @param Executable $statement
      *
      * @return PreparedStatement
      */
-    public function prepareStatement(Statement $statement)
+    public function prepareStatement(Executable $statement)
     {
         $params = $statement->getParams();
 

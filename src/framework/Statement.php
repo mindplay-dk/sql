@@ -7,7 +7,7 @@ use UnexpectedValueException;
 /**
  * This class represents an as-of-yet unprepared SQL statement.
  */
-class Statement
+class Statement implements Executable
 {
     /**
      * @var string
