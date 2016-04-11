@@ -11,6 +11,7 @@ use mindplay\sql\framework\RecordSetMapper;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
+use mindplay\sql\model\Column;
 use mindplay\sql\types\JSONType;
 use mindplay\sql\types\TimestampType;
 use Mockery\MockInterface;
@@ -649,6 +650,31 @@ test(
 
         eq($type->convertToPHP($valid_json), $valid_value, "can convert to PHP value");
         eq($type->convertToSQL($valid_value), $valid_json, "can convert to SQL JSON value");
+    }
+);
+
+test(
+    'can define Schema model',
+    function () {
+        $db = new Database(function () {}, new PostgresDriver());
+
+        /**
+         * @var SampleSchema $schema
+         */
+
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        ok($user instanceof UserTable);
+        
+        ok($user->first_name instanceof Column);
+
+        eq($user->first_name->getName(), 'first_name');
+        eq($user->first_name->getAlias(), 'first_name');
+
+        eq($user->first_name('foo')->getName(), 'first_name');
+        eq($user->first_name('foo')->getAlias(), 'foo');
     }
 );
 
