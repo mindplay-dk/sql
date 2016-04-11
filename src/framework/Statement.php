@@ -28,21 +28,13 @@ class Statement implements Executable
     }
 
     /**
-     * @return string SQL statement (with placeholders)
+     * @return Template fully-populated SQL template
      */
-    public function getSQL()
+    public function getTemplate()
     {
-        return $this->sql;
+        return new Template($this->sql, $this->params);
     }
-
-    /**
-     * @return array map where placeholder name maps to a scalar value, or array of scalar values
-     */
-    public function getParams()
-    {
-        return $this->params;
-    }
-
+    
     /**
      * Bind an individual placeholder name to a given value.
      *

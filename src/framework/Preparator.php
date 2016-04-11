@@ -46,9 +46,11 @@ class Preparator
      */
     public function prepareStatement(Executable $statement)
     {
-        $params = $statement->getParams();
+        $template = $statement->getTemplate();
 
-        $sql = $this->expandPlaceholders($statement->getSQL(), $params);
+        $params = $template->getParams();
+
+        $sql = $this->expandPlaceholders($template->getSQL(), $params);
 
         $prepared_statement = new PreparedStatement($this->pdo->prepare($sql));
 

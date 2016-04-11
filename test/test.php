@@ -280,7 +280,7 @@ test(
     function () {
         $st = new Statement("SELECT 1");
 
-        eq($st->getSQL(), "SELECT 1");
+        eq($st->getTemplate()->getSQL(), "SELECT 1");
 
         $st->bind('int', 1);
         $st->bind('float', 1.2);
@@ -297,7 +297,7 @@ test(
 
         $st->apply(['int' => 2, 'foo' => 'bar']); // overrides/adds values
 
-        eq($st->getParams(), [
+        eq($st->getTemplate()->getParams(), [
             'int'    => 2,
             'float'  => 1.2,
             'string' => 'hello',
@@ -312,6 +312,10 @@ test(
             'nulls'       => [null, null],
             'foo'         => 'bar',
         ]);
+
+        $tpl = $st->getTemplate();
+
+        eq($tpl, $tpl->getTemplate(), 'Template is Executable');
 
         expect(
             RuntimeException::class,
