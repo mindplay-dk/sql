@@ -5,8 +5,10 @@ use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Database;
 use mindplay\sql\framework\Preparator;
+use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\RecordSetMapper;
+use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
 use Mockery\MockInterface;
@@ -14,6 +16,10 @@ use Mockery\MockInterface;
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 require __DIR__ . '/fixtures.php';
+
+teardown(function () {
+    Mockery::close();
+});
 
 test(
     "can quote table-names",
@@ -90,8 +96,6 @@ test(
             return true;
         });
 
-        Mockery::close();
-
         eq($result, true, "transaction succeeds");
     }
 );
@@ -115,8 +119,6 @@ test(
             return true; // outer transaction succeeds
         });
 
-        Mockery::close();
-
         eq($result, true, "transaction succeeds");
     }
 );
@@ -135,8 +137,6 @@ test(
         $result = $connection->transact(function () {
             return false;
         });
-
-        Mockery::close();
 
         eq($result, false, "transaction fails");
     }
@@ -163,8 +163,6 @@ test(
             }
         );
 
-        Mockery::close();
-
         ok(true, "transcation fails");
     }
 );
@@ -190,8 +188,6 @@ test(
             }
         );
 
-        Mockery::close();
-
         ok(true, "transaction fails");
     }
 );
@@ -214,8 +210,6 @@ test(
 
             return true; // outer transaction succeeds
         });
-
-        Mockery::close();
 
         eq($result, false, "transaction fails");
     }
@@ -247,8 +241,6 @@ test(
 
             return true; // outer transaction succeeds
         });
-
-        Mockery::close();
 
         eq($result, false, "transaction fails");
     }
@@ -380,8 +372,6 @@ test(
 
         $preparator->prepareStatement($statement);
 
-        Mockery::close();
-
         ok(true, "mock assertions completed");
     }
 );
@@ -438,9 +428,196 @@ test(
 
         $preparator->prepareStatement($statement);
 
-        Mockery::close();
-        
         ok(true, "mock assertions completed");
+    }
+);
+
+test(
+    'prepared statements can re-bind parameters to scalar values',
+    function () {
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->shouldReceive('bindValue')->with('int', 1, PDO::PARAM_INT)->once();
+        $mock_handle->shouldReceive('bindValue')->with('float', 1.2, PDO::PARAM_STR)->once();
+        $mock_handle->shouldReceive('bindValue')->with('string', 'hello', PDO::PARAM_STR)->once();
+        $mock_handle->shouldReceive('bindValue')->with('true', true, PDO::PARAM_BOOL)->once();
+        $mock_handle->shouldReceive('bindValue')->with('false', false, PDO::PARAM_BOOL)->once();
+        $mock_handle->shouldReceive('bindValue')->with('null', false, PDO::PARAM_NULL)->once();
+
+        $st = new PreparedStatement($mock_handle);
+
+        $st->bind('int', 1);
+        $st->bind('float', 1.2);
+        $st->bind('string', 'hello');
+        $st->bind('true', true);
+        $st->bind('false', false);
+        $st->bind('null', null);
+
+        expect(
+            InvalidArgumentException::class,
+            "rejects non-scalar values",
+            function () use ($st) {
+                $st->bind('foo', (object) []);
+            }
+        );
+
+        expect(
+            InvalidArgumentException::class,
+            "rejects arrays",
+            function () use ($st) {
+                $st->bind('foo', [1]);
+            }
+        );
+    }
+);
+
+test(
+    'can execute prepared statement',
+    function () {
+        return; // TODO: unsure how to implement this test, because PDOStatement::$queryString is readonly!
+
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->queryString = "SELECT 1";
+
+        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
+
+        $st = new PreparedStatement($mock_handle);
+
+        $st->execute();
+
+        ok(true, 'it executes without error');
+
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->shouldReceive('execute')->andReturn(false)->once();
+        $mock_handle->shouldReceive('errorInfo')->andReturn(['XXXXXX', -1, 'ouch'])->once();
+
+        $st = new PreparedStatement($mock_handle);
+
+        try {
+            $st->execute();
+        } catch (SQLException $sql_exception) {
+            // caught
+        }
+
+        ok(isset($sql_exception));
+
+        eq($sql_exception->getCode(), -1);
+        eq($sql_exception->getMessage(), "XXXXXX: ouch");
+    }
+);
+
+test(
+    'can fetch; and auto-executes prepared statement on first fetch',
+    function () {
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+
+        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
+        $mock_handle->shouldReceive('fetch')->andReturn(['a' => 1])->once();
+        $mock_handle->shouldReceive('fetch')->andReturn(['a' => 2])->once();
+        $mock_handle->shouldReceive('fetch')->andReturn(false);
+        
+        $st = new PreparedStatement($mock_handle);
+
+        eq($st->fetch(), ['a' => 1]);
+        eq($st->fetch(), ['a' => 2]);
+        eq($st->fetch(), null);
+    }
+);
+
+test(
+    'can fetch records and apply Mappers in batches',
+    function () {
+        foreach ([30,20] as $num_records) {
+            /** @var MockInterface|PreparedStatement $mock_statement */
+            $mock_statement = Mockery::mock(PreparedStatement::class);
+
+            $mock_statement
+                ->shouldReceive('fetch')
+                ->times($num_records)
+                ->andReturnValues(array_map(function ($id) use ($num_records) { return ['id' => $id]; }, range(1, $num_records)));
+
+            $mock_statement
+                ->shouldReceive('fetch')
+                ->once()
+                ->andReturn(null);
+
+            $batch_num = 0;
+
+            $mappers = [new RecordSetMapper(function (array $records) use (&$batch_num) {
+                $batch_num += 1;
+
+                foreach ($records as &$record) {
+                    $record['batch_num'] = $batch_num;
+                }
+
+                return $records;
+            })];
+
+            $result = new Result($mock_statement, 20, $mappers);
+
+            foreach ($result as $index => $record) {
+                eq($record['id'], $index + 1);
+                eq($record['batch_num'], (int) floor($index / 20) + 1, $record['batch_num']);
+            }
+        }
+    }
+);
+
+test(
+    'can fetch first row of a result set',
+    function () {
+        /** @var MockInterface|PreparedStatement $mock_statement */
+        $mock_statement = Mockery::mock(PreparedStatement::class);
+
+        $mock_statement->shouldReceive('fetch')->andReturn(['id' => 1])->once();
+
+        $calls = [];
+
+        $mappers = [new RecordMapper(function (array $record) use (&$calls) {
+            $calls[] = $record;
+
+            return $record;
+        })];
+
+        $result = new Result($mock_statement, 20, $mappers);
+
+        $record = $result->firstRow();
+
+        eq($record, ['id' => 1], 'should return first row');
+
+        eq($calls, [['id' => 1]], 'should process precisely one record (disregarding batch size)');
+    }
+);
+
+
+test(
+    'can fetch first column of a result set',
+    function () {
+        /** @var MockInterface|PreparedStatement $mock_statement */
+        $mock_statement = Mockery::mock(PreparedStatement::class);
+
+        $mock_statement->shouldReceive('fetch')->andReturn(['id' => 1])->once();
+
+        $calls = [];
+
+        $mappers = [new RecordMapper(function (array $record) use (&$calls) {
+            $calls[] = $record;
+
+            return $record;
+        })];
+
+        $result = new Result($mock_statement, 20, $mappers);
+
+        $record = $result->firstCol();
+
+        eq($record, 1, 'should return first column of first record');
+
+        eq($calls, [['id' => 1]], 'should process precisely one record (disregarding batch size)');
     }
 );
 
