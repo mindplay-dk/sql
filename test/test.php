@@ -11,6 +11,8 @@ use mindplay\sql\framework\RecordSetMapper;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
+use mindplay\sql\types\JSONType;
+use mindplay\sql\types\TimestampType;
 use Mockery\MockInterface;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -594,7 +596,6 @@ test(
     }
 );
 
-
 test(
     'can fetch first column of a result set',
     function () {
@@ -620,6 +621,36 @@ test(
         eq($calls, [['id' => 1]], 'should process precisely one record (disregarding batch size)');
     }
 );
+
+test(
+    'can map DATETIME to Unix timestamps',
+    function () {
+        $type = new TimestampType();
+
+        $valid_datetime = '2015-11-04 14:40:52';
+        $valid_timestamp = 1446648052;
+
+        eq($type->convertToPHP($valid_datetime), $valid_timestamp, "can convert to PHP value");
+        eq($type->convertToSQL($valid_timestamp), $valid_datetime, "can convert to SQL DATETIME value");
+    }
+);
+
+test(
+    'can map PHP values to JSON',
+    function () {
+        $type = new JSONType();
+
+        $valid_value = ['foo' => 'bar'];
+        $valid_json = '{"foo":"bar"}';
+
+        eq($type->convertToPHP($valid_json), $valid_value, "can convert to PHP value");
+        eq($type->convertToSQL($valid_value), $valid_json, "can convert to SQL JSON value");
+    }
+);
+
+// TODO IntType test
+
+// TODO StringType test
 
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 
