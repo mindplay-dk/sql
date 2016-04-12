@@ -682,6 +682,29 @@ test(
 
 // TODO StringType test
 
+test(
+    'can bind values to query models',
+    function () {
+        $db = new Database(function () {}, new MySQLDriver());
+
+        $query = new MockQuery($db);
+
+        $query->bind('int', 123);
+
+        $valid_datetime = '2015-11-04 14:40:52';
+        $valid_timestamp = 1446648052;
+
+        $query->bind('date', $valid_timestamp, TimestampType::class);
+
+        $template = $query->getTemplate();
+
+        $params = $template->getParams();
+        
+        eq($params['int'], 123, 'can bind scalar value');
+        eq($params['date'], $valid_datetime, 'can bind value using Type conversion');
+    }
+);
+
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 
 exit(run());

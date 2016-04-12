@@ -3,6 +3,7 @@
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\Driver;
 use mindplay\sql\model\Column;
+use mindplay\sql\model\Query;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\Table;
 use mindplay\sql\types\IntType;
@@ -15,6 +16,14 @@ use mindplay\sql\types\TimestampType;
 function create_driver()
 {
     return new PostgresDriver();
+}
+
+class MockQuery extends Query
+{
+    protected function buildQuery()
+    {
+        return "SELECT 1";
+    }
 }
 
 /**
