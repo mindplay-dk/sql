@@ -2,13 +2,20 @@
 
 namespace mindplay\sql\model;
 
+use mindplay\sql\framework\Driver;
+
 class Column
 {
     /**
      * @var Table
      */
-    private $owner;
+    private $table;
 
+    /**
+     * @var Driver
+     */
+    private $driver;
+    
     /**
      * @var Type
      */
@@ -23,16 +30,18 @@ class Column
      * @var string
      */
     private $alias;
-
+    
     /**
-     * @param Table       $owner owner Table instance
+     * @param Table       $table parent Table instance
+     * @param Driver      $driver
      * @param Type        $type
      * @param string      $name
      * @param string|null $alias
      */
-    public function __construct(Table $owner, Type $type, $name, $alias)
+    public function __construct(Table $table, Driver $driver, Type $type, $name, $alias)
     {
-        $this->owner = $owner;
+        $this->table = $table;
+        $this->driver = $driver;
         $this->type = $type;
         $this->name = $name;
         $this->alias = $alias;
@@ -52,5 +61,19 @@ class Column
     public function getAlias()
     {
         return $this->alias;
+    }
+
+    /**
+     * @ignore
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->alias
+            // if this Column has an alias, quote that:
+            ? $this->driver->quoteName($this->alias)
+            // otherwise, get the quoted parent Table alias and use dotted (`table`.`column`) notation:
+            : $this->table->__toString() . '.' . $this->driver->quoteName($this->name);
     }
 }

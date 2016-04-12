@@ -8,10 +8,9 @@ namespace mindplay\sql\framework;
 abstract class Driver
 {
     /**
-     * @param string      $table  table name
-     * @param string|null $column column name (or NULL to quote only the table-name)
+     * @param string $name table or column name
      *
      * @return string quoted name
      */
-    abstract public function quoteName($table, $column = null);
+    abstract public function quoteName($name);
 }

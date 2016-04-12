@@ -6,8 +6,8 @@ use mindplay\sql\framework\Driver;
 
 class PostgresDriver extends Driver
 {
-    public function quoteName($table, $column = null)
+    public function quoteName($name)
     {
-        return '"' . $table . '"' . ($column ? '."' . $column . '"' : '');
+        return '"' . $name . '"';
     }
 }

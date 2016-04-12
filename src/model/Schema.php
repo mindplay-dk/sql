@@ -10,7 +10,7 @@ abstract class Schema
      * @var TableFactory
      */
     private $factory;
-    
+
     /**
      * @param TableFactory $factory
      */
@@ -20,12 +20,11 @@ abstract class Schema
     }
 
     /**
-     * @param             $class_name
-     * @param             $table_name
-     * @param string|null $alias optional Table alias
+     * @param string      $class_name Table class-name
+     * @param string      $table_name relational table-name
+     * @param string|null $alias      optional Table alias
      *
      * @return Table
-     * @internal param string $name Table class-name
      */
     protected function createTable($class_name, $table_name, $alias = null)
     {
@@ -34,15 +33,15 @@ abstract class Schema
 
     /**
      * @ignore
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return Table
      */
     public function __get($name)
     {
         // TODO caching
-        
-        return call_user_func([$this, $name], $name);
+
+        return $this->$name(null);
     }
 }

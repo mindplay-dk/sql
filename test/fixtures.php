@@ -22,6 +22,9 @@ function create_driver()
  */
 class SampleSchema extends Schema
 {
+    /**
+     * @return UserTable
+     */
     public function user($alias)
     {
         return $this->createTable(UserTable::class, __FUNCTION__, $alias);

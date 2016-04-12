@@ -21,12 +21,20 @@ abstract class Table
      * @var string
      */
     private $name;
-    
+
     /**
      * @var string|null
      */
     private $alias;
-    
+
+    /**
+     * Table constructor.
+     *
+     * @param Driver       $driver
+     * @param TypeProvider $types
+     * @param string       $name
+     * @param string|null  $alias
+     */
     public function __construct(Driver $driver, TypeProvider $types, $name, $alias)
     {
         $this->driver = $driver;
@@ -36,28 +44,38 @@ abstract class Table
     }
 
     /**
-     * @param string $type Type class-name
-     * @param string $name
-     * @param string $alias
-     * 
+     * @param string      $type Type class-name
+     * @param string      $name
+     * @param string|null $alias
+     *
      * @return Column
      */
     protected function createColumn($type, $name, $alias)
     {
-        return new Column($this, $this->types->getType($type), $name, $alias);
+        return new Column($this, $this->driver, $this->types->getType($type), $name, $alias);
     }
-    
+
+    /**
+     * @ignore
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->driver->quoteName($this->alias ?: $this->name);
+    }
+
     /**
      * @ignore
      *
      * @param string $name
-     * 
+     *
      * @return Column
      */
     public function __get($name)
     {
         // TODO caching
 
-        return call_user_func([$this, $name], $name);
+        return $this->$name($this->alias ? "{$this->alias}_{$name}" : null);
     }
 }

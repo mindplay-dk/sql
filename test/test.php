@@ -30,12 +30,10 @@ test(
         $driver = new PostgresDriver();
 
         eq($driver->quoteName('foo'), '"foo"');
-        eq($driver->quoteName('foo', 'bar'), '"foo"."bar"');
 
         $driver = new MySQLDriver();
 
         eq($driver->quoteName('foo'), '`foo`');
-        eq($driver->quoteName('foo', 'bar'), '`foo`.`bar`');
     }
 );
 
@@ -656,12 +654,9 @@ test(
 test(
     'can define Schema model',
     function () {
-        $db = new Database(function () {}, new PostgresDriver());
+        $db = new Database(function () {}, new MySQLDriver());
 
-        /**
-         * @var SampleSchema $schema
-         */
-
+        /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
 
         $user = $schema->user;
@@ -671,10 +666,15 @@ test(
         ok($user->first_name instanceof Column);
 
         eq($user->first_name->getName(), 'first_name');
-        eq($user->first_name->getAlias(), 'first_name');
+        eq($user->first_name->getAlias(), null);
+        eq($user->first_name->__toString(), '`user`.`first_name`');
 
         eq($user->first_name('foo')->getName(), 'first_name');
         eq($user->first_name('foo')->getAlias(), 'foo');
+        eq($user->first_name('foo')->__toString(), '`foo`');
+        
+        eq($schema->user('foo')->first_name->__toString(), '`foo_first_name`');
+        eq($schema->user('foo')->first_name('bar')->__toString(), '`bar`');
     }
 );
 
