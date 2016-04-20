@@ -3,6 +3,7 @@
 namespace mindplay\sql\framework;
 
 use mindplay\sql\model\Schema;
+use mindplay\sql\model\SelectQuery;
 use mindplay\sql\model\Table;
 use mindplay\sql\model\Type;
 use mindplay\unbox\Container;
@@ -104,5 +105,15 @@ class Database implements TypeProvider, TableFactory
     public function createTable($class_name, $table_name, $alias)
     {
         return $this->container->create($class_name, ['name' => $table_name, 'alias' => $alias]);
+    }
+
+    /**
+     * @param Table $from
+     * 
+     * @return SelectQuery
+     */
+    public function select(Table $from)
+    {
+        return $this->container->create(SelectQuery::class, ['root' => $from]);
     }
 }

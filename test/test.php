@@ -7,11 +7,12 @@ use mindplay\sql\framework\Database;
 use mindplay\sql\framework\Preparator;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\RecordMapper;
-use mindplay\sql\framework\RecordSetMapper;
+use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\Column;
+use mindplay\sql\model\SelectQuery;
 use mindplay\sql\types\JSONType;
 use mindplay\sql\types\TimestampType;
 use Mockery\MockInterface;
@@ -261,7 +262,7 @@ test(
 test(
     'can map sets of records',
     function () {
-        $mapper = new RecordSetMapper(function ($records) {
+        $mapper = new BatchMapper(function ($records) {
             return array_map(
                 function ($record) {
                     return ['a' => $record['a'] * 10];
@@ -553,7 +554,7 @@ test(
 
             $batch_num = 0;
 
-            $mappers = [new RecordSetMapper(function (array $records) use (&$batch_num) {
+            $mappers = [new BatchMapper(function (array $records) use (&$batch_num) {
                 $batch_num += 1;
 
                 foreach ($records as &$record) {
@@ -702,6 +703,33 @@ test(
         
         eq($params['int'], 123, 'can bind scalar value');
         eq($params['date'], $valid_datetime, 'can bind value using Type conversion');
+    }
+);
+
+test(
+    'can build SELECT query',
+    function () {
+        $db = new Database(function () {}, new MySQLDriver());
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $select = $db
+            ->select($user)
+            ->columns([$user->first_name, $user->last_name])
+            ->where([
+                "{$user->first_name} LIKE :first_name",
+                "{$user->last_name} LIKE :last_name"
+            ])
+            ->bind("first_name", '%rasmus')
+            ->bind("last_name", '%rasmus')
+            ->page(1, 20);
+        
+        // TODO turn this into a real test :-)
+        
+        echo $select->getTemplate()->getSQL();
     }
 );
 

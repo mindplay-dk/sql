@@ -67,15 +67,19 @@ class Connection
      *
      * Note that you can directly iterate over the `Result` instance.
      *
-     * @param Executable $statement
-     * @param int        $batch_size batch-size (when fetching large result sets)
-     * @param array      $mappers    list of Mappers to apply while fetching results
+     * @param ReturningExecutable $statement
+     * @param int                 $batch_size batch-size (when fetching large result sets)
+     * @param Mapper[]            $mappers    list of additional Mappers to apply while fetching results
      *
      * @return Result
      */
-    public function fetch(Executable $statement, $batch_size = 1000, array $mappers = [])
+    public function fetch(ReturningExecutable $statement, $batch_size = 1000, array $mappers = [])
     {
-        return $this->preparator->prepareResult($statement, $batch_size, $mappers);
+        return $this->preparator->prepareResult(
+            $statement,
+            $batch_size,
+            array_merge($statement->getMappers(), $mappers)
+        );
     }
 
     /**

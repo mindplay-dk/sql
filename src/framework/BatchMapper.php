@@ -3,9 +3,9 @@
 namespace mindplay\sql\framework;
 
 /**
- * Use this Mapper for quick, on-demand record-set mapping - as an alternative to implementing an actual Mapper class.
+ * Use this Mapper for quick, on-demand batch mapping - as an alternative to implementing an actual Mapper class.
  */
-class RecordSetMapper implements Mapper
+class BatchMapper implements Mapper
 {
     /**
      * @var callable

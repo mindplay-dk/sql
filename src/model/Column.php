@@ -46,7 +46,15 @@ class Column
         $this->name = $name;
         $this->alias = $alias;
     }
-
+    
+    /**
+     * @return Type
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+    
     /**
      * @return string
      */
@@ -54,9 +62,9 @@ class Column
     {
         return $this->name;
     }
-
+    
     /**
-     * @return string
+     * @return string|null
      */
     public function getAlias()
     {
