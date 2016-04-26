@@ -46,6 +46,14 @@ class Column
         $this->name = $name;
         $this->alias = $alias;
     }
+
+    /**
+     * @return Table
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
     
     /**
      * @return Type
@@ -78,10 +86,6 @@ class Column
      */
     public function __toString()
     {
-        return $this->alias
-            // if this Column has an alias, quote that:
-            ? $this->driver->quoteName($this->alias)
-            // otherwise, get the quoted parent Table alias and use dotted (`table`.`column`) notation:
-            : $this->table->__toString() . '.' . $this->driver->quoteName($this->name);
+        return $this->table->__toString() . '.' . $this->driver->quoteName($this->name);
     }
 }

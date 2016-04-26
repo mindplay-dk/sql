@@ -3,6 +3,7 @@
 namespace mindplay\sql\model;
 
 use InvalidArgumentException;
+use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\TypeProvider;
 
 /**
@@ -14,19 +15,24 @@ use mindplay\sql\framework\TypeProvider;
 abstract class ProjectionQuery extends Query
 {
     /**
-     * @var string root table expression of this query (from which JOIN statements may extend)
+     * @var Driver
+     */
+    protected $driver;
+
+    /**
+     * @var Table root Table of this query (from which JOIN clauses may extend the projection)
      */
     protected $root;
 
     /**
-     * @var string[] list of JOIN clauses extending from the root table expression of this query
+     * @var string[] list of JOIN clauses extending from the root Table of this query
      */
     protected $joins = [];
 
     /**
      * @var string[] list of condition expressions to apply to the WHERE clause
      */
-    protected $where = [];
+    protected $conditions = [];
 
     /**
      * @var string[] list of ORDER BY terms
@@ -44,13 +50,15 @@ abstract class ProjectionQuery extends Query
     protected $limit;
 
     /**
-     * @param string       $root
+     * @param Table        $root
+     * @param Driver       $driver
      * @param TypeProvider $types
      */
-    public function __construct($root, TypeProvider $types)
+    public function __construct(Table $root, Driver $driver, TypeProvider $types)
     {
         parent::__construct($types);
 
+        $this->driver = $driver;
         $this->root = $root;
     }
 
@@ -62,41 +70,53 @@ abstract class ProjectionQuery extends Query
     public function where($exprs)
     {
         foreach ((array) $exprs as $expr) {
-            $this->where[] = $expr;
+            $this->conditions[] = $expr;
         }
 
         return $this;
     }
 
     /**
-     * @param string $table table expression
-     * @param string $expr  join condition
+     * @param string $expr order-by expression (which may include a trailing "ASC" or "DESC" modifier)
+     * 
+     * @return $this
+     */
+    public function order($expr)
+    {
+        $this->order[] = "{$expr}";
+        
+        return $this;
+    }
+    
+    /**
+     * @param Table  $table
+     * @param string $expr join condition
      *
      * @return $this
      */
-    public function innerJoin($table, $expr)
+    public function innerJoin(Table $table, $expr)
     {
         return $this->join("INNER", $table, $expr);
     }
 
     /**
-     * @param string $table table expression
-     * @param string $expr  join condition
+     * @param Table  $table
+     * @param string $expr join condition
      *
      * @return $this
      */
-    public function leftJoin($table, $expr)
+    public function leftJoin(Table $table, $expr)
     {
         return $this->join("LEFT", $table, $expr);
     }
 
     /**
-     * @param string $table table expression
-     * @param string $expr  join condition
+     * @param Table  $table
+     * @param string $expr join condition
      *
      * @return $this
      */
-    public function rightJoin($table, $expr)
+    public function rightJoin(Table $table, $expr)
     {
         return $this->join("RIGHT", $table, $expr);
     }
@@ -147,17 +167,33 @@ abstract class ProjectionQuery extends Query
     }
 
     /**
-     * @param string $type  join type ("INNER", "LEFT", etc.)
-     * @param string $table table expression
-     * @param string $expr  join condition
+     * @param string $type join type ("INNER", "LEFT", etc.)
+     * @param Table  $table
+     * @param string $expr join condition
      *
      * @return $this
      */
-    protected function join($type, $table, $expr)
+    protected function join($type, Table $table, $expr)
     {
-        $this->joins[] = "{$type} JOIN {$table} ON {$expr}";
+        $table_expr = $this->buildNode($table);
+
+        $this->joins[] = "{$type} JOIN {$table_expr} ON {$expr}";
 
         return $this;
+    }
+
+    /**
+     * @param Table $table
+     *
+     * @return string table expression (e.g. "{table} AS {alias}" for use in the FROM clause of an SQL statement)
+     */
+    protected function buildNode(Table $table)
+    {
+        $alias = $table->getAlias();
+
+        return $alias
+            ? $this->driver->quoteName($table->getName()) . ' AS ' . $this->driver->quoteName($alias)
+            : $this->driver->quoteName($table->getName());
     }
 
     /**
@@ -165,7 +201,7 @@ abstract class ProjectionQuery extends Query
      */
     protected function buildNodes()
     {
-        return implode("\n", array_merge([$this->root], $this->joins));
+        return implode("\n", array_merge([$this->buildNode($this->root)], $this->joins));
     }
 
     /**
@@ -173,7 +209,7 @@ abstract class ProjectionQuery extends Query
      */
     protected function buildConditions()
     {
-        return expr::all($this->where);
+        return expr::all($this->conditions);
     }
 
     /**
@@ -190,7 +226,7 @@ abstract class ProjectionQuery extends Query
     protected function buildLimit()
     {
         return $this->limit !== null
-            ? "\nLIMIT {$this->limit}"  . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
+            ? "\nLIMIT {$this->limit}" . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
             : ''; // no limit or offset
     }
 }

@@ -2,17 +2,17 @@
 
 use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
+use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Database;
+use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\Preparator;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\RecordMapper;
-use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\Column;
-use mindplay\sql\model\SelectQuery;
 use mindplay\sql\types\JSONType;
 use mindplay\sql\types\TimestampType;
 use Mockery\MockInterface;
@@ -526,7 +526,7 @@ test(
         $mock_handle->shouldReceive('fetch')->andReturn(['a' => 1])->once();
         $mock_handle->shouldReceive('fetch')->andReturn(['a' => 2])->once();
         $mock_handle->shouldReceive('fetch')->andReturn(false);
-        
+
         $st = new PreparedStatement($mock_handle);
 
         eq($st->fetch(), ['a' => 1]);
@@ -663,7 +663,7 @@ test(
         $user = $schema->user;
 
         ok($user instanceof UserTable);
-        
+
         ok($user->first_name instanceof Column);
 
         eq($user->first_name->getName(), 'first_name');
@@ -672,10 +672,22 @@ test(
 
         eq($user->first_name('foo')->getName(), 'first_name');
         eq($user->first_name('foo')->getAlias(), 'foo');
-        eq($user->first_name('foo')->__toString(), '`foo`');
-        
-        eq($schema->user('foo')->first_name->__toString(), '`foo_first_name`');
-        eq($schema->user('foo')->first_name('bar')->__toString(), '`bar`');
+        eq($user->first_name('foo')->__toString(), '`user`.`first_name`'); // *
+
+        eq($schema->user('foo')->first_name->__toString(), '`foo`.`first_name`'); // *
+        eq($schema->user('foo')->first_name('bar')->__toString(), '`foo`.`first_name`'); // *
+
+        // * NOTE: column aliases do not affect __toString() magic, because we don't know whether
+        //         an aliased Column has also been selected - we therefore always refer to the
+        //         column using qualified "{table or alias}.{column}" notation.
+
+        $columns = $user->listColumns();
+
+        eq(count($columns), 4);
+
+        foreach ($columns as $column) {
+            ok($column instanceof Column);
+        }
     }
 );
 
@@ -700,11 +712,31 @@ test(
         $template = $query->getTemplate();
 
         $params = $template->getParams();
-        
+
         eq($params['int'], 123, 'can bind scalar value');
         eq($params['date'], $valid_datetime, 'can bind value using Type conversion');
     }
 );
+
+/**
+ * @param string $sql
+ *
+ * @return string SQL with normalized whitespace
+ */
+function normalize_sql($sql)
+{
+    return preg_replace('/\s+/', ' ', $sql);
+}
+
+/**
+ * @param Executable  $query
+ * @param string      $expected_sql
+ * @param string|null $why
+ */
+function sql_eq(Executable $query, $expected_sql, $why = null)
+{
+    eq(normalize_sql($expected_sql), normalize_sql($query->getTemplate()->getSQL()), $why);
+}
 
 test(
     'can build SELECT query',
@@ -714,22 +746,69 @@ test(
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
 
+        sql_eq(
+            $db->select($schema->user),
+            'SELECT `user`.* FROM `user`',
+            'auto-selects everything from root node'
+        );
+
+        sql_eq(
+            $db->select($schema->user('u')),
+            'SELECT `u`.* FROM `user` AS `u`',
+            'auto-select with root alias'
+        );
+
         $user = $schema->user;
 
-        $select = $db
-            ->select($user)
-            ->columns([$user->first_name, $user->last_name])
-            ->where([
-                "{$user->first_name} LIKE :first_name",
-                "{$user->last_name} LIKE :last_name"
-            ])
-            ->bind("first_name", '%rasmus')
-            ->bind("last_name", '%rasmus')
-            ->page(1, 20);
-        
-        // TODO turn this into a real test :-)
-        
-        echo $select->getTemplate()->getSQL();
+        sql_eq(
+            $db->select($user)
+                ->columns([$user->first_name, $user->last_name])
+                ->where("{$user->first_name} LIKE :name"),
+            'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE `user`.`first_name` LIKE :name',
+            'manually select columns'
+        );
+
+        sql_eq(
+            $db->select($user)
+                ->columns([$user->first_name('first'), $user->last_name('last')])
+                ->where("{$user->first_name('first')} LIKE :name"),
+            'SELECT `user`.`first_name` AS `first`, `user`.`last_name` AS `last` FROM `user` WHERE `user`.`first_name` LIKE :name',
+            'manually select aliased columns'
+        );
+
+        $user = $schema->user('u');
+
+        sql_eq(
+            $db->select($user)
+                ->columns([$user->first_name, $user->last_name])
+                ->where("{$user->first_name} LIKE :name"),
+            'SELECT `u`.`first_name` AS `u_first_name`, `u`.`last_name` AS `u_last_name` FROM `user` AS `u` WHERE `u`.`first_name` LIKE :name',
+            'manually select columns using a table alias'
+        );
+
+        sql_eq(
+            $db->select($user)
+                ->columns([$user->first_name('first'), $user->last_name('last')])
+                ->where("{$user->first_name('first')} LIKE :name"),
+            'SELECT `u`.`first_name` AS `first`, `u`.`last_name` AS `last` FROM `user` AS `u` WHERE `u`.`first_name` LIKE :name',
+            'manually select aliased columns using a table alias'
+        );
+
+        $user = $schema->user;
+
+        sql_eq(
+            $db->select($user)
+                ->columns([$user->first_name, $user->last_name])
+                ->where([
+                    "{$user->first_name} LIKE :first",
+                    "{$user->last_name} LIKE :last"
+                ])
+                ->order("{$user->first_name} ASC")
+                ->order("{$user->last_name} ASC")
+                ->page(1, 20),
+            'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE (`user`.`first_name` LIKE :first AND `user`.`last_name` LIKE :last) ORDER BY `user`.`first_name` ASC, `user`.`last_name` ASC LIMIT 20 OFFSET 0',
+            'select with multiple WHERE conditions, multiple ORDER BY terms, and LIMIT and OFFSET'
+        );
     }
 );
 

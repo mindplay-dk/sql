@@ -4,6 +4,8 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\TypeProvider;
+use ReflectionClass;
+use ReflectionMethod;
 
 abstract class Table
 {
@@ -41,6 +43,56 @@ abstract class Table
         $this->types = $types;
         $this->name = $name;
         $this->alias = $alias;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAlias()
+    {
+        return $this->alias;
+    }
+
+    /**
+     * @return Column[] list of all available Columns
+     */
+    public function listColumns()
+    {
+        // create a whitelist of parent types, excluding the Table class itself:
+
+        $type = get_class($this);
+
+        $whitelist = [];
+
+        while ($type && $type !== self::class) {
+            $whitelist[$type] = true;
+
+            $type = get_parent_class($type);
+        }
+
+        // reflect all available public methods:
+
+        $reflection = new ReflectionClass($this);
+
+        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        $columns = [];
+
+        foreach ($methods as $method) {
+            if (isset($whitelist[$method->class]) && !$method->isStatic()) {
+                $columns[] = $this->__get($method->name);
+            }
+        }
+
+        return $columns;
     }
 
     /**

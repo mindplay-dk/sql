@@ -13,7 +13,7 @@ class SelectQuery extends ReturningQuery
 
         $from = "\nFROM " . $this->buildNodes();
 
-        $where = count($this->where)
+        $where = count($this->conditions)
             ? "\nWHERE " . $this->buildConditions()
             : ''; // no conditions present
 
@@ -27,5 +27,13 @@ class SelectQuery extends ReturningQuery
             : ''; // no limit or offset
 
         return "{$select}{$from}{$where}{$order}{$limit}";
+    }
+
+    /**
+     * @ignore string magic (enables creation of nested SELECT queries)
+     */
+    public function __toString()
+    {
+        return $this->buildQuery();
     }
 }
