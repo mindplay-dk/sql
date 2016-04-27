@@ -541,6 +541,64 @@ test(
 );
 
 test(
+    'can apply Mapper to records',
+    function () {
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
+
+        $db = new Database($mock_pdo, new MySQLDriver());
+
+        /** @var MockInterface|PDOStatement $mock_statement */
+        $mock_statement = Mockery::mock(PDOStatement::class);
+
+        $mock_pdo
+            ->shouldReceive('prepare')
+            ->once()
+            ->andReturn($mock_statement);
+
+        $mock_statement
+            ->shouldReceive('execute')
+            ->once()
+            ->andReturn(true);
+
+        $mock_statement
+            ->shouldReceive('fetch')
+            ->once()
+            ->andReturn(['id' => '123', 'first_name' => 'Rasmus']);
+
+        $mock_statement
+            ->shouldReceive('fetch')
+            ->once()
+            ->andReturn(false);
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $query = $db
+            ->select($user)
+            ->columns([$user->id, $user->first_name])
+            ->mapRecords(function ($record) {
+                $record['mapped'] = true;
+
+                return $record;
+            });
+
+        $result = iterator_to_array($db->getConnection()->fetch($query));
+
+        eq(
+            $result,
+            [
+                ['id' => 123, 'first_name' => 'Rasmus', 'mapped' => true],
+            ]
+        );
+
+        Mockery::close();
+    }
+);
+
+test(
     'can fetch records and apply Mappers in batches',
     function () {
         foreach ([30,20] as $num_records) {
@@ -688,7 +746,7 @@ test(
 
         $columns = $user->listColumns();
 
-        eq(count($columns), 4);
+        eq(count($columns), 5);
 
         foreach ($columns as $column) {
             ok($column instanceof Column);
@@ -887,6 +945,7 @@ test(
         $user = $schema->user;
 
         $expected_types = [
+            'id'              => IntType::class,
             'first_name'      => StringType::class,
             'last_name'       => StringType::class,
             'dob'             => TimestampType::class,

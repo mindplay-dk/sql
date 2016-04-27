@@ -41,6 +41,7 @@ class SampleSchema extends Schema
 }
 
 /**
+ * @property-read Column $id
  * @property-read Column $first_name
  * @property-read Column $last_name
  * @property-read Column $dob
@@ -48,6 +49,11 @@ class SampleSchema extends Schema
  */
 class UserTable extends Table
 {
+    public function id($alias)
+    {
+        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+    }
+    
     public function first_name($alias)
     {
         return $this->createColumn(StringType::class, __FUNCTION__, $alias);

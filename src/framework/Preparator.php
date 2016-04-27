@@ -70,7 +70,7 @@ class Preparator
             }
         }
 
-        return $statement;
+        return $prepared_statement;
     }
 
     /**
