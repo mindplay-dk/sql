@@ -13,7 +13,12 @@ use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\Column;
+use mindplay\sql\model\expr;
+use mindplay\sql\model\ReturningQuery;
+use mindplay\sql\model\Type;
+use mindplay\sql\types\IntType;
 use mindplay\sql\types\JSONType;
+use mindplay\sql\types\StringType;
 use mindplay\sql\types\TimestampType;
 use Mockery\MockInterface;
 
@@ -718,6 +723,23 @@ test(
     }
 );
 
+test(
+    'can build and/or expressions',
+    function () {
+        eq(expr::any(['a']), 'a');
+        eq(expr::any(['a', 'b']), '(a OR b)');
+        eq(expr::any(['a', 'b', 'c']), '(a OR b OR c)');
+
+        expect(RuntimeException::class, 'shoud throw for empty array', function () { expr::any([]); });
+
+        eq(expr::all(['a']), 'a');
+        eq(expr::all(['a', 'b']), '(a AND b)');
+        eq(expr::all(['a', 'b', 'c']), '(a AND b AND c)');
+
+        expect(RuntimeException::class, 'shoud throw for empty array', function () { expr::all([]); });
+    }
+);
+
 /**
  * @param string $sql
  *
@@ -738,8 +760,38 @@ function sql_eq(Executable $query, $expected_sql, $why = null)
     eq(normalize_sql($expected_sql), normalize_sql($query->getTemplate()->getSQL()), $why);
 }
 
+/**
+ * @param ReturningQuery $query
+ * @param string[]       $expected_types map where return variable name => Type class-name
+ */
+function check_return_types(ReturningQuery $query, $expected_types)
+{
+    /** @var Type[] $types */
+    $types = inspect($query->getMappers()[0], 'types');
+
+    $num_types = count($expected_types);
+    $num_vars = count($types);
+
+    if ($num_types !== $num_vars) {
+        ok(false, "type map count mismatch - expected: {$num_types}, got: {$num_vars}");
+    }
+
+    foreach ($expected_types as $var_name => $expected_type) {
+        if (isset($types[$var_name])) {
+            $type = $types[$var_name];
+
+            ok(
+                $type instanceof $expected_type,
+                "return var '{$var_name}' should have type: {$expected_type}"
+            );
+        } else {
+            ok(false, "return var '{$var_name}' is undefined");
+        }
+    }
+}
+
 test(
-    'can build SELECT query',
+    'can build SELECT queries',
     function () {
         $db = new Database(function () {}, new MySQLDriver());
 
@@ -797,6 +849,18 @@ test(
         $user = $schema->user;
 
         sql_eq(
+            $db->select($user),
+            'SELECT `user`.* FROM `user`',
+            'auto-select table'
+        );
+
+        sql_eq(
+            $db->select($user)->table($user),
+            'SELECT `user`.* FROM `user`',
+            'manually select tables'
+        );
+
+        sql_eq(
             $db->select($user)
                 ->columns([$user->first_name, $user->last_name])
                 ->where([
@@ -809,6 +873,38 @@ test(
             'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE (`user`.`first_name` LIKE :first AND `user`.`last_name` LIKE :last) ORDER BY `user`.`first_name` ASC, `user`.`last_name` ASC LIMIT 20 OFFSET 0',
             'select with multiple WHERE conditions, multiple ORDER BY terms, and LIMIT and OFFSET'
         );
+    }
+);
+
+test(
+    'can map return vars to types',
+    function () {
+        $db = new Database(function () {}, new MySQLDriver());
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $expected_types = [
+            'first_name'      => StringType::class,
+            'last_name'       => StringType::class,
+            'dob'             => TimestampType::class,
+            'home_address_id' => IntType::class,
+        ];
+
+        check_return_types($db->select($user), $expected_types);
+
+        check_return_types($db->select($user)->table($user), $expected_types);
+
+        check_return_types(
+            $db->select($user)
+                ->value("CONCAT({$user->first_name}, ' ', {$user->last_name})", "full_name")
+                ->value("DATE_DIFF(NOW(), {$user->dob})", "age", IntType::class),
+            [
+                'full_name' => StringType::class,
+                'age' => IntType::class,
+            ]);
     }
 );
 

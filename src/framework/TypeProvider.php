@@ -7,9 +7,9 @@ use mindplay\sql\model\Type;
 interface TypeProvider
 {
     /**
-     * @param string $schema Type class-name
+     * @param string $type_name Type class-name
      *
      * @return Type
      */
-    public function getType($schema);
+    public function getType($type_name);
 }

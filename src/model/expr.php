@@ -2,6 +2,8 @@
 
 namespace mindplay\sql\model;
 
+use UnexpectedValueException;
+
 /**
  * Pseudo-namespace for expression builder functions
  */
@@ -16,6 +18,10 @@ abstract class expr
      */
     public static function any(array $exprs)
     {
+        if (count($exprs) === 0) {
+            throw new UnexpectedValueException("unexpected empty array");
+        }
+
         return count($exprs) > 1
             ? "(" . implode(" OR ", $exprs) . ")"
             : $exprs[0];
@@ -30,6 +36,10 @@ abstract class expr
      */
     public static function all(array $exprs)
     {
+        if (count($exprs) === 0) {
+            throw new UnexpectedValueException("unexpected empty array");
+        }
+        
         return count($exprs) > 1
             ? "(" . implode(" AND ", $exprs) . ")"
             : $exprs[0];

@@ -15,7 +15,7 @@ abstract class Query implements Executable
     /**
      * @var TypeProvider
      */
-    private $types;
+    protected $types;
 
     /**
      * @var array map where placeholder name => mixed value types

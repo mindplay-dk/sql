@@ -8,6 +8,7 @@ use mindplay\sql\framework\Mapper;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\ReturningExecutable;
 use mindplay\sql\framework\TypeProvider;
+use mindplay\sql\types\StringType;
 use OutOfBoundsException;
 use RuntimeException;
 
@@ -102,7 +103,7 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
      *
      * @return $this
      */
-    public function value($expr, $name, Type $type = null)
+    public function value($expr, $name, $type = StringType::class)
     {
         if (isset($this->return_vars[$name])) {
             throw new OutOfBoundsException("duplicate return variable name: {$name}");
@@ -111,8 +112,11 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
         $quoted_name = $this->driver->quoteName($name);
 
         $this->return_vars[$name] = "{$expr} AS {$quoted_name}";
-        $this->type_map[$name] = $type;
 
+        $this->type_map[$name] = is_string($type)
+            ? $this->types->getType($type)
+            : $type; // assumes Type instance
+        
         return $this;
     }
 
