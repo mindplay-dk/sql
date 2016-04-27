@@ -96,15 +96,41 @@ abstract class Table
     }
 
     /**
-     * @param string      $type Type class-name
      * @param string      $name
+     * @param string      $type Type class-name
+     * @param string|null $alias
+     * @param mixed       $default
+     *
+     * @return Column
+     */
+    protected function requiredColumn($name, $type, $alias = null, $default = null)
+    {
+        return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, true, $default, false);
+    }
+
+    /**
+     * @param string      $name
+     * @param string      $type Type class-name
+     * @param string|null $alias
+     * @param mixed       $default
+     *
+     * @return Column
+     */
+    protected function optionalColumn($name, $type, $alias = null, $default = null)
+    {
+        return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, false, $default, false);
+    }
+
+    /**
+     * @param string      $name
+     * @param string      $type Type class-name
      * @param string|null $alias
      *
      * @return Column
      */
-    protected function createColumn($type, $name, $alias)
+    protected function autoColumn($name, $type, $alias = null)
     {
-        return new Column($this, $this->driver, $this->types->getType($type), $name, $alias);
+        return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, false, null, true);
     }
 
     /**

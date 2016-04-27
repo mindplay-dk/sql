@@ -75,27 +75,27 @@ class UserTable extends Table
 {
     public function id($alias)
     {
-        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+        return $this->autoColumn(__FUNCTION__, IntType::class, $alias);
     }
     
     public function first_name($alias)
     {
-        return $this->createColumn(StringType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, StringType::class, $alias);
     }
 
     public function last_name($alias)
     {
-        return $this->createColumn(StringType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, StringType::class, $alias);
     }
 
     public function dob($alias)
     {
-        return $this->createColumn(TimestampType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, TimestampType::class, $alias);
     }
     
     public function home_address_id($alias)
     {
-        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, IntType::class, $alias);
     }
 }
 
@@ -107,12 +107,12 @@ class OrderTable extends Table
 {
     public function user_id($alias)
     {
-        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, IntType::class, $alias);
     }
 
     public function completed($alias)
     {
-        return $this->createColumn(TimestampType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, TimestampType::class, $alias);
     }
 }
 
@@ -124,11 +124,11 @@ class AddressTable extends Table
 {
     public function id($alias)
     {
-        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+        return $this->autoColumn(__FUNCTION__, IntType::class, $alias);
     }
 
     public function street_name($alias)
     {
-        return $this->createColumn(StringType::class, __FUNCTION__, $alias);
+        return $this->requiredColumn(__FUNCTION__, StringType::class, $alias);
     }
 }

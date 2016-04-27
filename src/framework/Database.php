@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\framework;
 
+use mindplay\sql\model\InsertQuery;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\SelectQuery;
 use mindplay\sql\model\Table;
@@ -115,5 +116,16 @@ class Database implements TypeProvider, TableFactory
     public function select(Table $from)
     {
         return $this->container->create(SelectQuery::class, ['root' => $from]);
+    }
+
+    /**
+     * @param Table                  $into
+     * @param mixed[]|mixed[][]|null $record optional record map (or list of record maps) where Column name => value
+     * 
+     * @return InsertQuery
+     */
+    public function insert(Table $into, $record = null)
+    {
+        return $this->container->create(InsertQuery::class, ['table' => $into, 'record' => $record]);
     }
 }

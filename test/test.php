@@ -1015,23 +1015,60 @@ test(
 
         $expected_sql = <<<'SQL'
 SELECT
-  `user`.`first_name`,
-  `user`.`last_name`,
-  `home_address`.`street_name` AS `home_address_street_name`,
-  `work_address`.`street_name` AS `work_address_street_name`,
-  NOW() AS `now`,
-  (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) AS `num_orders`
+    `user`.`first_name`,
+    `user`.`last_name`,
+    `home_address`.`street_name` AS `home_address_street_name`,
+    `work_address`.`street_name` AS `work_address_street_name`,
+    NOW() AS `now`,
+    (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) AS `num_orders`
 FROM `user`
-  INNER JOIN `address` AS `home_address` ON `home_address`.`id` = `user`.`home_address_id`
-  INNER JOIN `address` AS `work_address` ON `work_address`.`id` = `user`.`home_address_id`
+    INNER JOIN `address` AS `home_address` ON `home_address`.`id` = `user`.`home_address_id`
+    INNER JOIN `address` AS `work_address` ON `work_address`.`id` = `user`.`home_address_id`
 WHERE
-  `user`.`first_name` LIKE :first_name
-  AND `user`.`dob` = :dob
-  AND (`home_address`.`street_name` LIKE :street_name OR `work_address`.`street_name` LIKE :street_name)
-  AND (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) > 3
+    `user`.`first_name` LIKE :first_name
+    AND `user`.`dob` = :dob
+    AND (`home_address`.`street_name` LIKE :street_name OR `work_address`.`street_name` LIKE :street_name)
+    AND (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) > 3
 SQL;
         
         sql_eq($query, $expected_sql);
+    }
+);
+
+test(
+    'can create INSERT queries',
+    function () {
+        $db = new Database(function () {}, new MySQLDriver());
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $valid_datetime = '2015-11-04 14:40:52';
+        $valid_timestamp = 1446648052;
+
+        $insert = $db->insert($schema->order, ['user_id' => 123, 'completed' => $valid_timestamp]);
+
+        sql_eq(
+            $insert,
+            'INSERT INTO `order` (`user_id`, `completed`) VALUES (:c0_0, :c0_1)'
+        );
+
+        $params = $insert->getTemplate()->getParams();
+
+        eq($params['c0_0'], 123, 'binds values to parameters');
+        eq($params['c0_1'], $valid_datetime, 'performs type conversion on input');
+        
+        sql_eq(
+            $db->insert($schema->address, ['street_name' => 'One Street']),
+            'INSERT INTO `address` (`street_name`) VALUES (:c0_1)',
+            'can insert multiple columns'
+        );
+
+        sql_eq(
+            $db->insert($schema->address, [['street_name' => 'One Street'], ['street_name' => 'Two Street']]),
+            'INSERT INTO `address` (`street_name`) VALUES (:c0_1), (:c1_1)',
+            'can insert multiple rows'
+        );
     }
 );
 

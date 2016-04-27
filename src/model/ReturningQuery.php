@@ -37,7 +37,7 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
      * @param Driver       $driver
      * @param TypeProvider $types
      */
-    public function __construct($root, Driver $driver, TypeProvider $types)
+    public function __construct(Table $root, Driver $driver, TypeProvider $types)
     {
         parent::__construct($root, $driver, $types);
     }

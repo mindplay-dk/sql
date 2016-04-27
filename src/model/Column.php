@@ -15,7 +15,7 @@ class Column
      * @var Driver
      */
     private $driver;
-    
+
     /**
      * @var Type
      */
@@ -30,21 +30,42 @@ class Column
      * @var string
      */
     private $alias;
-    
+
     /**
-     * @param Table       $table parent Table instance
-     * @param Driver      $driver
-     * @param Type        $type
-     * @param string      $name
-     * @param string|null $alias
+     * @var bool
      */
-    public function __construct(Table $table, Driver $driver, Type $type, $name, $alias)
+    private $required;
+
+    /**
+     * @var mixed
+     */
+    private $default;
+
+    /**
+     * @var bool
+     */
+    private $auto;
+
+    /**
+     * @param Driver      $driver
+     * @param Table       $table parent Table instance
+     * @param string      $name
+     * @param Type        $type
+     * @param string|null $alias
+     * @param bool        $required
+     * @param mixed       $default
+     * @param bool        $auto
+     */
+    public function __construct(Driver $driver, Table $table, $name, Type $type, $alias, $required, $default, $auto)
     {
         $this->table = $table;
         $this->driver = $driver;
         $this->type = $type;
         $this->name = $name;
         $this->alias = $alias;
+        $this->required = $required;
+        $this->default = $default;
+        $this->auto = $auto;
     }
 
     /**
@@ -54,7 +75,7 @@ class Column
     {
         return $this->table;
     }
-    
+
     /**
      * @return Type
      */
@@ -62,7 +83,7 @@ class Column
     {
         return $this->type;
     }
-    
+
     /**
      * @return string
      */
@@ -70,13 +91,37 @@ class Column
     {
         return $this->name;
     }
-    
+
     /**
      * @return string|null
      */
     public function getAlias()
     {
         return $this->alias;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRequired()
+    {
+        return $this->required;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefault()
+    {
+        return $this->default;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAuto()
+    {
+        return $this->auto;
     }
 
     /**
