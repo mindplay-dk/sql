@@ -34,6 +34,6 @@ class SelectQuery extends ReturningQuery
      */
     public function __toString()
     {
-        return $this->buildQuery();
+        return "(" . $this->buildQuery() . ")";
     }
 }

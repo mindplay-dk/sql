@@ -815,7 +815,7 @@ function normalize_sql($sql)
  */
 function sql_eq(Executable $query, $expected_sql, $why = null)
 {
-    eq(normalize_sql($expected_sql), normalize_sql($query->getTemplate()->getSQL()), $why);
+    eq(normalize_sql($query->getTemplate()->getSQL()), normalize_sql($expected_sql), $why);
 }
 
 /**
@@ -928,7 +928,7 @@ test(
                 ->order("{$user->first_name} ASC")
                 ->order("{$user->last_name} ASC")
                 ->page(1, 20),
-            'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE (`user`.`first_name` LIKE :first AND `user`.`last_name` LIKE :last) ORDER BY `user`.`first_name` ASC, `user`.`last_name` ASC LIMIT 20 OFFSET 0',
+            'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE `user`.`first_name` LIKE :first AND `user`.`last_name` LIKE :last ORDER BY `user`.`first_name` ASC, `user`.`last_name` ASC LIMIT 20 OFFSET 0',
             'select with multiple WHERE conditions, multiple ORDER BY terms, and LIMIT and OFFSET'
         );
     }
@@ -964,6 +964,74 @@ test(
                 'full_name' => StringType::class,
                 'age' => IntType::class,
             ]);
+    }
+);
+
+test(
+    'can build nested SELECT queries',
+    function () {
+        $db = new Database(function () {}, new MySQLDriver());
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+        
+        $home_address = $schema->address('home_address');
+        $work_address = $schema->address('work_address');
+
+        $order = $schema->order;
+        
+        $num_orders = $db
+            ->select($order)
+            ->value("COUNT(`order_id`)")
+            ->where([
+                "{$order->user_id} = {$user->id}",
+                "{$order->completed} >= :order_date"
+            ]);
+
+        $query = $db
+            ->select($user)
+            ->columns([$user->first_name, $user->last_name])
+            ->innerJoin($home_address, "{$home_address->id} = {$user->home_address_id}")
+            ->innerJoin($work_address, "{$work_address->id} = {$user->home_address_id}")
+            ->columns([$home_address->street_name, $work_address->street_name])
+            ->value("NOW()", "now", TimestampType::class)
+            ->where([
+                "{$user->first_name} LIKE :first_name",
+                "{$user->dob} = :dob",
+                expr::any([
+                    "{$home_address->street_name} LIKE :street_name",
+                    "{$work_address->street_name} LIKE :street_name"
+                ])
+            ])
+            ->value($num_orders, "num_orders", IntType::class)
+            ->where("{$num_orders} > 3")
+            ->bind("order_date", strtotime('2015-03-20'), TimestampType::class)
+            ->bind("first_name", "rasmus")
+            ->bind("street_name", "dronningensgade")
+            ->bind("dob", strtotime('1975-07-07'), TimestampType::class)
+            ->bind("groups", [1,2,3]);
+
+        $expected_sql = <<<'SQL'
+SELECT
+  `user`.`first_name`,
+  `user`.`last_name`,
+  `home_address`.`street_name` AS `home_address_street_name`,
+  `work_address`.`street_name` AS `work_address_street_name`,
+  NOW() AS `now`,
+  (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) AS `num_orders`
+FROM `user`
+  INNER JOIN `address` AS `home_address` ON `home_address`.`id` = `user`.`home_address_id`
+  INNER JOIN `address` AS `work_address` ON `work_address`.`id` = `user`.`home_address_id`
+WHERE
+  `user`.`first_name` LIKE :first_name
+  AND `user`.`dob` = :dob
+  AND (`home_address`.`street_name` LIKE :street_name OR `work_address`.`street_name` LIKE :street_name)
+  AND (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) > 3
+SQL;
+        
+        sql_eq($query, $expected_sql);
     }
 );
 

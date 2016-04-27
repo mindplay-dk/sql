@@ -27,16 +27,40 @@ class MockQuery extends Query
 }
 
 /**
- * @property-read UserTable $user
+ * @property-read UserTable    $user
+ * @property-read AddressTable $address
+ * @property-read OrderTable   $order
  */
 class SampleSchema extends Schema
 {
     /**
+     * @param string $alias
+     * 
      * @return UserTable
      */
     public function user($alias)
     {
         return $this->createTable(UserTable::class, __FUNCTION__, $alias);
+    }
+
+    /**
+     * @param string $alias
+     * 
+     * @return AddressTable
+     */
+    public function address($alias)
+    {
+        return $this->createTable(AddressTable::class, __FUNCTION__, $alias);
+    }
+
+    /**
+     * @param string $alias
+     * 
+     * @return OrderTable
+     */
+    public function order($alias)
+    {
+        return $this->createTable(OrderTable::class, __FUNCTION__, $alias);
     }
 }
 
@@ -72,5 +96,39 @@ class UserTable extends Table
     public function home_address_id($alias)
     {
         return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+    }
+}
+
+/**
+ * @property-read Column $user_id
+ * @property-read Column $completed
+ */
+class OrderTable extends Table
+{
+    public function user_id($alias)
+    {
+        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+    }
+
+    public function completed($alias)
+    {
+        return $this->createColumn(TimestampType::class, __FUNCTION__, $alias);
+    }
+}
+
+/**
+ * @property-read Column $id
+ * @property-read Column $street_name
+ */
+class AddressTable extends Table
+{
+    public function id($alias)
+    {
+        return $this->createColumn(IntType::class, __FUNCTION__, $alias);
+    }
+
+    public function street_name($alias)
+    {
+        return $this->createColumn(StringType::class, __FUNCTION__, $alias);
     }
 }

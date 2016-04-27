@@ -209,9 +209,9 @@ abstract class ProjectionQuery extends Query
      */
     protected function buildConditions()
     {
-        return expr::all($this->conditions);
+        return implode(" AND ", $this->conditions);
     }
-
+    
     /**
      * @return string order terms (for use in the ORDER BY clause of an SQL statement)
      */

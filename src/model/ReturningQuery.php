@@ -98,25 +98,29 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
      * Add an SQL expression to select and return
      * 
      * @param string           $expr return expression
-     * @param string           $name return variable name
+     * @param string|null      $name return variable name (optional, but usually required)
      * @param Type|string|null $type optional Type (or Type class-name)
      *
      * @return $this
      */
-    public function value($expr, $name, $type = StringType::class)
+    public function value($expr, $name = null, $type = StringType::class)
     {
         if (isset($this->return_vars[$name])) {
             throw new OutOfBoundsException("duplicate return variable name: {$name}");
         }
-        
-        $quoted_name = $this->driver->quoteName($name);
 
-        $this->return_vars[$name] = "{$expr} AS {$quoted_name}";
+        if ($name === null) {
+            $this->return_vars[] = "{$expr}";
+        } else {
+            $quoted_name = $this->driver->quoteName($name);
 
-        $this->type_map[$name] = is_string($type)
-            ? $this->types->getType($type)
-            : $type; // assumes Type instance
-        
+            $this->return_vars[$name] = "{$expr} AS {$quoted_name}";
+
+            $this->type_map[$name] = is_string($type)
+                ? $this->types->getType($type)
+                : $type; // assumes Type instance
+        }
+
         return $this;
     }
 
