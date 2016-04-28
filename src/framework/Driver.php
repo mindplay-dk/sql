@@ -3,14 +3,14 @@
 namespace mindplay\sql\framework;
 
 /**
- * This class implements a driver model for DBMS-specific operations.
+ * This interface defines the driver model for DBMS-specific operations.
  */
-abstract class Driver
+interface Driver
 {
     /**
      * @param string $name table or column name
      *
      * @return string quoted name
      */
-    abstract public function quoteName($name);
+    public function quoteName($name);
 }
