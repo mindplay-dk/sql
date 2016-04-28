@@ -8,6 +8,9 @@ use mindplay\sql\model\SelectQuery;
 use mindplay\sql\model\Table;
 use UnexpectedValueException;
 
+/**
+ * This class implements the primary public API of the database model.
+ */
 class Database
 {
     /**

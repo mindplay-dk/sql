@@ -4,6 +4,9 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Driver;
 
+/**
+ * This class represents a Column belonging to a Table.
+ */
 class Column
 {
     /**

@@ -1,8 +1,6 @@
 <?php
 
 use mindplay\benchpress\Benchmark;
-use mindplay\sql\drivers\MySQLDriver;
-use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\model\expr;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\TimestampType;
@@ -25,7 +23,7 @@ $bench->add(
 
         $query = $db->select($user)->order("{$user->first_name}, {$user->last_name}")->page(1, 20);
 
-        $sql = $query->getTemplate()->getSQL();
+        $query->getTemplate()->getSQL();
     }
 );
 
@@ -73,7 +71,7 @@ $bench->add(
             ->bind("dob", strtotime('1975-07-07'), TimestampType::class)
             ->bind("groups", [1,2,3]);
 
-        $sql = $query->getTemplate()->getSQL();
+        $query->getTemplate()->getSQL();
     }
 );
 

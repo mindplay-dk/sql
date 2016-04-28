@@ -8,6 +8,9 @@ use mindplay\sql\framework\SQLException;
 use PDO;
 use PDOStatement;
 
+/**
+ * This class implements a Prepared Statement adapter for PDO Statements.
+ */
 class PreparedPDOStatement implements PreparedStatement
 {
     /**

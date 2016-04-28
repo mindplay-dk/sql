@@ -6,6 +6,12 @@ use mindplay\sql\framework\Mapper;
 use OutOfBoundsException;
 use UnexpectedValueException;
 
+/**
+ * This Mapper performs Type conversions on return variables (columns) returned by
+ * a returning database query, e.g. SELECT or UPDATE RETURNING queries.
+ * 
+ * @see ReturningQuery::getMappers()
+ */
 class TypeMapper implements Mapper
 {
     /**

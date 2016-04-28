@@ -4,6 +4,9 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\TableFactory;
 
+/**
+ * This is an abstract base-class for user-defined Schema-types.
+ */
 abstract class Schema
 {
     /**

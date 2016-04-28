@@ -7,6 +7,9 @@ use mindplay\sql\framework\TypeProvider;
 use ReflectionClass;
 use ReflectionMethod;
 
+/**
+ * This is an abstract base-class for user-defined Table-types belonging to a Schema.
+ */
 abstract class Table
 {
     /**

@@ -6,6 +6,9 @@ use mindplay\sql\model\Type;
 use mindplay\unbox\Container;
 use UnexpectedValueException;
 
+/**
+ * This class implements a dedicated dependency injection container for the database domain.
+ */
 class DatabaseContainer extends Container implements TypeProvider, TableFactory
 {
     /**

@@ -71,7 +71,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -90,7 +90,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -113,7 +113,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -132,7 +132,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -157,7 +157,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -182,7 +182,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -205,7 +205,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        $driver = create_driver();
+        
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -461,43 +461,43 @@ test(
     }
 );
 
-test(
-    'can execute prepared statement',
-    function () {
-        return; // TODO: unsure how to implement this test, because PDOStatement::$queryString is readonly!
-
-        /** @var MockInterface|PDOStatement $mock_handle */
-        $mock_handle = Mockery::mock(PDOStatement::class);
-
-        $mock_handle->queryString = "SELECT 1";
-
-        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
-
-        $st = new PreparedPDOStatement($mock_handle);
-
-        $st->execute();
-
-        ok(true, 'it executes without error');
-
-        $mock_handle = Mockery::mock(PDOStatement::class);
-
-        $mock_handle->shouldReceive('execute')->andReturn(false)->once();
-        $mock_handle->shouldReceive('errorInfo')->andReturn(['XXXXXX', -1, 'ouch'])->once();
-
-        $st = new PreparedPDOStatement($mock_handle);
-
-        try {
-            $st->execute();
-        } catch (SQLException $sql_exception) {
-            // caught
-        }
-
-        ok(isset($sql_exception));
-
-        eq($sql_exception->getCode(), -1);
-        eq($sql_exception->getMessage(), "XXXXXX: ouch");
-    }
-);
+// NOTE: the following test cannot be implemented, because PDOStatement::$queryString is readonly!
+//
+//test(
+//    'can execute prepared statement',
+//    function () {
+//        /** @var MockInterface|PDOStatement $mock_handle */
+//        $mock_handle = Mockery::mock(PDOStatement::class);
+//
+//        $mock_handle->queryString = "SELECT 1";
+//
+//        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
+//
+//        $st = new PreparedPDOStatement($mock_handle);
+//
+//        $st->execute();
+//
+//        ok(true, 'it executes without error');
+//
+//        $mock_handle = Mockery::mock(PDOStatement::class);
+//
+//        $mock_handle->shouldReceive('execute')->andReturn(false)->once();
+//        $mock_handle->shouldReceive('errorInfo')->andReturn(['XXXXXX', -1, 'ouch'])->once();
+//
+//        $st = new PreparedPDOStatement($mock_handle);
+//
+//        try {
+//            $st->execute();
+//        } catch (SQLException $sql_exception) {
+//            // caught
+//        }
+//
+//        ok(isset($sql_exception));
+//
+//        eq($sql_exception->getCode(), -1);
+//        eq($sql_exception->getMessage(), "XXXXXX: ouch");
+//    }
+//);
 
 test(
     'can fetch; and auto-executes prepared statement on first fetch',

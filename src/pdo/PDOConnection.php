@@ -11,6 +11,9 @@ use mindplay\sql\framework\ReturningExecutable;
 use PDO;
 use UnexpectedValueException;
 
+/**
+ * This class implements a Connection adapter for a PDO connection.
+ */
 class PDOConnection implements Connection
 {
     /**
