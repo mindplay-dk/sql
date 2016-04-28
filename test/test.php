@@ -3,7 +3,7 @@
 use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\BatchMapper;
-use mindplay\sql\framework\Database;
+use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\Preparator;
 use mindplay\sql\framework\PreparedStatement;
@@ -525,8 +525,8 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $db = new Database(new MySQLDriver());
-
+        $db = create_db();
+        
         /** @var MockInterface|PDOStatement $mock_statement */
         $mock_statement = Mockery::mock(PDOStatement::class);
 
@@ -699,7 +699,7 @@ test(
 test(
     'can define Schema model',
     function () {
-        $db = new Database(new MySQLDriver());
+        $db = create_db();
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -742,7 +742,7 @@ test(
 test(
     'can bind values to query models',
     function () {
-        $db = new Database(new MySQLDriver());
+        $db = new DatabaseContainer(new MySQLDriver());
 
         $query = new MockQuery($db);
 
@@ -832,7 +832,7 @@ function check_return_types(ReturningQuery $query, $expected_types)
 test(
     'can build SELECT queries',
     function () {
-        $db = new Database(new MySQLDriver());
+        $db = create_db();
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -918,7 +918,7 @@ test(
 test(
     'can map return vars to types',
     function () {
-        $db = new Database(new MySQLDriver());
+        $db = create_db();
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -951,7 +951,7 @@ test(
 test(
     'can build nested SELECT queries',
     function () {
-        $db = new Database(new MySQLDriver());
+        $db = create_db();
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -1019,7 +1019,7 @@ SQL;
 test(
     'can create INSERT queries',
     function () {
-        $db = new Database(new MySQLDriver());
+        $db = create_db();
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);

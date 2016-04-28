@@ -1,6 +1,9 @@
 <?php
 
+use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
+use mindplay\sql\framework\Database;
+use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Driver;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\Query;
@@ -16,6 +19,14 @@ use mindplay\sql\types\TimestampType;
 function create_driver()
 {
     return new PostgresDriver();
+}
+
+/**
+ * Database
+ */
+function create_db()
+{
+    return new Database(new DatabaseContainer(new MySQLDriver()));
 }
 
 class MockQuery extends Query

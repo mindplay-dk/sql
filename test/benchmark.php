@@ -2,7 +2,7 @@
 
 use mindplay\benchpress\Benchmark;
 use mindplay\sql\drivers\MySQLDriver;
-use mindplay\sql\framework\Database;
+use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\model\expr;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\TimestampType;
@@ -13,7 +13,7 @@ require __DIR__ . '/fixtures.php';
 
 $bench = new Benchmark();
 
-$db = new Database(new MySQLDriver());
+$db = new DatabaseContainer(new MySQLDriver());
 
 $bench->add(
     "build simple SELECT query",
