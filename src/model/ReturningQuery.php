@@ -103,7 +103,7 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
      *
      * @return $this
      */
-    public function value($expr, $name = null, $type = StringType::class)
+    public function value($expr, $name = null, $type = null)
     {
         if (isset($this->return_vars[$name])) {
             throw new OutOfBoundsException("duplicate return variable name: {$name}");
@@ -116,9 +116,11 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
 
             $this->return_vars[$name] = "{$expr} AS {$quoted_name}";
 
-            $this->type_map[$name] = is_string($type)
-                ? $this->types->getType($type)
-                : $type; // assumes Type instance
+            if ($type !== null) {
+                $this->type_map[$name] = is_string($type)
+                    ? $this->types->getType($type)
+                    : $type; // assumes Type instance
+            }
         }
 
         return $this;

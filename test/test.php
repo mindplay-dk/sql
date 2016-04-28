@@ -961,9 +961,9 @@ test(
                 ->value("CONCAT({$user->first_name}, ' ', {$user->last_name})", "full_name")
                 ->value("DATE_DIFF(NOW(), {$user->dob})", "age", IntType::class),
             [
-                'full_name' => StringType::class,
                 'age' => IntType::class,
-            ]);
+            ]
+        );
     }
 );
 
@@ -1057,7 +1057,7 @@ test(
 
         eq($params['c0_0'], 123, 'binds values to parameters');
         eq($params['c0_1'], $valid_datetime, 'performs type conversion on input');
-        
+
         sql_eq(
             $db->insert($schema->address, ['street_name' => 'One Street']),
             'INSERT INTO `address` (`street_name`) VALUES (:c0_1)',
