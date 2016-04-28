@@ -6,7 +6,6 @@ use Exception;
 use LogicException;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Executable;
-use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\ReturningExecutable;
 use PDO;

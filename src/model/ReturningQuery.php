@@ -8,9 +8,7 @@ use mindplay\sql\framework\Mapper;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\ReturningExecutable;
 use mindplay\sql\framework\TypeProvider;
-use mindplay\sql\types\StringType;
 use OutOfBoundsException;
-use RuntimeException;
 
 /**
  * Abstract base class for Query types that return and map results, such as `SELECT` or `UPDATE RETURNING`.

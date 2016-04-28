@@ -9,9 +9,6 @@ namespace mindplay\sql\framework;
  * @see Connection::execute()
  * @see Connection::fetch()
  * @see Connection::prepare()
- * 
- * @see Preparator::prepareResult()
- * @see Preparator::prepareStatement()
  */
 interface Executable
 {

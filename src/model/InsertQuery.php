@@ -22,11 +22,6 @@ class InsertQuery extends Query
     private $table;
 
     /**
-     * @var Type[] map where Column Name => Type
-     */
-    private $type_map;
-
-    /**
      * @var mixed[][] list of record maps, where Column name => value
      */
     private $records = [];
