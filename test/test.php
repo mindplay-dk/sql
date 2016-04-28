@@ -5,7 +5,6 @@ use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
-use mindplay\sql\framework\Preparator;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\Result;
