@@ -12,6 +12,7 @@
     },
     "require-dev": {
         "mindplay/testies": "dev-master",
+        "mindplay/benchpress": "dev-master",
         "mockery/mockery": "~0.9.4",
         "phpunit/php-code-coverage": "^3.0"
     }
