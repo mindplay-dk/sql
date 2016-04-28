@@ -3,8 +3,8 @@
 namespace mindplay\sql\framework;
 
 /**
- * This class represents an SQL statement template, with PDO placeholders, and matching
- * map of parameter names to scalar values and/or arrays of scalar values.
+ * This class represents an SQL statement template, with ":name" placeholders, and a
+ * matching map of parameter names to scalar values and/or arrays of scalar values.
  */
 class Template implements Executable
 {

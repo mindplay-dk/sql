@@ -13,7 +13,7 @@ require __DIR__ . '/fixtures.php';
 
 $bench = new Benchmark();
 
-$db = new Database(function () {}, new MySQLDriver());
+$db = new Database(new MySQLDriver());
 
 $bench->add(
     "build simple SELECT query",

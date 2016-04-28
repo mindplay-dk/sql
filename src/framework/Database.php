@@ -8,7 +8,6 @@ use mindplay\sql\model\SelectQuery;
 use mindplay\sql\model\Table;
 use mindplay\sql\model\Type;
 use mindplay\unbox\Container;
-use PDO;
 use UnexpectedValueException;
 
 class Database implements TypeProvider, TableFactory
@@ -19,26 +18,13 @@ class Database implements TypeProvider, TableFactory
     private $container;
 
     /**
-     * @param callable|PDO $pdo_or_factory PDO factory function (or existing PDO object)
-     * @param Driver       $driver
+     * @param Driver $driver
      */
-    public function __construct($pdo_or_factory, Driver $driver)
+    public function __construct(Driver $driver)
     {
         $this->container = new Container();
 
-        if (is_callable($pdo_or_factory)) {
-            // PDO factory given - register with Container:
-            $this->container->register(PDO::class, $pdo_or_factory);
-        } else {
-            // PDO instance given - inject into Container:
-            $this->container->set(PDO::class, $pdo_or_factory);
-        }
-
         $this->container->set(Driver::class, $driver);
-
-        $this->container->register(Preparator::class);
-
-        $this->container->register(Connection::class);
 
         // self-register:
 
@@ -48,16 +34,6 @@ class Database implements TypeProvider, TableFactory
         $this->container->set(TableFactory::class, $this);
     }
     
-    /**
-     * @return Connection
-     */
-    public function getConnection()
-    {
-        // TODO service locator! remove?
-
-        return $this->container->get(Connection::class);
-    }
-
     /**
      * @inheritdoc
      */

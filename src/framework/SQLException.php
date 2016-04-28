@@ -11,9 +11,9 @@ use RuntimeException;
 class SQLException extends RuntimeException
 {
     /**
-     * @param string         $sql    SQL statement (with PDO placeholders)
-     * @param array          $params paramters that were attempted to bind against the statement
-     * @param string         $message 
+     * @param string         $sql    SQL statement (with ":name" placeholders)
+     * @param array          $params map of parameter name/value pairs (to bind against placeholders in the statement)
+     * @param string         $message
      * @param int            $code
      * @param Exception|null $previous
      */
