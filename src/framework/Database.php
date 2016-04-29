@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\framework;
 
+use mindplay\sql\model\DeleteQuery;
 use mindplay\sql\model\InsertQuery;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\SelectQuery;
@@ -78,5 +79,15 @@ class Database
     public function update(Table $table)
     {
         return $this->container->create(UpdateQuery::class, ['root' => $table]);
+    }
+
+    /**
+     * @param Table $table
+     * 
+     * @return DeleteQuery
+     */
+    public function delete(Table $table)
+    {
+        return $this->container->create(DeleteQuery::class, ['root' => $table]);
     }
 }

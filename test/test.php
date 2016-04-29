@@ -1177,6 +1177,35 @@ SQL;
     }
 );
 
+test(
+    'can create DELETE query',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $query = $db->delete($user)
+            ->where("{$user->id} = :id")
+            ->bind("id", 123)
+            ->limit(1);
+
+        $expected_sql = <<<'SQL'
+DELETE FROM `user`
+WHERE `user`.`id` = :id
+LIMIT 1
+SQL;
+
+        sql_eq($query, $expected_sql);
+
+        check_params($query, [
+            'id' => 123,
+        ]);
+    }
+);
+
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 
 exit(run());
