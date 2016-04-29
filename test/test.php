@@ -12,6 +12,7 @@ use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\expr;
+use mindplay\sql\model\Query;
 use mindplay\sql\model\ReturningQuery;
 use mindplay\sql\model\Type;
 use mindplay\sql\pdo\PDOConnection;
@@ -29,6 +30,80 @@ require __DIR__ . '/fixtures.php';
 teardown(function () {
     Mockery::close();
 });
+
+/**
+ * @param string $sql
+ *
+ * @return string SQL with normalized whitespace
+ */
+function normalize_sql($sql)
+{
+    return preg_replace('/\s+/', ' ', $sql);
+}
+
+/**
+ * @param Executable  $query
+ * @param string      $expected_sql
+ * @param string|null $why
+ */
+function sql_eq(Executable $query, $expected_sql, $why = null)
+{
+    eq(normalize_sql($query->getTemplate()->getSQL()), normalize_sql($expected_sql), $why);
+}
+
+/**
+ * @param ReturningQuery $query
+ * @param string[]       $expected_types map where return variable name => Type class-name
+ */
+function check_return_types(ReturningQuery $query, $expected_types)
+{
+    /** @var Type[] $types */
+    $types = inspect($query->getMappers()[0], 'types');
+
+    $num_types = count($expected_types);
+    $num_vars = count($types);
+
+    if ($num_types !== $num_vars) {
+        ok(false, "type map count mismatch - expected: {$num_types}, got: {$num_vars}");
+    }
+
+    foreach ($expected_types as $var_name => $expected_type) {
+        if (isset($types[$var_name])) {
+            $type = $types[$var_name];
+
+            ok(
+                $type instanceof $expected_type,
+                "return var '{$var_name}' should have type: {$expected_type}"
+            );
+        } else {
+            ok(false, "return var '{$var_name}' is undefined");
+        }
+    }
+}
+
+/**
+ * @param Query $query
+ * @param array $expected_params map where placeholder name => value
+ */
+function check_params(Query $query, $expected_params)
+{
+    $params = $query->getTemplate()->getParams();
+
+    $expected_num_params = count($expected_params);
+    $num_params = count($params);
+
+    if ($expected_num_params !== $num_params) {
+        ok(false, "parameter map count mismatch - expected: {$expected_num_params}, got: {$num_params}", $params);
+    }
+
+    foreach ($expected_params as $name => $expected_value) {
+        if (array_key_exists($name, $params)) {
+            eq($params[$name], $expected_value);
+        } else {
+            ok(false, "undefined parameter: {$name}");
+        }
+    }
+}
 
 test(
     "can quote table-names",
@@ -205,7 +280,7 @@ test(
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
-        
+
         $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
@@ -778,56 +853,6 @@ test(
     }
 );
 
-/**
- * @param string $sql
- *
- * @return string SQL with normalized whitespace
- */
-function normalize_sql($sql)
-{
-    return preg_replace('/\s+/', ' ', $sql);
-}
-
-/**
- * @param Executable  $query
- * @param string      $expected_sql
- * @param string|null $why
- */
-function sql_eq(Executable $query, $expected_sql, $why = null)
-{
-    eq(normalize_sql($query->getTemplate()->getSQL()), normalize_sql($expected_sql), $why);
-}
-
-/**
- * @param ReturningQuery $query
- * @param string[]       $expected_types map where return variable name => Type class-name
- */
-function check_return_types(ReturningQuery $query, $expected_types)
-{
-    /** @var Type[] $types */
-    $types = inspect($query->getMappers()[0], 'types');
-
-    $num_types = count($expected_types);
-    $num_vars = count($types);
-
-    if ($num_types !== $num_vars) {
-        ok(false, "type map count mismatch - expected: {$num_types}, got: {$num_vars}");
-    }
-
-    foreach ($expected_types as $var_name => $expected_type) {
-        if (isset($types[$var_name])) {
-            $type = $types[$var_name];
-
-            ok(
-                $type instanceof $expected_type,
-                "return var '{$var_name}' should have type: {$expected_type}"
-            );
-        } else {
-            ok(false, "return var '{$var_name}' is undefined");
-        }
-    }
-}
-
 test(
     'can build SELECT queries',
     function () {
@@ -1049,6 +1074,106 @@ test(
             'INSERT INTO `address` (`street_name`) VALUES (:c0_1), (:c1_1)',
             'can insert multiple rows'
         );
+    }
+);
+
+test(
+    'can create UPDATE query',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $query = $db->update($user)
+            ->setValue($user->first_name, "Rasmus")
+            ->where("{$user->id} = :id")
+            ->bind("id", 123);
+
+        $expected_sql = <<<'SQL'
+UPDATE `user`
+SET `user`.`first_name` = :user_first_name
+WHERE `user`.`id` = :id
+SQL;
+
+        sql_eq($query, $expected_sql);
+
+        check_params($query, [
+            'user_first_name' => 'Rasmus',
+            'id'              => 123,
+        ]);
+    }
+);
+
+test(
+    'can create UPDATE query with alias',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user('u');
+
+        $query = $db->update($user)
+            ->setValue($user->first_name, "Rasmus")
+            ->setValue($user->dob, 173923200)
+            ->setExpr($user->last_name, "'Schultz'")
+            ->where("{$user->id} = :id")
+            ->bind("id", 123);
+
+        $expected_sql = <<<'SQL'
+UPDATE `user` AS `u`
+SET `u`.`first_name` = :u_first_name,
+    `u`.`dob` = :u_dob,
+    `u`.`last_name` = 'Schultz'
+WHERE `u`.`id` = :id
+SQL;
+
+        sql_eq($query, $expected_sql);
+
+        check_params($query, [
+            'u_first_name' => 'Rasmus',
+            'u_dob'        => '1975-07-07 00:00:00',
+            'id'           => 123,
+        ]);
+    }
+);
+
+test(
+    'can create UPDATE query with bulk assignment',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $query = $db->update($user)
+            ->assign([
+                'first_name' => 'Rasmus',
+                'dob'        => 173923200,
+            ])
+            ->where("{$user->id} = :id")
+            ->bind("id", 123);
+
+        $expected_sql = <<<'SQL'
+UPDATE `user`
+SET `user`.`first_name` = :user_first_name,
+    `user`.`dob` = :user_dob
+WHERE `user`.`id` = :id
+SQL;
+
+        sql_eq($query, $expected_sql);
+
+        check_params($query, [
+            'user_first_name' => 'Rasmus',
+            'user_dob'        => '1975-07-07 00:00:00',
+            'id'              => 123,
+        ]);
     }
 );
 

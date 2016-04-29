@@ -6,6 +6,7 @@ use mindplay\sql\model\InsertQuery;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\SelectQuery;
 use mindplay\sql\model\Table;
+use mindplay\sql\model\UpdateQuery;
 use UnexpectedValueException;
 
 /**
@@ -67,5 +68,15 @@ class Database
     public function insert(Table $into, $record = null)
     {
         return $this->container->create(InsertQuery::class, ['table' => $into, 'record' => $record]);
+    }
+
+    /**
+     * @param Table $table
+     * 
+     * @return UpdateQuery
+     */
+    public function update(Table $table)
+    {
+        return $this->container->create(UpdateQuery::class, ['table' => $table]);
     }
 }
