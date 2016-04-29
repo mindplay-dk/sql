@@ -1,6 +1,13 @@
 {
     "type": "library",
     "name": "mindplay/sql",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rasmus Schultz",
+            "email": "rasmus@mindplay.dk"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "mindplay\\sql\\": "src/"
