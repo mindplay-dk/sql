@@ -77,6 +77,6 @@ class Database
      */
     public function update(Table $table)
     {
-        return $this->container->create(UpdateQuery::class, ['table' => $table]);
+        return $this->container->create(UpdateQuery::class, ['root' => $table]);
     }
 }

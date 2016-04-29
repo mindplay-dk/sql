@@ -11,26 +11,9 @@ use mindplay\sql\framework\TypeProvider;
 class UpdateQuery extends ProjectionQuery
 {
     /**
-     * @var Table
-     */
-    private $table;
-
-    /**
      * @var mixed[] map where Column name => literal SQL expression to assign
      */
     private $assignments = [];
-
-    /**
-     * @param Table        $table Table to INSERT into
-     * @param Driver       $driver
-     * @param TypeProvider $types
-     */
-    public function __construct(Table $table, Driver $driver, TypeProvider $types)
-    {
-        parent::__construct($table, $driver, $types);
-
-        $this->table = $table;
-    }
 
     /**
      * @param Column|string $column Column to update (or Column name)
@@ -76,7 +59,7 @@ class UpdateQuery extends ProjectionQuery
         }
 
         $this->assignments[$name] = "{$quoted_name} = {$expr}";
-        
+
         return $this;
     }
 
