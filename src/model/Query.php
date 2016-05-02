@@ -4,7 +4,6 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\Statement;
-use mindplay\sql\framework\Template;
 use mindplay\sql\framework\TypeProvider;
 
 /**
@@ -36,11 +35,6 @@ abstract class Query implements Executable
     }
 
     /**
-     * @return string SQL query (with placeholders)
-     */
-    abstract protected function buildQuery();
-
-    /**
      * Bind an individual placeholder name to a given value.
      *
      * The `$type` argument is optional for scalar types (string, int, float, bool, null) and arrays of scalar values.
@@ -63,22 +57,10 @@ abstract class Query implements Executable
     }
 
     /**
-     * @return Template fully-populated SQL template
+     * @inheritdoc
      */
-    public function getTemplate()
+    public function getParams()
     {
-        return $this->createStatement()->getTemplate();
-    }
-
-    /**
-     * Internally build the SQL query, apply `Type` conversions, and create a `Statement` instance.
-     *
-     * @return Statement
-     */
-    public function createStatement()
-    {
-        $statement = new Statement($this->buildQuery());
-
         $params = [];
 
         foreach ($this->params as $name => $value) {
@@ -87,9 +69,7 @@ abstract class Query implements Executable
                 : $value; // assume scalar value (or array of scalar values)
         }
 
-        $statement->apply($params);
-
-        return $statement;
+        return $params;
     }
 
     /**

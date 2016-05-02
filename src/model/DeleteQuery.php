@@ -10,7 +10,7 @@ use mindplay\sql\framework\TypeProvider;
  */
 class DeleteQuery extends ProjectionQuery
 {
-    public function buildQuery()
+    public function getSQL()
     {
         $delete = "DELETE FROM " . $this->buildNodes();
 

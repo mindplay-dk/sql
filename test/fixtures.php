@@ -31,7 +31,10 @@ function create_db()
 
 class MockQuery extends Query
 {
-    protected function buildQuery()
+    /**
+     * @return string SQL statement (with placeholders)
+     */
+    public function getSQL()
     {
         return "SELECT 1";
     }

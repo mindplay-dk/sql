@@ -74,9 +74,9 @@ class InsertQuery extends Query
     }
 
     /**
-     * @return string SQL query (with placeholders)
+     * @inheritdoc
      */
-    protected function buildQuery()
+    public function getSQL()
     {
         if (count($this->records) === 0) {
             throw new RuntimeException("no records added to this query");

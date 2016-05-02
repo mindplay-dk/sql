@@ -16,7 +16,7 @@ class SelectQuery extends ReturningQuery
     /**
      * @inheritdoc
      */
-    protected function buildQuery()
+    public function getSQL()
     {
         $select = "SELECT " . $this->buildReturnVars();
 
@@ -43,6 +43,6 @@ class SelectQuery extends ReturningQuery
      */
     public function __toString()
     {
-        return "(" . $this->buildQuery() . ")";
+        return "(" . $this->getSQL() . ")";
     }
 }

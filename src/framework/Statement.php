@@ -28,14 +28,6 @@ class Statement implements Executable
     }
 
     /**
-     * @return Template fully-populated SQL template
-     */
-    public function getTemplate()
-    {
-        return new Template($this->sql, $this->params);
-    }
-    
-    /**
      * Bind an individual placeholder name to a given value.
      *
      * Acceptable value types are scalar types (string, int, float, bool, null) and arrays of scalar values.
@@ -86,5 +78,21 @@ class Statement implements Executable
         foreach ($params as $name => $value) {
             $this->bind($name, $value);
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSQL()
+    {
+        return $this->sql;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getParams()
+    {
+        return $this->params;
     }
 }

@@ -48,11 +48,9 @@ class PDOConnection implements Connection
      */
     public function prepare(Executable $statement)
     {
-        $template = $statement->getTemplate();
+        $params = $statement->getParams();
 
-        $params = $template->getParams();
-
-        $sql = $this->expandPlaceholders($template->getSQL(), $params);
+        $sql = $this->expandPlaceholders($statement->getSQL(), $params);
 
         $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql));
 

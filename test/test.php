@@ -48,7 +48,7 @@ function normalize_sql($sql)
  */
 function sql_eq(Executable $query, $expected_sql, $why = null)
 {
-    eq(normalize_sql($query->getTemplate()->getSQL()), normalize_sql($expected_sql), $why);
+    eq(normalize_sql($query->getSQL()), normalize_sql($expected_sql), $why);
 }
 
 /**
@@ -87,8 +87,8 @@ function check_return_types(ReturningQuery $query, $expected_types)
  */
 function check_params(Query $query, $expected_params)
 {
-    $params = $query->getTemplate()->getParams();
-
+    $params = $query->getParams();
+    
     $expected_num_params = count($expected_params);
     $num_params = count($params);
 
@@ -338,7 +338,7 @@ test(
     function () {
         $st = new Statement("SELECT 1");
 
-        eq($st->getTemplate()->getSQL(), "SELECT 1");
+        eq($st->getSQL(), "SELECT 1");
 
         $st->bind('int', 1);
         $st->bind('float', 1.2);
@@ -355,7 +355,7 @@ test(
 
         $st->apply(['int' => 2, 'foo' => 'bar']); // overrides/adds values
 
-        eq($st->getTemplate()->getParams(), [
+        eq($st->getParams(), [
             'int'    => 2,
             'float'  => 1.2,
             'string' => 'hello',
@@ -370,10 +370,6 @@ test(
             'nulls'       => [null, null],
             'foo'         => 'bar',
         ]);
-
-        $tpl = $st->getTemplate();
-
-        eq($tpl, $tpl->getTemplate(), 'Template is Executable');
 
         expect(
             RuntimeException::class,
@@ -827,9 +823,7 @@ test(
 
         $query->bind('date', $valid_timestamp, TimestampType::class);
 
-        $template = $query->getTemplate();
-
-        $params = $template->getParams();
+        $params = $query->getParams();
 
         eq($params['int'], 123, 'can bind scalar value');
         eq($params['date'], $valid_datetime, 'can bind value using Type conversion');
@@ -1058,7 +1052,7 @@ test(
             'INSERT INTO `order` (`user_id`, `completed`) VALUES (:c0_0, :c0_1)'
         );
 
-        $params = $insert->getTemplate()->getParams();
+        $params = $insert->getParams();
 
         eq($params['c0_0'], 123, 'binds values to parameters');
         eq($params['c0_1'], $valid_datetime, 'performs type conversion on input');

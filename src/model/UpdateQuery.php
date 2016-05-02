@@ -86,7 +86,7 @@ class UpdateQuery extends ProjectionQuery
     /**
      * @inheritdoc
      */
-    public function buildQuery()
+    public function getSQL()
     {
         $update = "UPDATE " . $this->buildNodes();
 
