@@ -53,7 +53,7 @@ class PDOConnection implements Connection
         $sql = $this->expandPlaceholders($statement->getSQL(), $params);
 
         $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql));
-
+        
         foreach ($params as $name => $value) {
             if (is_array($value)) {
                 $index = 1; // use a base-1 offset consistent with expandPlaceholders()
@@ -78,8 +78,8 @@ class PDOConnection implements Connection
      */
     public function fetch(ReturningExecutable $statement, $batch_size = 1000, array $mappers = [])
     {
-        return $this->prepareResult(
-            $statement,
+        return new Result(
+            $this->prepare($statement),
             $batch_size,
             array_merge($statement->getMappers(), $mappers)
         );
@@ -138,20 +138,6 @@ class PDOConnection implements Connection
         }
 
         return $this->transaction_result;
-    }
-
-    /**
-     * Prepare and bind a `Statement` and create a `Result` instance.
-     *
-     * @param Executable $statement
-     * @param int        $batch_size batch-size (when fetching large result sets)
-     * @param array      $mappers    list of Mappers to apply while fetching results
-     *
-     * @return Result
-     */
-    private function prepareResult(Executable $statement, $batch_size, array $mappers)
-    {
-        return new Result($this->prepare($statement), $batch_size, $mappers);
     }
 
     /**
