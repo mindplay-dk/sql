@@ -2,9 +2,6 @@
 
 namespace mindplay\sql\model;
 
-use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\TypeProvider;
-
 /**
  * This class represents a DELETE query.
  */

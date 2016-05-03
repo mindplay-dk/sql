@@ -6,6 +6,7 @@ use mindplay\sql\model\DeleteQuery;
 use mindplay\sql\model\InsertQuery;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\SelectQuery;
+use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Table;
 use mindplay\sql\model\UpdateQuery;
 use UnexpectedValueException;
@@ -89,5 +90,15 @@ class Database
     public function delete(Table $table)
     {
         return $this->container->create(DeleteQuery::class, ['root' => $table]);
+    }
+
+    /**
+     * @param string $sql
+     * 
+     * @return SQLQuery
+     */
+    public function sql($sql)
+    {
+        return $this->container->create(SQLQuery::class, ['sql' => $sql]);
     }
 }

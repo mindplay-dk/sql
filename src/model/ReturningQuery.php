@@ -202,4 +202,22 @@ abstract class ReturningQuery extends ProjectionQuery implements ReturningExecut
 
         return implode(",\n  ", $return_vars);
     }
+
+    /**
+     * Internally creates a full Type-map for all Columns in a given Table
+     *
+     * @param Table $table
+     *
+     * @return Type[] map where Column Alias maps to Type
+     */
+    protected function createTypeMap(Table $table)
+    {
+        $type_map = [];
+
+        foreach ($table->listColumns() as $column) {
+            $type_map[$column->getAlias() ?: $column->getName()] = $column->getType();
+        }
+
+        return $type_map;
+    }
 }

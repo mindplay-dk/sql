@@ -6,14 +6,15 @@ use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\PreparedStatement;
+use mindplay\sql\framework\Query;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\SQLException;
-use mindplay\sql\framework\Statement;
+use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\expr;
-use mindplay\sql\model\Query;
 use mindplay\sql\model\ReturningQuery;
+use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Type;
 use mindplay\sql\pdo\PDOConnection;
 use mindplay\sql\pdo\PreparedPDOStatement;
@@ -336,7 +337,7 @@ test(
 test(
     'can bind statement parameters to values',
     function () {
-        $st = new Statement("SELECT 1");
+        $st = create_db()->sql("SELECT 1");
 
         eq($st->getSQL(), "SELECT 1");
 
@@ -417,10 +418,10 @@ test(
         ];
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
-
+        
         $preparator = new PDOConnection($mock_pdo);
 
-        $statement = new Statement($sql);
+        $statement = new SQLQuery(Mockery::mock(TypeProvider::class), $sql);
 
         $mock_pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
 
@@ -467,7 +468,7 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $preparator = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
 
@@ -481,12 +482,12 @@ test(
             }
         }
 
-        $statement = new Statement($sql);
+        $statement = new SQLQuery(Mockery::mock(TypeProvider::class), $sql);
 
         $statement->apply($params);
         $statement->bind('empty', []);
 
-        $preparator->prepare($statement);
+        $connection->prepare($statement);
 
         ok(true, "mock assertions completed");
     }
