@@ -3,6 +3,7 @@
 use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\framework\BatchMapper;
+use mindplay\sql\framework\Database;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\PreparedStatement;
@@ -1200,6 +1201,33 @@ SQL;
         ]);
     }
 );
+
+// TODO can't write a meaningful unit-test getRowsAffected() - needs an integration test
+//
+//test(
+//    'can get rows affected',
+//    function () {
+//        /** @var PDO|MockInterface $mock_pdo */
+//        $mock_pdo = Mockery::mock(PDO::class);
+//
+//        /** @var PDOStatement|MockInterface $mock_statement */
+//        $mock_statement = Mockery::mock(PDOStatement::class);
+//
+//        $mock_pdo->shouldReceive('prepare')->andReturn($mock_statement);
+//
+//        $mock_statement->shouldReceive('execute')->andReturn(true);
+//
+//        $mock_statement->shouldReceive('rowCount')->andReturn(1);
+//        
+//        $connection = new PDOConnection($mock_pdo);
+//        
+//        $statement = new PreparedPDOStatement($mock_statement);
+//        
+//        eq($connection->execute($statement)->getRowsAffected(), 1);
+//    }
+//);
+
+// TODO integration test for Connection::lastInsertId()
 
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 

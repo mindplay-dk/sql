@@ -32,4 +32,9 @@ interface PreparedStatement
      * @return array|null next record-set (or NULL, if no more records are available)
      */
     public function fetch();
+
+    /**
+     * @return int number of rows affected by a non-returning query (e.g. INSERT, UPDATE or DELETE)
+     */
+    public function getRowsAffected();
 }

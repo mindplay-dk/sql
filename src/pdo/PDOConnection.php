@@ -90,7 +90,11 @@ class PDOConnection implements Connection
      */
     public function execute(Executable $statement)
     {
-        $this->prepare($statement)->execute();
+        $prepared_statement = $this->prepare($statement);
+
+        $prepared_statement->execute();
+        
+        return $prepared_statement;
     }
 
     /**
@@ -167,5 +171,19 @@ class PDOConnection implements Connection
         return count($replace_pairs)
             ? strtr($sql, $replace_pairs)
             : $sql; // no arrays found in the given parameters
+    }
+
+    /**
+     * @param string|null $sequence_name auto-sequence name (or NULL for e.g. MySQL which supports only one auto-key)
+     *
+     * @return int|string
+     */
+    public function lastInsertId($sequence_name = null)
+    {
+        $id = $this->pdo->lastInsertId($sequence_name);
+        
+        return is_numeric($id)
+            ? (int) $id
+            : $id;
     }
 }

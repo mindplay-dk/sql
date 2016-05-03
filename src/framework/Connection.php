@@ -29,7 +29,7 @@ interface Connection
      *
      * @param Executable $statement
      *
-     * @return void
+     * @return PreparedStatement
      */
     public function execute(Executable $statement);
 
@@ -52,4 +52,11 @@ interface Connection
      * @throws UnexpectedValueException if the provided function does not return TRUE or FALSE
      */
     public function transact(callable $func);
+
+    /**
+     * @param string|null $sequence_name auto-sequence name (or NULL for e.g. MySQL which supports only one auto-key)
+     *
+     * @return mixed
+     */
+    public function lastInsertId($sequence_name = null);
 }

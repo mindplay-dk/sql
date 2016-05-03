@@ -91,4 +91,12 @@ class PreparedPDOStatement implements PreparedStatement
         
         return $result;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRowsAffected()
+    {
+        return $this->handle->rowCount();
+    }
 }
