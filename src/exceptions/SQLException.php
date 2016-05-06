@@ -1,6 +1,6 @@
 <?php
 
-namespace mindplay\sql\framework;
+namespace mindplay\sql\exceptions;
 
 use Exception;
 use RuntimeException;

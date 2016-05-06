@@ -3,8 +3,9 @@
 namespace mindplay\sql\pdo;
 
 use InvalidArgumentException;
+use mindplay\sql\exceptions\SQLException;
+use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\PreparedStatement;
-use mindplay\sql\framework\SQLException;
 use PDO;
 use PDOStatement;
 
@@ -19,6 +20,11 @@ class PreparedPDOStatement implements PreparedStatement
     private $handle;
 
     /**
+     * @var Driver
+     */
+    private $driver;
+
+    /**
      * @var array
      */
     private $params;
@@ -30,10 +36,12 @@ class PreparedPDOStatement implements PreparedStatement
 
     /**
      * @param PDOStatement $handle
+     * @param Driver       $driver
      */
-    public function __construct(PDOStatement $handle)
+    public function __construct(PDOStatement $handle, Driver $driver)
     {
         $this->handle = $handle;
+        $this->driver = $driver;
     }
 
     /**
@@ -66,9 +74,11 @@ class PreparedPDOStatement implements PreparedStatement
     public function execute()
     {
         if ($this->handle->execute() === false) {
-            $error = $this->handle->errorInfo();
-            
-            throw new SQLException($this->handle->queryString, $this->params, "{$error[0]}: {$error[2]}", $error[1]);
+            list($sql_state, $error_code, $error_message) = $this->handle->errorInfo();
+
+            $exception_type = $this->driver->getExceptionType($sql_state, $error_code, $error_message);
+
+            throw new $exception_type($this->handle->queryString, $this->params, "{$sql_state}: {$error_message}", $error_code);
         }
         
         $this->executed = true;

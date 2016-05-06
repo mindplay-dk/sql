@@ -2,15 +2,14 @@
 
 use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
+use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\framework\BatchMapper;
-use mindplay\sql\framework\Database;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\Query;
 use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\Result;
-use mindplay\sql\framework\SQLException;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\expr;
@@ -149,7 +148,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -168,7 +167,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -191,7 +190,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -210,7 +209,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -235,7 +234,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -260,7 +259,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -283,7 +282,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -420,7 +419,7 @@ test(
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
         
-        $preparator = new PDOConnection($mock_pdo);
+        $preparator = new PDOConnection($mock_pdo, create_driver());
 
         $statement = new SQLQuery(Mockery::mock(TypeProvider::class), $sql);
 
@@ -469,7 +468,7 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $mock_pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
 
@@ -507,7 +506,7 @@ test(
         $mock_handle->shouldReceive('bindValue')->with('false', false, PDO::PARAM_BOOL)->once();
         $mock_handle->shouldReceive('bindValue')->with('null', false, PDO::PARAM_NULL)->once();
 
-        $st = new PreparedPDOStatement($mock_handle);
+        $st = new PreparedPDOStatement($mock_handle, create_driver());
 
         $st->bind('int', 1);
         $st->bind('float', 1.2);
@@ -583,7 +582,7 @@ test(
         $mock_handle->shouldReceive('fetch')->andReturn(['a' => 2])->once();
         $mock_handle->shouldReceive('fetch')->andReturn(false);
 
-        $st = new PreparedPDOStatement($mock_handle);
+        $st = new PreparedPDOStatement($mock_handle, create_driver());
 
         eq($st->fetch(), ['a' => 1]);
         eq($st->fetch(), ['a' => 2]);
@@ -636,7 +635,7 @@ test(
                 return $record;
             });
 
-        $connection = new PDOConnection($mock_pdo);
+        $connection = new PDOConnection($mock_pdo, create_driver());
 
         $result = iterator_to_array($connection->fetch($query));
         
@@ -1228,6 +1227,8 @@ SQL;
 //);
 
 // TODO integration test for Connection::lastInsertId()
+
+// TODO integration test for driver-generated SQLException-types
 
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 

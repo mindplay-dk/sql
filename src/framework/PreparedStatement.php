@@ -2,6 +2,8 @@
 
 namespace mindplay\sql\framework;
 
+use mindplay\sql\exceptions\SQLException;
+
 /**
  * This interface defines the prepared SQL statement model.
  */
