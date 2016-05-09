@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\framework;
 
+use Exception;
 use InvalidArgumentException;
 use LogicException;
 use UnexpectedValueException;
@@ -47,6 +48,7 @@ interface Connection
      *
      * @return bool TRUE on success (committed) or FALSE on failure (rolled back)
      *
+     * @throws Exception if the provided function throws an Exception, that Exception will be re-thrown
      * @throws InvalidArgumentException if the provided argument is not a callable function
      * @throws LogicException if an unhandled Exception occurs while calling the provided function
      * @throws UnexpectedValueException if the provided function does not return TRUE or FALSE

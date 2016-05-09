@@ -141,8 +141,8 @@ class PDOConnection implements Connection
         }
 
         if (isset($exception)) {
-            // re-throw unhandled Exception as a LogicException:
-            throw new LogicException("unhandled Exception during transaction", 0, $exception);
+            // re-throw unhandled Exception:
+            throw $exception;
         }
 
         if (! is_bool($commit)) {
