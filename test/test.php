@@ -229,7 +229,7 @@ test(
 );
 
 test(
-    'transact() rolls back when function throws an exception',
+    'transact() rolls back and re-throws when function throws an exception',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -240,8 +240,8 @@ test(
         $mock_pdo->shouldReceive('rollBack')->once();
 
         expect(
-            LogicException::class,
-            "should throw when function throws an exception",
+            RuntimeException::class,
+            "should re-throw when function throws an exception",
             function () use ($connection) {
                 $connection->transact(function () {
                     throw new RuntimeException("oops!");
@@ -249,6 +249,34 @@ test(
             }
         );
 
+        ok(true, "transaction fails");
+    }
+);
+
+test(
+    'transact() rolls back and re-throws when nested function throws an exception',
+    function () {
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
+
+        $connection = new PDOConnection($mock_pdo, create_driver());
+
+        $mock_pdo->shouldReceive('beginTransaction')->once();
+        $mock_pdo->shouldReceive('rollBack')->once();
+
+        expect(
+            RuntimeException::class,
+            "should re-throw when function throws an exception",
+            function () use ($connection) {
+                $connection->transact(function () use ($connection) {
+                    return $connection->transact(function () {
+                        throw new RuntimeException("oops!");
+                    });
+                });
+            },
+            "/oops/"
+        );
+        
         ok(true, "transaction fails");
     }
 );
