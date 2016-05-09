@@ -276,7 +276,7 @@ test(
             },
             "/oops/"
         );
-        
+
         ok(true, "transaction fails");
     }
 );
@@ -665,7 +665,7 @@ test(
 
         $connection = new PDOConnection($mock_pdo, create_driver());
 
-        $result = iterator_to_array($connection->fetch($query));
+        $result = $connection->fetch($query)->all();
         
         eq(
             $result,

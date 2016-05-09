@@ -69,6 +69,14 @@ class Result implements IteratorAggregate
     }
 
     /**
+     * @return array all the records of the record-set
+     */
+    public function all()
+    {
+        return iterator_to_array($this->getIterator());
+    }
+    
+    /**
      * Execute this Statement and return a Generator, so you can iterate over the results.
      *
      * This method implements `IteratorAggregate`, permitting you to iterate directly over
