@@ -64,6 +64,19 @@ abstract class Table
         return $this->alias;
     }
 
+
+    /**
+     * @return string table expression (e.g. "{table} AS {alias}" for use in the FROM clause of an SQL statement)
+     */
+    public function getNode()
+    {
+        $alias = $this->getAlias();
+
+        return $alias
+            ? $this->driver->quoteName($this->getName()) . ' AS ' . $this->driver->quoteName($alias)
+            : $this->driver->quoteName($this->getName());
+    }
+    
     /**
      * @return Column[] list of all available Columns
      */

@@ -176,7 +176,7 @@ abstract class ProjectionQuery extends Query
      */
     protected function join($type, Table $table, $expr)
     {
-        $table_expr = $this->buildNode($table);
+        $table_expr = $table->getNode();
 
         $this->joins[] = "{$type} JOIN {$table_expr} ON {$expr}";
 
@@ -184,25 +184,11 @@ abstract class ProjectionQuery extends Query
     }
 
     /**
-     * @param Table $table
-     *
-     * @return string table expression (e.g. "{table} AS {alias}" for use in the FROM clause of an SQL statement)
-     */
-    protected function buildNode(Table $table)
-    {
-        $alias = $table->getAlias();
-
-        return $alias
-            ? $this->driver->quoteName($table->getName()) . ' AS ' . $this->driver->quoteName($alias)
-            : $this->driver->quoteName($table->getName());
-    }
-
-    /**
      * @return string root table expression and JOIN clauses (for use in the FROM clause of an SQL statement)
      */
     protected function buildNodes()
     {
-        return implode("\n", array_merge([$this->buildNode($this->root)], $this->joins));
+        return implode("\n", array_merge([$this->root->getNode()], $this->joins));
     }
 
     /**
