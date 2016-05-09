@@ -6,14 +6,14 @@ use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\Mapper;
 use mindplay\sql\framework\RecordMapper;
-use mindplay\sql\framework\ReturningExecutable;
+use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\TypeProvider;
 use OutOfBoundsException;
 
 /**
  * Abstract base class for Query types that return and map results, such as `SELECT` or `UPDATE RETURNING`.
  */
-abstract class ReturningQuery extends ProjectionQuery implements ReturningExecutable
+abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
 {
     /**
      * @var string[] list of return variable expressions (for use in a SELECT or RETURNING clause)

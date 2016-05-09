@@ -15,15 +15,20 @@ interface Connection
     /**
      * Fetch the `Result` of executing an SQL "SELECT" statement.
      *
+     * If the given `Executable` implements `MapperProvider`, any Mappers provided by it will
+     * be prepended to the given list of Mappers.
+     *
      * Note that you can directly iterate over the `Result` instance.
      *
-     * @param ReturningExecutable $statement
-     * @param int                 $batch_size batch-size (when fetching large result sets)
-     * @param Mapper[]            $mappers    list of additional Mappers to apply while fetching results
+     * @param Executable $statement
+     * @param int        $batch_size batch-size (when fetching large result sets)
+     * @param Mapper[]   $mappers    list of additional Mappers to apply while fetching results
      *
      * @return Result
+     *
+     * @see MapperProvider optional interface enabling an Executable to provide Mappers
      */
-    public function fetch(ReturningExecutable $statement, $batch_size = 1000, array $mappers = []);
+    public function fetch(Executable $statement, $batch_size = 1000, array $mappers = []);
 
     /**
      * Execute an SQL statement, which does not produce a result, e.g. an "INSERT", "UPDATE" or "DELETE" statement.

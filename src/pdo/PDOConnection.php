@@ -8,7 +8,7 @@ use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\Result;
-use mindplay\sql\framework\ReturningExecutable;
+use mindplay\sql\framework\MapperProvider;
 use PDO;
 use UnexpectedValueException;
 
@@ -84,12 +84,17 @@ class PDOConnection implements Connection
     /**
      * @inheritdoc
      */
-    public function fetch(ReturningExecutable $statement, $batch_size = 1000, array $mappers = [])
+    public function fetch(Executable $statement, $batch_size = 1000, array $mappers = [])
     {
+        if ($statement instanceof MapperProvider) {
+            // prepend Mappers provided by the Executable:
+            $mappers = array_merge($statement->getMappers(), $mappers);
+        }
+        
         return new Result(
             $this->prepare($statement),
             $batch_size,
-            array_merge($statement->getMappers(), $mappers)
+            $mappers    
         );
     }
 
