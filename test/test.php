@@ -1117,7 +1117,7 @@ test(
 
         $expected_sql = <<<'SQL'
 UPDATE `user`
-SET `user`.`first_name` = :user_first_name
+SET `first_name` = :user_first_name
 WHERE `user`.`id` = :id
 SQL;
 
@@ -1149,9 +1149,9 @@ test(
 
         $expected_sql = <<<'SQL'
 UPDATE `user` AS `u`
-SET `u`.`first_name` = :u_first_name,
-    `u`.`dob` = :u_dob,
-    `u`.`last_name` = 'Schultz'
+SET `first_name` = :u_first_name,
+    `dob` = :u_dob,
+    `last_name` = 'Schultz'
 WHERE `u`.`id` = :id
 SQL;
 
@@ -1185,8 +1185,8 @@ test(
 
         $expected_sql = <<<'SQL'
 UPDATE `user`
-SET `user`.`first_name` = :user_first_name,
-    `user`.`dob` = :user_dob
+SET `first_name` = :user_first_name,
+    `dob` = :user_dob
 WHERE `user`.`id` = :id
 SQL;
 

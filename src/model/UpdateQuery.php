@@ -23,7 +23,7 @@ class UpdateQuery extends ProjectionQuery
         if ($column instanceof Column) {
             $name = $this->getPlaceholder($column);
 
-            $quoted_name = "{$column}";
+            $quoted_name = $this->driver->quoteName($column->getName());
         } else {
             $name = $column;
 
@@ -48,7 +48,7 @@ class UpdateQuery extends ProjectionQuery
         if ($column instanceof Column) {
             $name = $this->getPlaceholder($column);
 
-            $quoted_name = "{$column}";
+            $quoted_name = $this->driver->quoteName($column->getName());
         } else {
             $name = $column;
 
