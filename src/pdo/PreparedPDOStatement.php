@@ -73,15 +73,15 @@ class PreparedPDOStatement implements PreparedStatement
      */
     public function execute()
     {
-        if ($this->handle->execute() === false) {
+        if (@$this->handle->execute()) {
+            $this->executed = true;
+        } else {
             list($sql_state, $error_code, $error_message) = $this->handle->errorInfo();
 
             $exception_type = $this->driver->getExceptionType($sql_state, $error_code, $error_message);
 
             throw new $exception_type($this->handle->queryString, $this->params, "{$sql_state}: {$error_message}", $error_code);
         }
-        
-        $this->executed = true;
     }
 
     /**
