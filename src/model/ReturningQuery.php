@@ -2,18 +2,14 @@
 
 namespace mindplay\sql\model;
 
-use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Mapper;
-use mindplay\sql\framework\RecordMapper;
-use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\TypeProvider;
 use OutOfBoundsException;
 
 /**
  * Abstract base class for Query types that return and map results, such as `SELECT` or `UPDATE RETURNING`.
  */
-abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
+abstract class ReturningQuery extends ProjectionQuery
 {
     /**
      * @var string[] list of return variable expressions (for use in a SELECT or RETURNING clause)
@@ -24,12 +20,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
      * @var Type[] map where return variable name maps to Type
      */
     protected $type_map = [];
-
-    /**
-     * @var Mapper[] list of Mappers to apply
-     */
-    protected $mappers = [];
-
+    
     /**
      * @param Table        $root
      * @param Driver       $driver
@@ -123,52 +114,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
 
         return $this;
     }
-
-    /**
-     * Append a Mapper instance to apply when each batch of a record-set is fetched.
-     *
-     * @param Mapper $mapper
-     *
-     * @return $this
-     *
-     * @see mapRecords() to map an anonymous function against every record
-     * @see mapBatches() to map an anonymous function against each batch of records
-     */
-    public function map(Mapper $mapper)
-    {
-        $this->mappers[] = $mapper;
-
-        return $this;
-    }
-
-    /**
-     * Map an anonymous function against every record.
-     *
-     * @param callable $mapper function (mixed $record) : mixed
-     *
-     * @return $this
-     *
-     * @see mapBatches() to map an anonymous function against each batch of records
-     */
-    public function mapRecords(callable $mapper)
-    {
-        return $this->map(new RecordMapper($mapper));
-    }
-
-    /**
-     * Map an anonymous function against each batch of records.
-     *
-     * @param callable $mapper function (array $record_set) : array
-     *
-     * @return $this
-     *
-     * @see mapRecords() to map an anonymous function against every record
-     */
-    public function mapBatches(callable $mapper)
-    {
-        return $this->map(new BatchMapper($mapper));
-    }
-
+    
     /**
      * @inheritdoc
      */
@@ -183,7 +129,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
             $type_map = array_merge($this->createTypeMap($this->root), $type_map);
         }
 
-        return array_merge([new TypeMapper($type_map)], $this->mappers);
+        return array_merge([new TypeMapper($type_map)], parent::getMappers());
     }
 
     /**

@@ -8,7 +8,7 @@ use UnexpectedValueException;
 /**
  * Abstract base-class for all types of SQL Query models.
  */
-abstract class Query implements Executable
+abstract class Query implements Executable, MapperProvider
 {
     /**
      * @var TypeProvider
@@ -24,6 +24,11 @@ abstract class Query implements Executable
      * @var Type[] map where placeholder name => Type instance
      */
     private $param_types = [];
+
+    /**
+     * @var Mapper[] list of Mappers to apply
+     */
+    protected $mappers = [];
 
     /**
      * @param TypeProvider $types
@@ -98,6 +103,59 @@ abstract class Query implements Executable
         }
         
         return $this;
+    }
+
+    /**
+     * Append a Mapper instance to apply when each batch of a record-set is fetched.
+     *
+     * @param Mapper $mapper
+     *
+     * @return $this
+     *
+     * @see mapRecords() to map an anonymous function against every record
+     * @see mapBatches() to map an anonymous function against each batch of records
+     */
+    public function map(Mapper $mapper)
+    {
+        $this->mappers[] = $mapper;
+
+        return $this;
+    }
+
+    /**
+     * Map an anonymous function against every record.
+     *
+     * @param callable $mapper function (mixed $record) : mixed
+     *
+     * @return $this
+     *
+     * @see mapBatches() to map an anonymous function against each batch of records
+     */
+    public function mapRecords(callable $mapper)
+    {
+        return $this->map(new RecordMapper($mapper));
+    }
+
+    /**
+     * Map an anonymous function against each batch of records.
+     *
+     * @param callable $mapper function (array $record_set) : array
+     *
+     * @return $this
+     *
+     * @see mapRecords() to map an anonymous function against every record
+     */
+    public function mapBatches(callable $mapper)
+    {
+        return $this->map(new BatchMapper($mapper));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMappers()
+    {
+        return $this->mappers;
     }
 
     /**
