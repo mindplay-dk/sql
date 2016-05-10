@@ -831,6 +831,14 @@ test(
         foreach ($columns as $column) {
             ok($column instanceof Column);
         }
+
+        $columns = $schema->order->listColumns("foo");
+
+        eq(count($columns), 2);
+        
+        foreach ($columns as $column) {
+            eq($column->getAlias(), "foo_" . $column->getName());
+        }
     }
 );
 
@@ -931,7 +939,7 @@ test(
             'SELECT `u`.`first_name` AS `first`, `u`.`last_name` AS `last` FROM `user` AS `u` WHERE `u`.`first_name` LIKE :name',
             'manually select aliased columns using a table alias'
         );
-
+        
         $user = $schema->user;
 
         sql_eq(

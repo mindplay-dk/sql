@@ -76,11 +76,13 @@ abstract class Table
             ? $this->driver->quoteName($this->getName()) . ' AS ' . $this->driver->quoteName($alias)
             : $this->driver->quoteName($this->getName());
     }
-    
+
     /**
+     * @param string|null $prefix optional Column Alias prefix
+     *
      * @return Column[] list of all available Columns
      */
-    public function listColumns()
+    public function listColumns($prefix = null)
     {
         // create a whitelist of parent types, excluding the Table class itself:
 
@@ -104,7 +106,11 @@ abstract class Table
 
         foreach ($methods as $method) {
             if (isset($whitelist[$method->class]) && !$method->isStatic()) {
-                $columns[] = $this->__get($method->name);
+                $alias = $prefix
+                    ? "{$prefix}_{$method->name}"
+                    : null;
+
+                $columns[] =  $method->invoke($this, $alias);
             }
         }
 
