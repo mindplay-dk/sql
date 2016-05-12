@@ -1082,7 +1082,9 @@ test(
         $valid_datetime = '2015-11-04 14:40:52';
         $valid_timestamp = 1446648052;
 
-        $insert = $db->insert($schema->order, ['user_id' => 123, 'completed' => $valid_timestamp]);
+        $insert = $db
+            ->insert($schema->order)
+            ->add(["user_id" => 123, "completed" => $valid_timestamp]);
 
         sql_eq(
             $insert,
@@ -1095,13 +1097,13 @@ test(
         eq($params['c0_1'], $valid_datetime, 'performs type conversion on input');
 
         sql_eq(
-            $db->insert($schema->address, ['street_name' => 'One Street']),
+            $db->insert($schema->address)->add(['street_name' => 'One Street']),
             'INSERT INTO `address` (`street_name`) VALUES (:c0_1)',
             'can insert multiple columns'
         );
 
         sql_eq(
-            $db->insert($schema->address, [['street_name' => 'One Street'], ['street_name' => 'Two Street']]),
+            $db->insert($schema->address)->add(['street_name' => 'One Street'])->add(['street_name' => 'Two Street']),
             'INSERT INTO `address` (`street_name`) VALUES (:c0_1), (:c1_1)',
             'can insert multiple rows'
         );

@@ -62,14 +62,13 @@ class Database
     }
 
     /**
-     * @param Table                  $into
-     * @param mixed[]|mixed[][]|null $record optional record map (or list of record maps) where Column name => value
+     * @param Table $into
      *
      * @return InsertQuery
      */
-    public function insert(Table $into, $record = null)
+    public function insert(Table $into)
     {
-        return $this->container->create(InsertQuery::class, ['table' => $into, 'record' => $record]);
+        return $this->container->create(InsertQuery::class, ['table' => $into]);
     }
 
     /**

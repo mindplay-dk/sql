@@ -33,12 +33,11 @@ class InsertQuery extends Query
     private $tuples = [];
 
     /**
-     * @param Driver                 $driver
-     * @param TypeProvider           $types
-     * @param Table                  $table  Table to INSERT into
-     * @param mixed[]|mixed[][]|null $record optional record map (or list of record maps) where Column name => value
+     * @param Driver       $driver
+     * @param TypeProvider $types
+     * @param Table        $table Table to INSERT into
      */
-    public function __construct(Driver $driver, TypeProvider $types, Table $table, array $record = null)
+    public function __construct(Driver $driver, TypeProvider $types, Table $table)
     {
         parent::__construct($types);
 
@@ -56,10 +55,6 @@ class InsertQuery extends Query
                 return $column->isAuto() === false;
             }
         );
-
-        if ($record !== null) {
-            $this->add($record);
-        }
 
         return $this;
     }
