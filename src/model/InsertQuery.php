@@ -23,9 +23,14 @@ class InsertQuery extends Query
     private $table;
 
     /**
-     * @var mixed[][] list of record maps, where Column name => value
+     * @var Column[]
      */
-    private $records = [];
+    private $columns;
+
+    /**
+     * @var string[] list of tuple expressions
+     */
+    private $tuples = [];
 
     /**
      * @param Driver                 $driver
@@ -45,33 +50,55 @@ class InsertQuery extends Query
 
         $this->table = $table;
 
+        $this->columns = array_filter(
+            $table->listColumns(),
+            function (Column $column) {
+                return $column->isAuto() === false;
+            }
+        );
+
         if ($record !== null) {
             $this->add($record);
         }
+
+        return $this;
     }
 
+
     /**
-     * Add one or more records to this INSERT query.
+     * Add a record to this INSERT query.
      *
-     * @param mixed[]|mixed[][] $record record map (or list of record maps) where Column name => value
+     * @param array $record record map (where Column name => value)
+     *
+     * @return $this
      */
     public function add(array $record)
     {
-        reset($record);
+        $placeholders = [];
 
-        $first_key = key($record);
+        $tuple_num = count($this->tuples);
 
-        if ($first_key === null) {
-            return; // empty array given - no records added
+        foreach ($this->columns as $col_index => $column) {
+            $name = $column->getName();
+
+            if (array_key_exists($name, $record)) {
+                $value = $record[$name];
+            } elseif ($column->isRequired() === false) {
+                $value = $column->getDefault();
+            } else {
+                throw new RuntimeException("required value '{$name}' missing from tuple # {$tuple_num}");
+            }
+
+            $placeholder = "c{$tuple_num}_{$col_index}";
+
+            $placeholders[] = ":{$placeholder}";
+
+            $this->bind($placeholder, $value, $column->getType());
         }
 
-        if (is_array($record[$first_key])) {
-            // append given list of records:
-            $this->records = array_merge($this->records, $record);
-        } else {
-            // append given single record:
-            $this->records[] = $record;
-        }
+        $this->tuples[] = "(" . implode(", ", $placeholders) . ")";
+
+        return $this;
     }
 
     /**
@@ -79,20 +106,11 @@ class InsertQuery extends Query
      */
     public function getSQL()
     {
-        if (count($this->records) === 0) {
+        if (count($this->tuples) === 0) {
             throw new RuntimeException("no records added to this query");
         }
 
         $table = "{$this->table}";
-
-        /** @var Column[] $columns */
-
-        $columns = array_filter(
-            $this->table->listColumns(),
-            function (Column $column) {
-                return $column->isAuto() === false;
-            }
-        );
 
         $quoted_column_names = implode(
             ", ",
@@ -100,36 +118,10 @@ class InsertQuery extends Query
                 function (Column $column) {
                     return $this->driver->quoteName($column->getName());
                 },
-                $columns
+                $this->columns
             )
         );
 
-        $tuples = [];
-
-        foreach ($this->records as $tuple_num => $record) {
-            $placeholders = [];
-
-            foreach ($columns as $col_index => $column) {
-                $name = $column->getName();
-                
-                if (array_key_exists($name, $record)) {
-                    $value = $record[$name];
-                } elseif ($column->isRequired() === false) {
-                    $value = $column->getDefault();
-                } else {
-                    throw new RuntimeException("required value '{$name}' missing from tuple # {$tuple_num}");
-                }
-                
-                $placeholder = "c{$tuple_num}_{$col_index}";
-                
-                $placeholders[] = ":{$placeholder}";
-                
-                $this->bind($placeholder, $value, $column->getType());
-            }
-
-            $tuples[] = "(" . implode(", ", $placeholders) . ")";
-        }
-
-        return "INSERT INTO {$table} ({$quoted_column_names}) VALUES\n" . implode(",\n", $tuples);
+        return "INSERT INTO {$table} ({$quoted_column_names}) VALUES\n" . implode(",\n", $this->tuples);
     }
 }

@@ -27,7 +27,7 @@ class PreparedPDOStatement implements PreparedStatement
     /**
      * @var array
      */
-    private $params;
+    private $params = [];
 
     /**
      * @var bool
