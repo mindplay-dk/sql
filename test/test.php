@@ -827,7 +827,7 @@ test(
 
         $columns = $user->listColumns();
 
-        eq(count($columns), 5);
+        eq(count($columns), 6);
 
         foreach ($columns as $column) {
             ok($column instanceof Column);
