@@ -9,6 +9,7 @@ use mindplay\sql\framework\Query;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\Table;
+use mindplay\sql\types\BooleanType;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\StringType;
 use mindplay\sql\types\TimestampType;
@@ -84,6 +85,7 @@ class SampleSchema extends Schema
  * @property-read Column $last_name
  * @property-read Column $dob
  * @property-read Column $home_address_id
+ * @property-read Column $deleted
  */
 class UserTable extends Table
 {
@@ -106,10 +108,15 @@ class UserTable extends Table
     {
         return $this->requiredColumn(__FUNCTION__, TimestampType::class, $alias);
     }
-    
+
     public function home_address_id($alias)
     {
         return $this->requiredColumn(__FUNCTION__, IntType::class, $alias);
+    }
+
+    public function deleted($alias)
+    {
+        return $this->requiredColumn(__FUNCTION__, BooleanType::class, $alias);
     }
 }
 
