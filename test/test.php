@@ -18,6 +18,7 @@ use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Type;
 use mindplay\sql\pdo\PDOConnection;
 use mindplay\sql\pdo\PreparedPDOStatement;
+use mindplay\sql\types\BooleanType;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\JSONType;
 use mindplay\sql\types\StringType;
@@ -826,7 +827,7 @@ test(
 
         $columns = $user->listColumns();
 
-        eq(count($columns), 5);
+        eq(count($columns), 6);
 
         foreach ($columns as $column) {
             ok($column instanceof Column);
@@ -845,6 +846,8 @@ test(
 // TODO IntType test
 
 // TODO StringType test
+
+// TODO BooleanType test
 
 test(
     'can bind values to query models',
@@ -986,6 +989,7 @@ test(
             'last_name'       => StringType::class,
             'dob'             => TimestampType::class,
             'home_address_id' => IntType::class,
+            'deleted'         => BooleanType::class,
         ];
 
         check_return_types($db->select($user), $expected_types);
