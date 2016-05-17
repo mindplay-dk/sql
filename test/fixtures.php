@@ -9,7 +9,7 @@ use mindplay\sql\framework\Query;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\Table;
-use mindplay\sql\types\BooleanType;
+use mindplay\sql\types\BoolType;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\StringType;
 use mindplay\sql\types\TimestampType;
@@ -116,7 +116,7 @@ class UserTable extends Table
 
     public function deleted($alias)
     {
-        return $this->requiredColumn(__FUNCTION__, BooleanType::class, $alias);
+        return $this->requiredColumn(__FUNCTION__, BoolType::class, $alias);
     }
 }
 

@@ -18,7 +18,7 @@ use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Type;
 use mindplay\sql\pdo\PDOConnection;
 use mindplay\sql\pdo\PreparedPDOStatement;
-use mindplay\sql\types\BooleanType;
+use mindplay\sql\types\BoolType;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\JSONType;
 use mindplay\sql\types\StringType;
@@ -797,6 +797,35 @@ test(
 );
 
 test(
+    'can map bool values to SQL',
+    function () {
+        $type = new BoolType();
+        
+        eq($type->convertToPHP(true), true);
+        eq($type->convertToPHP(false), false);
+        
+        eq($type->convertToSQL(true), true);
+        eq($type->convertToSQL(false), false);
+
+        $type = BoolType::toInt();
+
+        eq($type->convertToPHP(1), true);
+        eq($type->convertToPHP(0), false);
+
+        eq($type->convertToSQL(true), 1);
+        eq($type->convertToSQL(false), 0);
+
+        $type = BoolType::toYesNo();
+
+        eq($type->convertToPHP('yes'), true);
+        eq($type->convertToPHP('no'), false);
+
+        eq($type->convertToSQL(true), 'yes');
+        eq($type->convertToSQL(false), 'no');
+    }
+);
+
+test(
     'can define Schema model',
     function () {
         $db = create_db();
@@ -989,7 +1018,7 @@ test(
             'last_name'       => StringType::class,
             'dob'             => TimestampType::class,
             'home_address_id' => IntType::class,
-            'deleted'         => BooleanType::class,
+            'deleted'         => BoolType::class,
         ];
 
         check_return_types($db->select($user), $expected_types);
