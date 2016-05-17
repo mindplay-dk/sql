@@ -3,6 +3,7 @@
 namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Driver;
+use mindplay\sql\framework\mappers\TypeMapper;
 use mindplay\sql\framework\TypeProvider;
 use OutOfBoundsException;
 

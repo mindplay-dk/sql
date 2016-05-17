@@ -2,6 +2,8 @@
 
 namespace mindplay\sql\framework;
 
+use mindplay\sql\framework\mappers\BatchMapper;
+use mindplay\sql\framework\mappers\RecordMapper;
 use mindplay\sql\model\Type;
 use UnexpectedValueException;
 

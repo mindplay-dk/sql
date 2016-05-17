@@ -3,12 +3,12 @@
 use mindplay\sql\drivers\MySQLDriver;
 use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\exceptions\SQLException;
-use mindplay\sql\framework\BatchMapper;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
+use mindplay\sql\framework\mappers\BatchMapper;
+use mindplay\sql\framework\mappers\RecordMapper;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\Query;
-use mindplay\sql\framework\RecordMapper;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\Column;
