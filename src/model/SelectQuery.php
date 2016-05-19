@@ -2,6 +2,8 @@
 
 namespace mindplay\sql\model;
 
+use mindplay\sql\framework\MapperProvider;
+
 /**
  * This class represents a SELECT query.
  *

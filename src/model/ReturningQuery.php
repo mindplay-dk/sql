@@ -3,15 +3,21 @@
 namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Driver;
+use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\TypeMapper;
 use mindplay\sql\framework\TypeProvider;
+use mindplay\sql\model\components\Mappers;
 use OutOfBoundsException;
 
 /**
  * Abstract base class for Query types that return and map results, such as `SELECT` or `UPDATE RETURNING`.
  */
-abstract class ReturningQuery extends ProjectionQuery
+abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
 {
+    use Mappers {
+        getMappers as private getAddedMappers;
+    }
+
     /**
      * @var string[] list of return variable expressions (for use in a SELECT or RETURNING clause)
      */
@@ -130,7 +136,7 @@ abstract class ReturningQuery extends ProjectionQuery
             $type_map = array_merge($this->createTypeMap($this->root), $type_map);
         }
 
-        return array_merge([new TypeMapper($type_map)], parent::getMappers());
+        return array_merge([new TypeMapper($type_map)], $this->getAddedMappers());
     }
 
     /**
