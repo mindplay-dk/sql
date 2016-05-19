@@ -118,18 +118,14 @@ class UserSchema extends Schema
 
 #### 3. Bootstrap Your Project
 
-If you use a dependency injection container, first thing you should do, is register a `Database`
-instance - for example:
+If you use a dependency injection container, you should perform this bootstrapping once and register
+these objects as services in your container.
+
+First, select a `Database` implementation - for example:
 
 ```php
-$db = Database(new DatabaseContainer(new MySQLDriver()));
+$db = new MySQLDatabase();
 ```
-
-The `DatabaseContainer` is a specialized dependency injection container used internally by the
-framework - your schema model gets created and registered internally in this container.
-
-The `Driver` instance (in this example a `MySQLDriver`) internally does things like quoting
-table/column-names, which requires a differents syntax on e.g. PostgreSQL and MySQL databases.
 
 Next, create (and register in your DI container) your `Schema` model:
 

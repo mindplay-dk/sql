@@ -1,14 +1,12 @@
 <?php
 
-use mindplay\sql\drivers\MySQLDriver;
-use mindplay\sql\drivers\PostgresDriver;
-use mindplay\sql\framework\Database;
-use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\Query;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\Schema;
 use mindplay\sql\model\Table;
+use mindplay\sql\mysql\MySQLDatabase;
+use mindplay\sql\postgres\PostgresDriver;
 use mindplay\sql\types\BoolType;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\StringType;
@@ -23,11 +21,11 @@ function create_driver()
 }
 
 /**
- * Database
+ * @return MySQLDatabase
  */
 function create_db()
 {
-    return new Database(new DatabaseContainer(new MySQLDriver()));
+    return new MySQLDatabase();
 }
 
 class MockQuery extends Query

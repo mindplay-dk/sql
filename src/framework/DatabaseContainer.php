@@ -11,19 +11,12 @@ use UnexpectedValueException;
  */
 class DatabaseContainer extends Container implements TypeProvider, TableFactory
 {
-    /**
-     * @param Driver $driver
-     */
-    public function __construct(Driver $driver)
+    public function __construct()
     {
         parent::__construct();
         
-        $this->set(Driver::class, $driver);
-
         // self-register:
 
-        $this->set(self::class, $this);
-        $this->set(get_class($this), $this);
         $this->set(TypeProvider::class, $this);
         $this->set(TableFactory::class, $this);
     }

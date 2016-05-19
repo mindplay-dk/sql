@@ -30,17 +30,20 @@ class BoolType implements Type
     /**
      * @return BoolType
      */
-    public static function toInt()
+    public static function asInt()
     {
         return new BoolType(1, 0);
     }
 
     /**
+     * @param string $true_value
+     * @param string $false_value
+     *
      * @return BoolType
      */
-    public static function toYesNo()
+    public static function asEnum($true_value, $false_value)
     {
-        return new BoolType("yes", "no");
+        return new BoolType($true_value, $false_value);
     }
 
     public function convertToSQL($value)

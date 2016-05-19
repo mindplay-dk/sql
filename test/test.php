@@ -1,7 +1,5 @@
 <?php
 
-use mindplay\sql\drivers\MySQLDriver;
-use mindplay\sql\drivers\PostgresDriver;
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
@@ -16,8 +14,10 @@ use mindplay\sql\model\expr;
 use mindplay\sql\model\ReturningQuery;
 use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Type;
+use mindplay\sql\mysql\MySQLDriver;
 use mindplay\sql\pdo\PDOConnection;
 use mindplay\sql\pdo\PreparedPDOStatement;
+use mindplay\sql\postgres\PostgresDriver;
 use mindplay\sql\types\BoolType;
 use mindplay\sql\types\IntType;
 use mindplay\sql\types\JSONType;
@@ -807,7 +807,7 @@ test(
         eq($type->convertToSQL(true), true);
         eq($type->convertToSQL(false), false);
 
-        $type = BoolType::toInt();
+        $type = BoolType::asInt();
 
         eq($type->convertToPHP(1), true);
         eq($type->convertToPHP(0), false);
@@ -815,8 +815,8 @@ test(
         eq($type->convertToSQL(true), 1);
         eq($type->convertToSQL(false), 0);
 
-        $type = BoolType::toYesNo();
-
+        $type = BoolType::asEnum("yes", "no");
+        
         eq($type->convertToPHP('yes'), true);
         eq($type->convertToPHP('no'), false);
 
@@ -875,8 +875,6 @@ test(
 // TODO IntType test
 
 // TODO StringType test
-
-// TODO BooleanType test
 
 test(
     'can bind values to query models',

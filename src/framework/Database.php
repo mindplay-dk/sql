@@ -14,20 +14,24 @@ use UnexpectedValueException;
 /**
  * This class implements the primary public API of the database model.
  */
-class Database
+abstract class Database
 {
     /**
      * @var DatabaseContainer
      */
     protected $container;
     
-    /**
-     * @param DatabaseContainer $container
-     */
-    public function __construct(DatabaseContainer $container)
+    public function __construct()
     {
-        $this->container = $container;
+        $this->container = new DatabaseContainer();
+
+        $this->container->set(Driver::class, $this->createDriver());
     }
+    
+    /**
+     * @return Driver
+     */
+    abstract protected function createDriver();
 
     /**
      * @param string Schema class-name
