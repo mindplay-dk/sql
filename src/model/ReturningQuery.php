@@ -4,10 +4,9 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\MapperProvider;
-use mindplay\sql\framework\mappers\TypeMapper;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Mappers;
-use OutOfBoundsException;
+use mindplay\sql\model\components\ReturnVars;
 
 /**
  * Abstract base class for Query types that return and map results, such as `SELECT` or `UPDATE RETURNING`.
@@ -19,15 +18,10 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
     }
 
     /**
-     * @var string[] list of return variable expressions (for use in a SELECT or RETURNING clause)
+     * @var ReturnVars
      */
-    protected $return_vars = [];
+    private $return_vars;
 
-    /**
-     * @var Type[] map where return variable name maps to Type
-     */
-    protected $type_map = [];
-    
     /**
      * @param Table        $root
      * @param Driver       $driver
@@ -36,6 +30,8 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
     public function __construct(Table $root, Driver $driver, TypeProvider $types)
     {
         parent::__construct($root, $driver, $types);
+
+        $this->return_vars = new ReturnVars($root, $driver, $types);
     }
 
     /**
@@ -47,9 +43,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
      */
     public function table(Table $table)
     {
-        $this->return_vars[] = "{$table}.*";
-
-        $this->type_map = array_merge($this->type_map, $this->createTypeMap($table));
+        $this->return_vars->addTable($table);
 
         return $this;
     }
@@ -63,29 +57,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
      */
     public function columns($cols)
     {
-        /**
-         * @var Column[] $cols
-         */
-        
-        $cols = is_array($cols) ? $cols : [$cols];
-        
-        foreach ($cols as $col) {
-            $alias = $col->getAlias();
-
-            $col_name = $alias ?: $col->getName();
-
-            $table = $col->getTable();
-
-            $table_name = $table->getAlias() ?: $table->getName();
-
-            $column_expr = $this->driver->quoteName($table_name) . '.' . $this->driver->quoteName($col->getName());
-
-            $this->return_vars[$col_name] = $alias
-                ? "{$column_expr} AS " . $this->driver->quoteName($col_name)
-                : "{$column_expr}";
-
-            $this->type_map[$col_name] = $col->getType();
-        }
+        $this->return_vars->addColumns($cols);
 
         return $this;
     }
@@ -101,23 +73,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
      */
     public function value($expr, $name = null, $type = null)
     {
-        if (isset($this->return_vars[$name])) {
-            throw new OutOfBoundsException("duplicate return variable name: {$name}");
-        }
-
-        if ($name === null) {
-            $this->return_vars[] = "{$expr}";
-        } else {
-            $quoted_name = $this->driver->quoteName($name);
-
-            $this->return_vars[$name] = "{$expr} AS {$quoted_name}";
-
-            if ($type !== null) {
-                $this->type_map[$name] = is_string($type)
-                    ? $this->types->getType($type)
-                    : $type; // assumes Type instance
-            }
-        }
+        $this->return_vars->addValue($expr, $name, $type);
 
         return $this;
     }
@@ -127,16 +83,7 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
      */
     public function getMappers()
     {
-        $type_map = $this->type_map;
-
-        if (count($this->return_vars) === 0) {
-            // no defined return vars - buildReturnVars() will auto-select the root node, so
-            // we need to add root Column Types to the TypeMapper we're creating here:
-
-            $type_map = array_merge($this->createTypeMap($this->root), $type_map);
-        }
-
-        return array_merge([new TypeMapper($type_map)], $this->getAddedMappers());
+        return array_merge([$this->return_vars->createTypeMapper()], $this->getAddedMappers());
     }
 
     /**
@@ -144,33 +91,6 @@ abstract class ReturningQuery extends ProjectionQuery implements MapperProvider
      */
     protected function buildReturnVars()
     {
-        $return_vars = $this->return_vars;
-
-        if (count($return_vars) === 0) {
-            // no defined return vars - getMappers() will create a Type-map for the root node,
-            // so we need to auto-select the root node here:
-
-            $return_vars[] = "{$this->root}.*";
-        }
-
-        return implode(",\n  ", $return_vars);
-    }
-
-    /**
-     * Internally creates a full Type-map for all Columns in a given Table
-     *
-     * @param Table $table
-     *
-     * @return Type[] map where Column Alias maps to Type
-     */
-    protected function createTypeMap(Table $table)
-    {
-        $type_map = [];
-
-        foreach ($table->listColumns() as $column) {
-            $type_map[$column->getAlias() ?: $column->getName()] = $column->getType();
-        }
-
-        return $type_map;
+        return $this->return_vars->buildReturnVars();
     }
 }
