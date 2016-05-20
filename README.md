@@ -19,7 +19,12 @@ It is:
   * On-fly-fly mapping of functions against individual records, or batches of records.
   * **NOT** an object/relational-mapper.
 
-I favor simplicity over ease of use - this library minimally abstracts PDO and stays reasonably close to SQL
+An important non-goal of this project is the ability to switch from one database technology to another -
+while we do support both MySQL and PostgreSQL, and while a lot of the implementations are shared, no attempt
+is made at hiding or abstracting the differences between each technology. On the contrary, we try to make it
+plain and obvious that there are differences, both in terms of capabilities and best patterns for each DBMS.
+
+We favor simplicity over ease of use - this library minimally abstracts PDO and stays reasonably close to SQL
 and the relational model, rather than attempting to hide it.
 
 ## Quick Start
@@ -192,11 +197,17 @@ The codebase is namespaced accordingly.
 
 ### Framework
 
-TODO
+The framework consists of database Connection, Statement and Prepared Statement abstractions, and an
+implementation of these for PDO.
+
+In addition, the framework includes an iterable Result model which includes support for a Mapper abstraction
+and implementations providing support for custom operations on individual records, as well as processing of
+results in batches of multiple records.
 
 ### Model
 
-TODO
+The model includes a Driver abstraction, Query Builders for `INSERT`, `SELECT`, `UPDATE`, `DELETE` and custom
+SQL queries, a Schema model and a Type abstraction, which includes a Mapper implementation for Type conversions.
 
 ## Architecture
 
@@ -208,9 +219,9 @@ At the `Query` layer, values are managed as native PHP values. Simple values, su
 `bool`, `null`, are internally managed, and the use of arrays is managed by expanding PDO-style placeholders.
 
 The `Query` models implement either `Executable` or `ReturningExecutable`, depending on whether the type of
-query returns records (`SELECT`) or not. (`INSERT`, `DELETE`, etc.)
+query returns records (`SELECT`, `INSERT..RETURNING`, etc.) or not. (`INSERT`, `DELETE`, etc.)
 
-The `Connection` abstraction prepares an `Executable` by generating a `PreparedStatement` instance - at this
+The `Connection` abstraction prepares a `Statement` and generates a `PreparedStatement` instance - at this
 layer, the abstraction is connection-dependent, and only scalar values are supported.
 
 The idea of internally managing the creation of the `PDOStatement` instance was considered, but this would block
