@@ -37,4 +37,12 @@ class SQLQuery extends Query implements MapperProvider
     {
         return $this->sql;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMappers()
+    {
+        return $this->mappers;
+    }
 }

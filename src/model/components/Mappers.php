@@ -9,8 +9,6 @@ use mindplay\sql\framework\mappers\RecordMapper;
 
 /**
  * This trait implements support for mapping of results.
- * 
- * @see MapperProvider
  */
 trait Mappers
 {
@@ -66,13 +64,5 @@ trait Mappers
         $this->mappers[] = new BatchMapper($mapper);
         
         return $this;
-    }
-
-    /**
-     * @return Mapper[] list of Mappers
-     */
-    public function getMappers()
-    {
-        return $this->mappers;
     }
 }

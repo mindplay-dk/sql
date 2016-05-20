@@ -3,6 +3,7 @@
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Executable;
+use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
 use mindplay\sql\framework\PreparedStatement;
@@ -11,7 +12,6 @@ use mindplay\sql\framework\Result;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\Column;
 use mindplay\sql\model\expr;
-use mindplay\sql\model\ReturningQuery;
 use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Type;
 use mindplay\sql\mysql\MySQLDriver;
@@ -54,10 +54,10 @@ function sql_eq(Executable $query, $expected_sql, $why = null)
 }
 
 /**
- * @param ReturningQuery $query
+ * @param MapperProvider $query
  * @param string[]       $expected_types map where return variable name => Type class-name
  */
-function check_return_types(ReturningQuery $query, $expected_types)
+function check_return_types(MapperProvider $query, $expected_types)
 {
     /** @var Type[] $types */
     $types = inspect($query->getMappers()[0], 'types');
