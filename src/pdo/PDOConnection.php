@@ -4,6 +4,7 @@ namespace mindplay\sql\pdo;
 
 use Exception;
 use LogicException;
+use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\Driver;
@@ -157,6 +158,10 @@ class PDOConnection implements Connection
         if (isset($exception)) {
             // re-throw unhandled Exception:
             throw $exception;
+        }
+
+        if ($this->transaction_level > 0 && $commit === false) {
+            throw new TransactionAbortedException("a nested call to transact() returned FALSE");
         }
 
         if (! is_bool($commit)) {

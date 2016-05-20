@@ -5,6 +5,7 @@ namespace mindplay\sql\framework;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\model\SelectQuery;
 use UnexpectedValueException;
 
@@ -65,6 +66,7 @@ interface Connection
      *
      * @return bool TRUE on success (committed) or FALSE on failure (rolled back)
      *
+     * @throws TransactionAbortedException if a transaction is implicitly aborted by `return false` in a nested call
      * @throws Exception if the provided function throws an Exception, that Exception will be re-thrown
      * @throws InvalidArgumentException if the provided argument is not a callable function
      * @throws LogicException if an unhandled Exception occurs while calling the provided function

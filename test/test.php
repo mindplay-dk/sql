@@ -1,6 +1,7 @@
 <?php
 
 use mindplay\sql\exceptions\SQLException;
+use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\DatabaseContainer;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\framework\MapperProvider;
@@ -286,7 +287,7 @@ test(
 );
 
 test(
-    'transact() rolls back when a nested call to transact() fails',
+    'transact() throws when a nested call to transact() rolls back',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -296,15 +297,19 @@ test(
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
 
-        $result = $connection->transact(function () use ($connection) {
-            $connection->transact(function () {
-                return false; // inner function fails
-            });
+        expect(
+            TransactionAbortedException::class,
+            "should throw on implicit transaction failure",
+            function () use ($connection) {
+                $connection->transact(function () use ($connection) {
+                    $connection->transact(function () {
+                        return false; // inner transaction attempts to roll back
+                    });
 
-            return true; // outer transaction succeeds
-        });
-
-        eq($result, false, "transaction fails");
+                    return true; // outer transaction succeeds
+                });
+            }
+        );
     }
 );
 
@@ -319,23 +324,21 @@ test(
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
 
-        $result = $connection->transact(function () use ($connection) {
-            $connection->transact(function () {
-                return true; // first inner function succeeds
-            });
+        expect(
+            TransactionAbortedException::class,
+            "should throw on implicit transaction failure",
+            function () use ($connection) {
+                $connection->transact(function () use ($connection) {
+                    $connection->transact(function () {
+                        return true; // first inner function succeeds
+                    });
 
-            $connection->transact(function () {
-                return false; // second inner function fails
-            });
-
-            $connection->transact(function () {
-                return true; // third inner function succeeds
-            });
-
-            return true; // outer transaction succeeds
-        });
-
-        eq($result, false, "transaction fails");
+                    $connection->transact(function () {
+                        return false; // second inner function fails
+                    });
+                });
+            }
+        );
     }
 );
 
