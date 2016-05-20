@@ -91,14 +91,6 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
     }
 
     /**
-     * @return string comma-separated return expressions (for use in the SELECT or RETURNING clause of an SQL query)
-     */
-    protected function buildReturnVars()
-    {
-        return $this->return_vars->buildReturnVars();
-    }
-    
-    /**
      * @inheritdoc
      */
     public function getSQL()
@@ -129,5 +121,13 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
     public function __toString()
     {
         return "(" . $this->getSQL() . ")";
+    }
+
+    /**
+     * @return string comma-separated return expressions (for use in the SELECT or RETURNING clause of an SQL query)
+     */
+    protected function buildReturnVars()
+    {
+        return $this->return_vars->buildReturnVars();
     }
 }
