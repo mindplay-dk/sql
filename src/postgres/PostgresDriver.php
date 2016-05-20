@@ -5,7 +5,7 @@ namespace mindplay\sql\postgres;
 use mindplay\sql\exceptions\ForeignKeyException;
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\exceptions\UniqueConstraintException;
-use mindplay\sql\framework\Driver;
+use mindplay\sql\model\Driver;
 
 class PostgresDriver implements Driver
 {

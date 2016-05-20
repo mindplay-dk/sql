@@ -6,7 +6,6 @@ use Exception;
 use InvalidArgumentException;
 use LogicException;
 use mindplay\sql\exceptions\TransactionAbortedException;
-use mindplay\sql\model\SelectQuery;
 use UnexpectedValueException;
 
 /**
@@ -56,8 +55,6 @@ interface Connection
      * @param Countable $statement
      *
      * @return int
-     * 
-     * @see SelectQuery
      */
     public function count(Countable $statement);
 

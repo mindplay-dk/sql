@@ -1,11 +1,10 @@
 <?php
 
-namespace mindplay\sql\pdo;
+namespace mindplay\sql\framework\pdo;
 
 use InvalidArgumentException;
-use mindplay\sql\exceptions\SQLException;
-use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\PreparedStatement;
+use mindplay\sql\model\Driver;
 use PDO;
 use PDOStatement;
 

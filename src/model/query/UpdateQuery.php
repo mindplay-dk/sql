@@ -1,6 +1,8 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\query;
+
+use mindplay\sql\model\schema\Column;
 
 /**
  * This class represents an UPDATE query.

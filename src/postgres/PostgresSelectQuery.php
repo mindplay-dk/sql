@@ -2,7 +2,7 @@
 
 namespace mindplay\sql\postgres;
 
-use mindplay\sql\model\SelectQuery;
+use mindplay\sql\model\query\SelectQuery;
 
 class PostgresSelectQuery extends SelectQuery
 {

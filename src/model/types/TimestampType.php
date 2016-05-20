@@ -1,10 +1,10 @@
 <?php
 
-namespace mindplay\sql\types;
+namespace mindplay\sql\model\types;
 
 use DateTime;
 use DateTimeZone;
-use mindplay\sql\model\Type;
+use mindplay\sql\model\schema\Type;
 use UnexpectedValueException;
 
 /**

@@ -3,7 +3,6 @@
 namespace mindplay\sql\model\components;
 
 use mindplay\sql\framework\Mapper;
-use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
 

@@ -2,9 +2,9 @@
 
 namespace mindplay\sql\model\components;
 
-use mindplay\sql\model\Column;
-use mindplay\sql\model\Table;
-use mindplay\sql\model\Type;
+use mindplay\sql\model\schema\Column;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\schema\Type;
 
 /**
  * This trait implements support for the `RETURNING` clause of Postgres `INSERT`, `UPDATE` and `DELETE` queries.

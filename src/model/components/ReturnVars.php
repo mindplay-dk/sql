@@ -2,12 +2,12 @@
 
 namespace mindplay\sql\model\components;
 
-use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\mappers\TypeMapper;
-use mindplay\sql\framework\TypeProvider;
-use mindplay\sql\model\Column;
-use mindplay\sql\model\Table;
-use mindplay\sql\model\Type;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\schema\Column;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\schema\Type;
+use mindplay\sql\model\TypeProvider;
 use OutOfBoundsException;
 use UnexpectedValueException;
 

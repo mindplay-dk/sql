@@ -3,7 +3,7 @@
 namespace mindplay\sql\framework\mappers;
 
 use mindplay\sql\framework\Mapper;
-use mindplay\sql\model\Type;
+use mindplay\sql\model\schema\Type;
 use OutOfBoundsException;
 use UnexpectedValueException;
 

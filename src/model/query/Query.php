@@ -1,8 +1,10 @@
 <?php
 
-namespace mindplay\sql\framework;
+namespace mindplay\sql\model\query;
 
-use mindplay\sql\model\Type;
+use mindplay\sql\framework\Statement;
+use mindplay\sql\model\schema\Type;
+use mindplay\sql\model\TypeProvider;
 use UnexpectedValueException;
 
 /**

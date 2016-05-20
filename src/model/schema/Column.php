@@ -1,8 +1,8 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\schema;
 
-use mindplay\sql\framework\Driver;
+use mindplay\sql\model\Driver;
 
 /**
  * This class represents a Column belonging to a Table.

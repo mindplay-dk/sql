@@ -1,11 +1,10 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\query;
 
 use mindplay\sql\framework\MapperProvider;
-use mindplay\sql\framework\Query;
-use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Mappers;
+use mindplay\sql\model\TypeProvider;
 
 /**
  * This class represents a custom SQL Query.

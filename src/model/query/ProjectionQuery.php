@@ -1,11 +1,11 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\query;
 
 use InvalidArgumentException;
-use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Query;
-use mindplay\sql\framework\TypeProvider;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\TypeProvider;
 
 /**
  * Abstract base class for Query types involving projections, e.g. `INSERT`, `SELECT` or `UPDATE`.

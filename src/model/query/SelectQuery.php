@@ -1,14 +1,17 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\query;
 
 use mindplay\sql\framework\Countable;
-use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\MapperProvider;
-use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Mappers;
 use mindplay\sql\model\components\ReturnVars;
-use mindplay\sql\types\IntType;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\schema\Column;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\schema\Type;
+use mindplay\sql\model\TypeProvider;
+use mindplay\sql\model\types\IntType;
 
 /**
  * This class represents a SELECT query.

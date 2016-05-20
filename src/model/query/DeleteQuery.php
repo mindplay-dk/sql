@@ -1,6 +1,6 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\query;
 
 /**
  * This class represents a DELETE query.

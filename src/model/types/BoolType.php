@@ -1,9 +1,9 @@
 <?php
 
-namespace mindplay\sql\types;
+namespace mindplay\sql\model\types;
 
 use InvalidArgumentException;
-use mindplay\sql\model\Type;
+use mindplay\sql\model\schema\Type;
 
 class BoolType implements Type
 {

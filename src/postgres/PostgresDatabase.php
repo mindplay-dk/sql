@@ -2,8 +2,8 @@
 
 namespace mindplay\sql\postgres;
 
-use mindplay\sql\framework\Database;
-use mindplay\sql\model\Table;
+use mindplay\sql\model\Database;
+use mindplay\sql\model\schema\Table;
 
 class PostgresDatabase extends Database
 {

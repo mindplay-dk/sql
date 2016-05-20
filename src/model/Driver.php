@@ -1,8 +1,6 @@
 <?php
 
-namespace mindplay\sql\framework;
-
-use mindplay\sql\exceptions\SQLException;
+namespace mindplay\sql\model;
 
 /**
  * This interface defines the driver model for DBMS-specific operations.

@@ -2,14 +2,13 @@
 
 namespace mindplay\sql\mysql;
 
-use mindplay\sql\framework\Database;
-use mindplay\sql\framework\Driver;
-use mindplay\sql\model\DeleteQuery;
-use mindplay\sql\model\InsertQuery;
-use mindplay\sql\model\SelectQuery;
-use mindplay\sql\model\Table;
-use mindplay\sql\model\UpdateQuery;
-use mindplay\sql\types\BoolType;
+use mindplay\sql\model\Database;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\query\DeleteQuery;
+use mindplay\sql\model\query\InsertQuery;
+use mindplay\sql\model\query\UpdateQuery;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\types\BoolType;
 
 class MySQLDatabase extends Database
 {

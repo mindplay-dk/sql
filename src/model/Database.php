@@ -1,14 +1,9 @@
 <?php
 
-namespace mindplay\sql\framework;
+namespace mindplay\sql\model;
 
-use mindplay\sql\model\DeleteQuery;
-use mindplay\sql\model\InsertQuery;
-use mindplay\sql\model\Schema;
-use mindplay\sql\model\SelectQuery;
-use mindplay\sql\model\SQLQuery;
-use mindplay\sql\model\Table;
-use mindplay\sql\model\UpdateQuery;
+use mindplay\sql\model\query\SQLQuery;
+use mindplay\sql\model\schema\Schema;
 use UnexpectedValueException;
 
 /**

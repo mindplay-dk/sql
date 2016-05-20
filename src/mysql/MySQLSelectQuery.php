@@ -2,7 +2,7 @@
 
 namespace mindplay\sql\mysql;
 
-use mindplay\sql\model\SelectQuery;
+use mindplay\sql\model\query\SelectQuery;
 
 class MySQLSelectQuery extends SelectQuery
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace mindplay\sql\framework;
+namespace mindplay\sql\model;
 
-use mindplay\sql\model\Type;
+use mindplay\sql\model\schema\Type;
 use mindplay\unbox\Container;
 use UnexpectedValueException;
 

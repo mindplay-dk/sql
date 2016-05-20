@@ -1,6 +1,6 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\schema;
 
 /**
  * This interface defines the responsibilities of a Type definition.

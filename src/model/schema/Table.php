@@ -1,9 +1,9 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\schema;
 
-use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\TypeProvider;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\TypeProvider;
 use ReflectionClass;
 use ReflectionMethod;
 

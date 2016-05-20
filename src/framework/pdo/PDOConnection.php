@@ -1,16 +1,15 @@
 <?php
 
-namespace mindplay\sql\pdo;
+namespace mindplay\sql\framework\pdo;
 
 use Exception;
-use LogicException;
 use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Countable;
-use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Statement;
-use mindplay\sql\framework\Result;
 use mindplay\sql\framework\MapperProvider;
+use mindplay\sql\framework\Result;
+use mindplay\sql\framework\Statement;
+use mindplay\sql\model\Driver;
 use PDO;
 use UnexpectedValueException;
 

@@ -2,13 +2,13 @@
 
 namespace mindplay\sql\postgres;
 
-use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\MapperProvider;
-use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Returning;
 use mindplay\sql\model\components\ReturnVars;
-use mindplay\sql\model\DeleteQuery;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\query\DeleteQuery;
 use mindplay\sql\model\Table;
+use mindplay\sql\model\TypeProvider;
 
 class PostgresDeleteQuery extends DeleteQuery implements MapperProvider
 {

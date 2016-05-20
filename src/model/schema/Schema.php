@@ -1,8 +1,8 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\schema;
 
-use mindplay\sql\framework\TableFactory;
+use mindplay\sql\model\TableFactory;
 
 /**
  * This is an abstract base-class for user-defined Schema-types.

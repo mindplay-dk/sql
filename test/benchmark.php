@@ -2,8 +2,8 @@
 
 use mindplay\benchpress\Benchmark;
 use mindplay\sql\model\expr;
-use mindplay\sql\types\IntType;
-use mindplay\sql\types\TimestampType;
+use mindplay\sql\model\types\IntType;
+use mindplay\sql\model\types\TimestampType;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 

@@ -1,10 +1,11 @@
 <?php
 
-namespace mindplay\sql\model;
+namespace mindplay\sql\model\query;
 
-use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Query;
-use mindplay\sql\framework\TypeProvider;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\schema\Column;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\TypeProvider;
 use RuntimeException;
 
 /**

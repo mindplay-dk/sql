@@ -1,8 +1,8 @@
 <?php
 
-namespace mindplay\sql\framework;
+namespace mindplay\sql\model;
 
-use mindplay\sql\model\Table;
+use mindplay\sql\model\schema\Table;
 
 /**
  * This interface defines an internal facet of the DatabaseContainer as a factory

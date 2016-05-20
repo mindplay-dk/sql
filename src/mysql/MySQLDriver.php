@@ -5,7 +5,7 @@ namespace mindplay\sql\mysql;
 use mindplay\sql\exceptions\ForeignKeyException;
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\exceptions\UniqueConstraintException;
-use mindplay\sql\framework\Driver;
+use mindplay\sql\model\Driver;
 
 class MySQLDriver implements Driver
 {

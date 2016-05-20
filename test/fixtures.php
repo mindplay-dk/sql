@@ -1,16 +1,16 @@
 <?php
 
-use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Query;
-use mindplay\sql\model\Column;
-use mindplay\sql\model\Schema;
-use mindplay\sql\model\Table;
+use mindplay\sql\model\Driver;
+use mindplay\sql\model\query\Query;
+use mindplay\sql\model\schema\Column;
+use mindplay\sql\model\schema\Schema;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\types\BoolType;
+use mindplay\sql\model\types\IntType;
+use mindplay\sql\model\types\StringType;
+use mindplay\sql\model\types\TimestampType;
 use mindplay\sql\mysql\MySQLDatabase;
 use mindplay\sql\postgres\PostgresDriver;
-use mindplay\sql\types\BoolType;
-use mindplay\sql\types\IntType;
-use mindplay\sql\types\StringType;
-use mindplay\sql\types\TimestampType;
 
 /**
  * @return Driver
