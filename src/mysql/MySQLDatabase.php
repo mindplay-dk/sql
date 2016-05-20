@@ -25,11 +25,11 @@ class MySQLDatabase extends Database
     /**
      * @param Table $from
      *
-     * @return SelectQuery
+     * @return MySQLSelectQuery
      */
     public function select(Table $from)
     {
-        return $this->container->create(SelectQuery::class, ['root' => $from]);
+        return $this->container->create(MySQLSelectQuery::class, ['root' => $from]);
     }
 
     /**

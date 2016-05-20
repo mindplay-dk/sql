@@ -14,7 +14,9 @@ use mindplay\sql\model\Column;
 use mindplay\sql\model\expr;
 use mindplay\sql\model\SQLQuery;
 use mindplay\sql\model\Type;
+use mindplay\sql\mysql\MySQLDatabase;
 use mindplay\sql\mysql\MySQLDriver;
+use mindplay\sql\mysql\MySQLSelectQuery;
 use mindplay\sql\pdo\PDOConnection;
 use mindplay\sql\pdo\PreparedPDOStatement;
 use mindplay\sql\postgres\PostgresDatabase;
@@ -1023,6 +1025,21 @@ test(
         sql_eq(
             $count_query,
             'SELECT COUNT(*) AS `count` FROM `user` WHERE `user`.`first_name` LIKE :name'
+        );
+    }
+);
+
+test(
+    'can apply query flags',
+    function () {
+        $db = new MySQLDatabase();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        sql_eq(
+            $db->select($schema->user)->calcFoundRows(),
+            'SELECT SQL_CALC_FOUND_ROWS `user`.* FROM `user`'
         );
     }
 );

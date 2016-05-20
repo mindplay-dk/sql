@@ -4,7 +4,6 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Statement;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Mappers;
@@ -23,6 +22,11 @@ use mindplay\sql\types\IntType;
 class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
 {
     use Mappers;
+
+    /**
+     * @var bool[] map where flag => true
+     */
+    private $flags = [];
 
     /**
      * @var ReturnVars
@@ -136,7 +140,10 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
      */
     public function getSQL()
     {
-        $select = "SELECT " . $this->return_vars->buildReturnVars();
+        $flags = $this->buildFlags();
+
+        $select = "SELECT " . ($flags ? "{$flags} " : "")
+            . $this->return_vars->buildReturnVars();
 
         $from = "\nFROM " . $this->buildNodes();
 
@@ -197,5 +204,26 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
     protected function buildHaving()
     {
         return implode(" AND ", $this->having);
+    }
+
+    /**
+     * @param string $flag
+     * @param bool   $state
+     */
+    protected function setFlag($flag, $state = true)
+    {
+        if ($state) {
+            $this->flags[$flag] = true;
+        } else {
+            unset($this->flags[$flag]);
+        }
+    }
+    
+    /**
+     * @return string query flags (such as "SQL_CALC_FOUND_ROWS" in a MySQL SELECT query)
+     */
+    protected function buildFlags()
+    {
+        return implode(" ", array_keys($this->flags));
     }
 }
