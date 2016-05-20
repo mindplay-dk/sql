@@ -17,6 +17,7 @@ use mindplay\sql\model\Type;
 use mindplay\sql\mysql\MySQLDriver;
 use mindplay\sql\pdo\PDOConnection;
 use mindplay\sql\pdo\PreparedPDOStatement;
+use mindplay\sql\postgres\PostgresDatabase;
 use mindplay\sql\postgres\PostgresDriver;
 use mindplay\sql\types\BoolType;
 use mindplay\sql\types\IntType;
@@ -1269,6 +1270,39 @@ SQL;
         ]);
     }
 );
+
+test(
+    'can build INSERT RETURNING query',
+    function () {
+        $db = new PostgresDatabase();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $address = $schema->address;
+
+        $query = $db
+            ->insert($address)
+            ->add(['street_name' => "Fake Street"])
+            ->returningColumns($address->id);
+
+        $expected_sql = <<<'SQL'
+INSERT INTO "address" ("street_name")
+VALUES (:c0_1)
+RETURNING "address"."id"
+SQL;
+
+        sql_eq($query, $expected_sql);
+
+        check_params($query, ['c0_1' => 'Fake Street']);
+        
+        check_return_types($query, [
+            'id' => IntType::class
+        ]);
+    }
+);
+
+// TODO tests for UPDATE RETURNING and DELETE RETURNING 
 
 // TODO can't write a meaningful unit-test getRowsAffected() - needs an integration test
 //

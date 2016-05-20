@@ -56,46 +56,6 @@ abstract class Database
     }
     
     /**
-     * @param Table $from
-     *
-     * @return SelectQuery
-     */
-    public function select(Table $from)
-    {
-        return $this->container->create(SelectQuery::class, ['root' => $from]);
-    }
-
-    /**
-     * @param Table $into
-     *
-     * @return InsertQuery
-     */
-    public function insert(Table $into)
-    {
-        return $this->container->create(InsertQuery::class, ['table' => $into]);
-    }
-
-    /**
-     * @param Table $table
-     * 
-     * @return UpdateQuery
-     */
-    public function update(Table $table)
-    {
-        return $this->container->create(UpdateQuery::class, ['root' => $table]);
-    }
-
-    /**
-     * @param Table $table
-     * 
-     * @return DeleteQuery
-     */
-    public function delete(Table $table)
-    {
-        return $this->container->create(DeleteQuery::class, ['root' => $table]);
-    }
-
-    /**
      * @param string $sql
      * 
      * @return SQLQuery

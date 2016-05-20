@@ -1,0 +1,40 @@
+<?php
+
+namespace mindplay\sql\postgres;
+
+use mindplay\sql\framework\Driver;
+use mindplay\sql\framework\MapperProvider;
+use mindplay\sql\framework\TypeProvider;
+use mindplay\sql\model\components\Returning;
+use mindplay\sql\model\components\ReturnVars;
+use mindplay\sql\model\InsertQuery;
+use mindplay\sql\model\Table;
+
+class PostgresInsertQuery extends InsertQuery implements MapperProvider
+{
+    use Returning;
+
+    /**
+     * @param Driver       $driver
+     * @param TypeProvider $types
+     * @param Table        $table
+     */
+    public function __construct(Driver $driver, TypeProvider $types, Table $table)
+    {
+        parent::__construct($driver, $types, $table);
+
+        $this->return_vars = new ReturnVars($table, $driver, $types);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSQL()
+    {
+        $returning = $this->return_vars->hasReturnVars()
+            ? "\nRETURNING " . $this->return_vars->buildReturnVars()
+            : "";
+
+        return parent::getSQL() . $returning;
+    }
+}

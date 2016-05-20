@@ -140,22 +140,30 @@ class ReturnVars
 
         return new TypeMapper($type_map);
     }
+
+    /**
+     * @return bool true, if any return vars have been added
+     */
+    public function hasReturnVars()
+    {
+        return count($this->vars) > 0;
+    }
     
     /**
      * @return string comma-separated return expressions (for use in the SELECT or RETURNING clause of an SQL query)
      */
     public function buildReturnVars()
     {
-        $return_vars = $this->vars;
+        $vars = $this->vars;
 
-        if (count($return_vars) === 0) {
-            // no defined return vars - getMappers() will create a Type-map for the root node,
+        if (count($vars) === 0) {
+            // no defined return vars - createTypeMapper() will create a Type-map for the root node,
             // so we need to auto-select the root node here:
 
-            $return_vars[] = "{$this->root}.*";
+            $vars[] = "{$this->root}.*";
         }
 
-        return implode(",\n  ", $return_vars);
+        return implode(",\n  ", $vars);
     }
 
     /**
