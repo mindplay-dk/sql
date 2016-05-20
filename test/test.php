@@ -970,7 +970,7 @@ test(
             'SELECT `u`.`first_name` AS `first`, `u`.`last_name` AS `last` FROM `user` AS `u` WHERE `u`.`first_name` LIKE :name',
             'manually select aliased columns using a table alias'
         );
-        
+
         $user = $schema->user;
 
         sql_eq(
@@ -1099,6 +1099,37 @@ WHERE
     AND (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) > 3
 SQL;
         
+        sql_eq($query, $expected_sql);
+    }
+);
+
+test(
+    'can build SELECT..GROUP BY queries',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+        $order = $schema->order;
+
+        $query = $db
+            ->select($order)
+            ->table($user)
+            ->value("COUNT({$order->completed}) AS completed_orders")
+            ->innerJoin($user, "{$order->user_id} = {$user->id}")
+            ->groupBy($order->user_id);
+
+        $expected_sql = <<<'SQL'
+SELECT
+    `user`.*,
+    COUNT(`order`.`completed`) AS completed_orders
+FROM `order`
+    INNER JOIN `user` ON `order`.`user_id` = `user`.`id`
+GROUP BY `order`.`user_id`
+SQL;
+
         sql_eq($query, $expected_sql);
     }
 );

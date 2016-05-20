@@ -25,7 +25,12 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
      * @var ReturnVars
      */
     private $return_vars;
-    
+
+    /**
+     * @var string[] list of GROUP BY expressions
+     */
+    private $group_by = [];
+
     /**
      * @param Table        $root
      * @param Driver       $driver
@@ -83,6 +88,20 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
     }
 
     /**
+     * Add an expression to apply to a GROUP BY clause
+     *
+     * @param Column|string $expr SQL expression (or Column object) to apply to the GROUP BY clause
+     *
+     * @return $this
+     */
+    public function groupBy($expr)
+    {
+        $this->group_by[] = (string) $expr;
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getMappers()
@@ -102,7 +121,11 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
         $where = count($this->conditions)
             ? "\nWHERE " . $this->buildConditions()
             : ''; // no conditions present
-
+        
+        $group_by = count($this->group_by)
+            ? "\nGROUP BY " . implode(", ", $this->group_by)
+            : ""; // no group-by expressions
+        
         $order = count($this->order)
             ? "\nORDER BY " . $this->buildOrderTerms()
             : ''; // no order terms
@@ -112,9 +135,9 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
             . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
             : ''; // no limit or offset
 
-        return "{$select}{$from}{$where}{$order}{$limit}";
+        return "{$select}{$from}{$where}{$group_by}{$order}{$limit}";
     }
-
+    
     /**
      * @ignore string magic (enables creation of nested SELECT queries)
      */
