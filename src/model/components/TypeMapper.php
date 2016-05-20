@@ -1,6 +1,6 @@
 <?php
 
-namespace mindplay\sql\framework\mappers;
+namespace mindplay\sql\model\components;
 
 use mindplay\sql\framework\Mapper;
 use mindplay\sql\model\schema\Type;

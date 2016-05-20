@@ -2,7 +2,6 @@
 
 namespace mindplay\sql\model\components;
 
-use mindplay\sql\framework\mappers\TypeMapper;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Table;
