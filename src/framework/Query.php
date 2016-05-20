@@ -8,7 +8,7 @@ use UnexpectedValueException;
 /**
  * Abstract base-class for all types of SQL Query models.
  */
-abstract class Query implements Executable
+abstract class Query implements Statement
 {
     /**
      * @var TypeProvider

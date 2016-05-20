@@ -7,7 +7,7 @@ use LogicException;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Executable;
+use mindplay\sql\framework\Statement;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\MapperProvider;
 use PDO;
@@ -55,7 +55,7 @@ class PDOConnection implements Connection
     /**
      * @inheritdoc
      */
-    public function prepare(Executable $statement)
+    public function prepare(Statement $statement)
     {
         $params = $statement->getParams();
 
@@ -85,7 +85,7 @@ class PDOConnection implements Connection
     /**
      * @inheritdoc
      */
-    public function fetch(Executable $statement, $batch_size = 1000, array $mappers = [])
+    public function fetch(Statement $statement, $batch_size = 1000, array $mappers = [])
     {
         if ($statement instanceof MapperProvider) {
             // prepend Mappers provided by the Executable:
@@ -102,7 +102,7 @@ class PDOConnection implements Connection
     /**
      * @inheritdoc
      */
-    public function execute(Executable $statement)
+    public function execute(Statement $statement)
     {
         $prepared_statement = $this->prepare($statement);
 

@@ -2,7 +2,7 @@
 
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\framework\DatabaseContainer;
-use mindplay\sql\framework\Executable;
+use mindplay\sql\framework\Statement;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
@@ -45,11 +45,11 @@ function normalize_sql($sql)
 }
 
 /**
- * @param Executable  $query
+ * @param Statement   $query
  * @param string      $expected_sql
  * @param string|null $why
  */
-function sql_eq(Executable $query, $expected_sql, $why = null)
+function sql_eq(Statement $query, $expected_sql, $why = null)
 {
     eq(normalize_sql($query->getSQL()), normalize_sql($expected_sql), $why);
 }

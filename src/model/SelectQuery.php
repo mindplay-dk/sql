@@ -4,7 +4,7 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\Driver;
-use mindplay\sql\framework\Executable;
+use mindplay\sql\framework\Statement;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Mappers;

@@ -10,7 +10,7 @@ namespace mindplay\sql\framework;
 interface Countable
 {
     /**
-     * @return Executable
+     * @return Statement
      */
     public function createCountStatement();
 }

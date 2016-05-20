@@ -21,33 +21,33 @@ interface Connection
      *
      * Note that you can directly iterate over the `Result` instance.
      *
-     * @param Executable $statement
-     * @param int        $batch_size batch-size (when fetching large result sets)
-     * @param Mapper[]   $mappers    list of additional Mappers to apply while fetching results
+     * @param Statement $statement
+     * @param int       $batch_size batch-size (when fetching large result sets)
+     * @param Mapper[]  $mappers    list of additional Mappers to apply while fetching results
      *
      * @return Result
      *
      * @see MapperProvider optional interface enabling an Executable to provide Mappers
      */
-    public function fetch(Executable $statement, $batch_size = 1000, array $mappers = []);
+    public function fetch(Statement $statement, $batch_size = 1000, array $mappers = []);
 
     /**
      * Execute an SQL statement, which does not produce a result, e.g. an "INSERT", "UPDATE" or "DELETE" statement.
      *
-     * @param Executable $statement
+     * @param Statement $statement
      *
      * @return PreparedStatement
      */
-    public function execute(Executable $statement);
+    public function execute(Statement $statement);
 
     /**
      * Prepare an SQL statement.
      *
-     * @param Executable $statement
+     * @param Statement $statement
      *
      * @return PreparedStatement
      */
-    public function prepare(Executable $statement);
+    public function prepare(Statement $statement);
 
     /**
      * Execute a `SELECT COUNT(*)` SQL statement and return the result.
