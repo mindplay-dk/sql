@@ -314,7 +314,7 @@ test(
 );
 
 test(
-    'transact() rolls back when one of several nested calls to transact() fails',
+    'transact() throws when one of several nested calls to transact() fails',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
