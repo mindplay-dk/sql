@@ -24,12 +24,17 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
     /**
      * @var ReturnVars
      */
-    private $return_vars;
+    protected $return_vars;
 
     /**
      * @var string[] list of GROUP BY expressions
      */
-    private $group_by = [];
+    protected $group_by = [];
+
+    /**
+     * @var string[] list of HAVING expressions
+     */
+    protected $having = [];
 
     /**
      * @param Table        $root
@@ -102,6 +107,20 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
     }
 
     /**
+     * @param string|string[] $exprs one or more condition expressions to apply to the HAVING clause
+     *
+     * @return $this
+     */
+    public function having($exprs)
+    {
+        foreach ((array) $exprs as $expr) {
+            $this->having[] = $expr;
+        }
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getMappers()
@@ -125,6 +144,10 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
         $group_by = count($this->group_by)
             ? "\nGROUP BY " . implode(", ", $this->group_by)
             : ""; // no group-by expressions
+
+        $having = count($this->having)
+            ? "\nHAVING " . $this->buildHaving()
+            : ''; // no having clause present
         
         $order = count($this->order)
             ? "\nORDER BY " . $this->buildOrderTerms()
@@ -135,7 +158,7 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
             . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
             : ''; // no limit or offset
 
-        return "{$select}{$from}{$where}{$group_by}{$order}{$limit}";
+        return "{$select}{$from}{$where}{$group_by}{$having}{$order}{$limit}";
     }
     
     /**
@@ -144,5 +167,13 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
     public function __toString()
     {
         return "(" . $this->getSQL() . ")";
+    }
+
+    /**
+     * @return string combined condition expression (for use in the WHERE clause of an SQL statement)
+     */
+    protected function buildHaving()
+    {
+        return implode(" AND ", $this->having);
     }
 }

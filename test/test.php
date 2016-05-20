@@ -1104,7 +1104,7 @@ SQL;
 );
 
 test(
-    'can build SELECT..GROUP BY queries',
+    'can build SELECT..GROUP BY..HAVING queries',
     function () {
         $db = create_db();
 
@@ -1119,7 +1119,8 @@ test(
             ->table($user)
             ->value("COUNT({$order->completed}) AS completed_orders")
             ->innerJoin($user, "{$order->user_id} = {$user->id}")
-            ->groupBy($order->user_id);
+            ->groupBy($order->user_id)
+            ->having("completed_orders > 0");
 
         $expected_sql = <<<'SQL'
 SELECT
@@ -1128,6 +1129,7 @@ SELECT
 FROM `order`
     INNER JOIN `user` ON `order`.`user_id` = `user`.`id`
 GROUP BY `order`.`user_id`
+HAVING completed_orders > 0
 SQL;
 
         sql_eq($query, $expected_sql);
