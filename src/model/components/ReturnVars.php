@@ -9,6 +9,7 @@ use mindplay\sql\model\Column;
 use mindplay\sql\model\Table;
 use mindplay\sql\model\Type;
 use OutOfBoundsException;
+use UnexpectedValueException;
 
 /**
  * This component implements support for return variable expressions (for use in a SELECT or RETURNING clause)
@@ -110,6 +111,10 @@ class ReturnVars
         }
 
         if ($name === null) {
+            if ($type !== null) {
+                throw new UnexpectedValueException("type conversion requires a return-variable name");
+            }
+
             $this->vars[] = "{$expr}";
         } else {
             $quoted_name = $this->driver->quoteName($name);

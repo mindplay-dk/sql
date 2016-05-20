@@ -5,6 +5,7 @@ namespace mindplay\sql\framework;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use mindplay\sql\model\SelectQuery;
 use UnexpectedValueException;
 
 /**
@@ -47,6 +48,17 @@ interface Connection
      * @return PreparedStatement
      */
     public function prepare(Executable $statement);
+
+    /**
+     * Execute a `SELECT COUNT(*)` SQL statement and return the result.
+     * 
+     * @param Countable $statement
+     *
+     * @return int
+     * 
+     * @see SelectQuery
+     */
+    public function count(Countable $statement);
 
     /**
      * @param callable $func function () : bool - must return TRUE to commit or FALSE to roll back

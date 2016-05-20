@@ -2,11 +2,14 @@
 
 namespace mindplay\sql\model;
 
+use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\Driver;
+use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\TypeProvider;
 use mindplay\sql\model\components\Mappers;
 use mindplay\sql\model\components\ReturnVars;
+use mindplay\sql\types\IntType;
 
 /**
  * This class represents a SELECT query.
@@ -17,7 +20,7 @@ use mindplay\sql\model\components\ReturnVars;
  * Note that, when constructing nested queries, parameters must be bound against the
  * parent query - binding parameters or applying Mappers against a nested query has no effect.
  */
-class SelectQuery extends ProjectionQuery implements MapperProvider
+class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
 {
     use Mappers;
 
@@ -160,7 +163,26 @@ class SelectQuery extends ProjectionQuery implements MapperProvider
 
         return "{$select}{$from}{$where}{$group_by}{$having}{$order}{$limit}";
     }
-    
+
+    /**
+     * @inheritdoc
+     */
+    public function createCountStatement()
+    {
+        $query = clone $this;
+
+        $query->return_vars = new ReturnVars($this->root, $this->driver, $this->types);
+
+        $query->return_vars->addValue("COUNT(*)", "count", IntType::class);
+        
+        $query->limit = null;
+        $query->offset = null;
+        
+        $query->order = [];
+        
+        return $query;
+    }
+
     /**
      * @ignore string magic (enables creation of nested SELECT queries)
      */

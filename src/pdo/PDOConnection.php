@@ -5,6 +5,7 @@ namespace mindplay\sql\pdo;
 use Exception;
 use LogicException;
 use mindplay\sql\framework\Connection;
+use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\Driver;
 use mindplay\sql\framework\Executable;
 use mindplay\sql\framework\Result;
@@ -108,6 +109,14 @@ class PDOConnection implements Connection
         $prepared_statement->execute();
         
         return $prepared_statement;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count(Countable $statement)
+    {
+        return $this->fetch($statement->createCountStatement())->firstCol();
     }
 
     /**

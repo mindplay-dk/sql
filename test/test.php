@@ -1002,6 +1002,58 @@ test(
 );
 
 test(
+    'can rewrite SELECT query into SELECT COUNT(*) query',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+        
+        $user = $schema->user;
+        
+        $count_query = $db
+            ->select($user)
+            ->columns($user->first_name)// discarded
+            ->page(1, 20)// discarded
+            ->order("{$user->first_name}")// discarded
+            ->where("{$user->first_name} LIKE :name")
+            ->bind("name", "%rasmus%")
+            ->createCountStatement();
+
+        sql_eq(
+            $count_query,
+            'SELECT COUNT(*) AS `count` FROM `user` WHERE `user`.`first_name` LIKE :name'
+        );
+    }
+);
+
+test(
+    'can execute countable query (using PDO)',
+    function () {
+        $db = create_db();
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
+
+        /** @var MockInterface|PDOStatement $mock_statement */
+        $mock_statement = Mockery::mock(PDOStatement::class);
+
+        $mock_pdo->shouldReceive('prepare')->andReturn($mock_statement);
+
+        $mock_statement->shouldReceive('execute')->andReturn(true);
+
+        $mock_statement->shouldReceive('fetch')->once()->andReturn(['count' => 123]);
+
+        $connection = new PDOConnection($mock_pdo, create_driver());
+
+        eq($connection->count($db->select($schema->user)), 123);
+    }
+);
+
+test(
     'can map return vars to types',
     function () {
         $db = create_db();
