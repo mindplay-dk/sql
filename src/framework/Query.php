@@ -18,12 +18,12 @@ abstract class Query implements Executable
     /**
      * @var array map where placeholder name => mixed value types
      */
-    private $params = [];
+    protected $params = [];
 
     /**
      * @var Type[] map where placeholder name => Type instance
      */
-    private $param_types = [];
+    protected $param_types = [];
 
     /**
      * @param TypeProvider $types
