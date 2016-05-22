@@ -56,8 +56,6 @@ class InsertQuery extends Query
                 return $column->isAuto() === false;
             }
         );
-
-        return $this;
     }
 
 
