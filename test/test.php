@@ -1440,6 +1440,8 @@ SQL;
 
 // TODO integration test for driver-generated SQLException-types
 
+// TODO add test for FloatType
+
 configure()->enableCodeCoverage(__DIR__ . '/build/clover.xml', dirname(__DIR__) . '/src');
 
 exit(run());

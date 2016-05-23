@@ -9,6 +9,7 @@ use mindplay\sql\model\query\InsertQuery;
 use mindplay\sql\model\query\UpdateQuery;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
+use mindplay\sql\model\types\FloatType;
 
 class MySQLDatabase extends Database
 {
@@ -21,6 +22,8 @@ class MySQLDatabase extends Database
         });
         
         $this->container->alias("scalar.boolean", BoolType::class);
+        
+        $this->container->register("scalar.double", FloatType::class);
     }
     
     /**

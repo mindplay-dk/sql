@@ -5,6 +5,7 @@ namespace mindplay\sql\postgres;
 use mindplay\sql\model\Database;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
+use mindplay\sql\model\types\FloatType;
 
 class PostgresDatabase extends Database
 {
@@ -17,6 +18,8 @@ class PostgresDatabase extends Database
         });
         
         $this->container->alias("scalar.boolean", BoolType::class);
+
+        $this->container->register("scalar.double", FloatType::class);
     }
 
     /**
