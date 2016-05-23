@@ -56,28 +56,30 @@ abstract class Query implements Statement
             'NULL'    => true,
         ];
 
-        $value_type = gettype($value);
+        if ($type === null) {
+            $value_type = gettype($value);
 
-        if ($value_type === 'array') {
-            foreach ($value as $item) {
-                $item_type = gettype($item);
+            if ($value_type === 'array') {
+                foreach ($value as $element) {
+                    $element_type = gettype($element);
 
-                if (! isset($SCALAR_TYPES[$item_type])) {
-                    throw new UnexpectedValueException("unexpected item type in array: {$item_type}");
+                    if (! isset($SCALAR_TYPES[$element_type])) {
+                        throw new UnexpectedValueException("unexpected array element type: {$element_type}");
+                    }
+                }
+            } else {
+                if (! isset($SCALAR_TYPES[$value_type])) {
+                    throw new UnexpectedValueException("unexpected value type: {$value_type}");
                 }
             }
-        } else {
-            if (! isset($SCALAR_TYPES[$value_type])) {
-                throw new UnexpectedValueException("unexpected value type: {$value_type}");
-            }
         }
-
+        
         $this->params[$name] = $value;
-
+        
         $this->param_types[$name] = is_string($type)
             ? $this->types->getType($type)
             : $type; // assumes Type instance (or NULL)
-
+        
         return $this;
     }
 

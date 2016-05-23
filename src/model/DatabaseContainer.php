@@ -24,23 +24,31 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     /**
      * @inheritdoc
      */
-    public function getType($type)
+    public function getType($type_name)
     {
-        if (! $this->has($type)) {
-            $this->register($type); // auto-wiring (for Types with no special constructor dependencies)
+        if (! $this->has($type_name)) {
+            $this->register($type_name); // auto-wiring (for Types with no special constructor dependencies)
         }
 
-        $type = $this->get($type);
+        $type = $this->get($type_name);
 
         if (! $type instanceof Type) {
             $class_name = get_class($type);
 
             throw new UnexpectedValueException("{$class_name} does not implement the Type interface");
         }
-
+        
         return $type;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function hasType($type_name)
+    {
+        return $this->has($type_name);
+    }
+    
     /**
      * @inheritdoc
      */

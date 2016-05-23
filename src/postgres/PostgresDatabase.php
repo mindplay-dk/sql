@@ -4,9 +4,21 @@ namespace mindplay\sql\postgres;
 
 use mindplay\sql\model\Database;
 use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\types\BoolType;
 
 class PostgresDatabase extends Database
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->container->register(BoolType::class, function () {
+            return BoolType::get(true, false);
+        });
+        
+        $this->container->alias("scalar.boolean", BoolType::class);
+    }
+
     /**
      * @param Table $from
      *

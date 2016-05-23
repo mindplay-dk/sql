@@ -152,7 +152,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -171,7 +171,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -194,7 +194,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -213,7 +213,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -238,7 +238,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -263,7 +263,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -291,7 +291,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -318,7 +318,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -416,9 +416,9 @@ test(
 
         expect(
             RuntimeException::class,
-            "rejects nested arrays",
+            "rejects deeply nested arrays",
             function () use ($st) {
-                $st->bind('foo', [[1]]);
+                $st->bind('foo', [[[1]]]);
             }
         );
     }
@@ -453,9 +453,12 @@ test(
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
         
-        $preparator = new PDOConnection($mock_pdo, create_driver());
+        $preparator = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
-        $statement = new SQLQuery(Mockery::mock(TypeProvider::class), $sql);
+        $container = new DatabaseContainer();
+        $container->set(BoolType::class, BoolType::get(true, false));
+
+        $statement = new SQLQuery($container, $sql);
 
         $mock_pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
 
@@ -502,7 +505,7 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $mock_pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
 
@@ -540,7 +543,7 @@ test(
         $mock_handle->shouldReceive('bindValue')->with('false', false, PDO::PARAM_BOOL)->once();
         $mock_handle->shouldReceive('bindValue')->with('null', false, PDO::PARAM_NULL)->once();
 
-        $st = new PreparedPDOStatement($mock_handle, create_driver());
+        $st = new PreparedPDOStatement($mock_handle, create_driver(), new DatabaseContainer());
 
         $st->bind('int', 1);
         $st->bind('float', 1.2);
@@ -616,7 +619,7 @@ test(
         $mock_handle->shouldReceive('fetch')->andReturn(['a' => 2])->once();
         $mock_handle->shouldReceive('fetch')->andReturn(false);
 
-        $st = new PreparedPDOStatement($mock_handle, create_driver());
+        $st = new PreparedPDOStatement($mock_handle, create_driver(), new DatabaseContainer());
 
         eq($st->fetch(), ['a' => 1]);
         eq($st->fetch(), ['a' => 2]);
@@ -669,7 +672,7 @@ test(
                 return $record;
             });
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $result = $connection->fetch($query)->all();
         
@@ -804,7 +807,7 @@ test(
 test(
     'can map bool values to SQL',
     function () {
-        $type = new BoolType();
+        $type = BoolType::get(true, false);
         
         eq($type->convertToPHP(true), true);
         eq($type->convertToPHP(false), false);
@@ -812,7 +815,7 @@ test(
         eq($type->convertToSQL(true), true);
         eq($type->convertToSQL(false), false);
 
-        $type = BoolType::asInt();
+        $type = BoolType::get(1, 0);
 
         eq($type->convertToPHP(1), true);
         eq($type->convertToPHP(0), false);
@@ -820,7 +823,7 @@ test(
         eq($type->convertToSQL(true), 1);
         eq($type->convertToSQL(false), 0);
 
-        $type = BoolType::asEnum("yes", "no");
+        $type = BoolType::get("yes", "no");
         
         eq($type->convertToPHP('yes'), true);
         eq($type->convertToPHP('no'), false);
@@ -1066,8 +1069,8 @@ test(
 
         $mock_statement->shouldReceive('fetch')->once()->andReturn(['count' => 123]);
 
-        $connection = new PDOConnection($mock_pdo, create_driver());
-
+        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        
         eq($connection->count($db->select($schema->user)), 123);
     }
 );

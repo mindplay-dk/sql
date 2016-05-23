@@ -17,17 +17,15 @@ class TimestampType implements Type
     const FORMAT = 'Y-m-d H:i:s';
 
     /**
-     * @return DateTimeZone
+     * @var DateTimeZone
      */
-    protected static function getTimeZone()
+    private static $utc_timezone;
+
+    public function __construct()
     {
-        static $utc;
-
-        if ($utc === null) {
-            $utc = new DateTimeZone('UTC');
+        if (self::$utc_timezone === null) {
+            self::$utc_timezone = new DateTimeZone('UTC');
         }
-
-        return $utc;
     }
 
     public function convertToSQL($value)
@@ -42,7 +40,7 @@ class TimestampType implements Type
             throw new UnexpectedValueException("unable to convert value to int: " . $value);
         }
 
-        $datetime = DateTime::createFromFormat('U', $timestamp, self::getTimeZone());
+        $datetime = DateTime::createFromFormat('U', $timestamp, self::$utc_timezone);
 
         return $datetime->format(static::FORMAT);
     }
@@ -57,7 +55,7 @@ class TimestampType implements Type
             return $value; // return NULL value as-is
         }
 
-        $datetime = DateTime::createFromFormat(static::FORMAT, $value, self::getTimeZone());
+        $datetime = DateTime::createFromFormat(static::FORMAT, $value, self::$utc_timezone);
 
         if ($datetime === false) {
             throw new UnexpectedValueException("unable to convert value from int: " . $value);

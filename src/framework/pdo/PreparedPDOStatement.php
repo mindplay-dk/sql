@@ -5,6 +5,7 @@ namespace mindplay\sql\framework\pdo;
 use InvalidArgumentException;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\model\Driver;
+use mindplay\sql\model\TypeProvider;
 use PDO;
 use PDOStatement;
 
@@ -24,6 +25,11 @@ class PreparedPDOStatement implements PreparedStatement
     private $driver;
 
     /**
+     * @var TypeProvider
+     */
+    private $types;
+
+    /**
      * @var array
      */
     private $params = [];
@@ -36,11 +42,13 @@ class PreparedPDOStatement implements PreparedStatement
     /**
      * @param PDOStatement $handle
      * @param Driver       $driver
+     * @param TypeProvider $types
      */
-    public function __construct(PDOStatement $handle, Driver $driver)
+    public function __construct(PDOStatement $handle, Driver $driver, TypeProvider $types)
     {
         $this->handle = $handle;
         $this->driver = $driver;
+        $this->types = $types;
     }
 
     /**
@@ -58,6 +66,16 @@ class PreparedPDOStatement implements PreparedStatement
 
         $value_type = gettype($value);
 
+        $scalar_type = "scalar.{$value_type}";
+
+        if ($this->types->hasType($scalar_type)) {
+            $type = $this->types->getType($scalar_type);
+
+            $value = $type->convertToSQL($value);
+
+            $value_type = gettype($value);
+        }
+        
         if (isset($PDO_TYPE[$value_type])) {
             $this->handle->bindValue($name, $value, $PDO_TYPE[$value_type]);
 

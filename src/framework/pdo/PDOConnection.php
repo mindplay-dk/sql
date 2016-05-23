@@ -10,6 +10,7 @@ use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\Driver;
+use mindplay\sql\model\TypeProvider;
 use PDO;
 use UnexpectedValueException;
 
@@ -29,6 +30,11 @@ class PDOConnection implements Connection
     private $driver;
 
     /**
+     * @var TypeProvider
+     */
+    private $types;
+    
+    /**
      * @var int number of nested calls to transact()
      *
      * @see transact()
@@ -46,10 +52,11 @@ class PDOConnection implements Connection
      * @param PDO    $pdo
      * @param Driver $driver
      */
-    public function __construct(PDO $pdo, Driver $driver)
+    public function __construct(PDO $pdo, Driver $driver, TypeProvider $types)
     {
         $this->pdo = $pdo;
         $this->driver = $driver;
+        $this->types = $types;
     }
 
     /**
@@ -61,7 +68,7 @@ class PDOConnection implements Connection
 
         $sql = $this->expandPlaceholders($statement->getSQL(), $params);
 
-        $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql), $this->driver);
+        $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql), $this->driver, $this->types);
         
         foreach ($params as $name => $value) {
             if (is_array($value)) {

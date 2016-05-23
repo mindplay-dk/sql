@@ -11,9 +11,16 @@ use mindplay\sql\model\schema\Type;
 interface TypeProvider
 {
     /**
-     * @param string $type_name Type class-name
+     * @param string $type_name type name (often a Type class-name)
      *
      * @return Type
      */
     public function getType($type_name);
+
+    /**
+     * @param string $type_name type name (often a Type class-name)
+     *
+     * @return bool
+     */
+    public function hasType($type_name);
 }

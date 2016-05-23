@@ -17,10 +17,12 @@ class MySQLDatabase extends Database
         parent::__construct();
         
         $this->container->register(BoolType::class, function () {
-            return BoolType::asInt();
+            return BoolType::get(1, 0);
         });
+        
+        $this->container->alias("scalar.boolean", BoolType::class);
     }
-
+    
     /**
      * @param Table $from
      *

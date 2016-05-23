@@ -21,29 +21,31 @@ class BoolType implements Type
      * @param mixed $true_value
      * @param mixed $false_value
      */
-    public function __construct($true_value = true, $false_value = false)
+    protected function __construct($true_value = true, $false_value = false)
     {
         $this->true_value = $true_value;
         $this->false_value = $false_value;
     }
 
     /**
-     * @return BoolType
-     */
-    public static function asInt()
-    {
-        return new BoolType(1, 0);
-    }
-
-    /**
-     * @param string $true_value
-     * @param string $false_value
+     * Flyweight factory method.
      *
-     * @return BoolType
+     * @param int|string|bool $true_value  value to which boolean TRUE should be mapped
+     * @param int|string|bool $false_value value to which boolean FALSE should be mapped
+     *
+     * @return self
      */
-    public static function asEnum($true_value, $false_value)
+    public static function get($true_value = true, $false_value = false)
     {
-        return new BoolType($true_value, $false_value);
+        static $instances = [];
+
+        $key = "{$true_value}_{$false_value}";
+
+        if (!isset($instances[$key])) {
+            $instances[$key] = new BoolType($true_value, $false_value);
+        }
+        
+        return $instances[$key];
     }
 
     public function convertToSQL($value)
