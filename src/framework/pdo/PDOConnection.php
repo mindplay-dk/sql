@@ -9,7 +9,6 @@ use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\Statement;
-use mindplay\sql\model\Driver;
 use mindplay\sql\model\TypeProvider;
 use PDO;
 use UnexpectedValueException;
@@ -17,17 +16,12 @@ use UnexpectedValueException;
 /**
  * This class implements a Connection adapter for a PDO connection.
  */
-class PDOConnection implements Connection
+abstract class PDOConnection implements Connection, PDOExceptionMapper
 {
     /**
      * @var PDO
      */
     private $pdo;
-
-    /**
-     * @var Driver
-     */
-    private $driver;
 
     /**
      * @var TypeProvider
@@ -49,14 +43,15 @@ class PDOConnection implements Connection
     private $transaction_result;
 
     /**
+     * To avoid duplicating dependencies, you should use DatabaseContainer::createPDOConnection()
+     * rather than calling this constructor directly.
+     *
      * @param PDO          $pdo
-     * @param Driver       $driver
      * @param TypeProvider $types
      */
-    public function __construct(PDO $pdo, Driver $driver, TypeProvider $types)
+    public function __construct(PDO $pdo, TypeProvider $types)
     {
         $this->pdo = $pdo;
-        $this->driver = $driver;
         $this->types = $types;
     }
 
@@ -69,7 +64,7 @@ class PDOConnection implements Connection
 
         $sql = $this->expandPlaceholders($statement->getSQL(), $params);
 
-        $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql), $this->driver, $this->types);
+        $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql), $this, $this->types);
         
         foreach ($params as $name => $value) {
             if (is_array($value)) {

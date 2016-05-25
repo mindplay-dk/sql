@@ -17,19 +17,19 @@ abstract class Database
     protected $container;
 
     /**
-     * @param DatabaseContainer $container
+     * @param DatabaseContainer|null $container
      */
-    public function __construct(DatabaseContainer $container)
+    public function __construct(DatabaseContainer $container = null)
     {
-        $this->container = $container;
-        
-        $container->set(Driver::class, $this->createDriver());
+        $this->container = $container ?: new DatabaseContainer();
+
+        $this->bootstrap($this->container);
     }
-    
+
     /**
-     * @return Driver
+     * @return DatabaseContainer
      */
-    abstract protected function createDriver();
+    abstract protected function bootstrap(DatabaseContainer $container);
 
     /**
      * @param string Schema class-name

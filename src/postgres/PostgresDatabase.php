@@ -4,16 +4,18 @@ namespace mindplay\sql\postgres;
 
 use mindplay\sql\model\Database;
 use mindplay\sql\model\DatabaseContainer;
+use mindplay\sql\model\Driver;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
 use mindplay\sql\model\types\FloatType;
+use PDO;
 
-class PostgresDatabase extends Database
+class PostgresDatabase extends Database implements Driver
 {
-    public function __construct(DatabaseContainer $container)
+    protected function bootstrap(DatabaseContainer $container)
     {
-        parent::__construct($container);
-
+        $container->set(Driver::class, $this);
+        
         $container->register(BoolType::class, function () {
             return BoolType::get(true, false);
         });
@@ -21,6 +23,24 @@ class PostgresDatabase extends Database
         $container->alias("scalar.boolean", BoolType::class);
 
         $container->register("scalar.double", FloatType::class);
+    }
+
+    /**
+     * @param PDO $pdo
+     *
+     * @return PostgresConnection
+     */
+    public function createConnection(PDO $pdo)
+    {
+        return $this->container->create(PostgresConnection::class, ['pdo' => $pdo]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function quoteName($name)
+    {
+        return '"' . $name . '"';
     }
     
     /**
@@ -61,10 +81,5 @@ class PostgresDatabase extends Database
     public function delete(Table $table)
     {
         return $this->container->create(PostgresDeleteQuery::class, ['root' => $table]);
-    }
-    
-    protected function createDriver()
-    {
-        return new PostgresDriver();
     }
 }

@@ -5,15 +5,10 @@ namespace mindplay\sql\postgres;
 use mindplay\sql\exceptions\ForeignKeyException;
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\exceptions\UniqueConstraintException;
-use mindplay\sql\model\Driver;
+use mindplay\sql\framework\pdo\PDOConnection;
 
-class PostgresDriver implements Driver
+class PostgresConnection extends PDOConnection
 {
-    public function quoteName($name)
-    {
-        return '"' . $name . '"';
-    }
-
     public function getExceptionType($sql_state, $error_code, $error_message)
     {
         switch ($sql_state) {

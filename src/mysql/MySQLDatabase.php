@@ -11,20 +11,39 @@ use mindplay\sql\model\query\UpdateQuery;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
 use mindplay\sql\model\types\FloatType;
+use PDO;
 
-class MySQLDatabase extends Database
+class MySQLDatabase extends Database implements Driver
 {
-    public function __construct(DatabaseContainer $container)
+    protected function bootstrap(DatabaseContainer $container)
     {
-        parent::__construct($container);
-        
+        $container->set(Driver::class, $this);
+
         $container->register(BoolType::class, function () {
             return BoolType::get(1, 0);
         });
-        
+
         $container->alias("scalar.boolean", BoolType::class);
-        
+
         $container->register("scalar.double", FloatType::class);
+    }
+    
+    /**
+     * @param PDO $pdo
+     * 
+     * @return MySQLConnection
+     */
+    public function createConnection(PDO $pdo)
+    {
+        return $this->container->create(MySQLConnection::class, ['pdo' => $pdo]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function quoteName($name)
+    {
+        return '`' . $name . '`';
     }
     
     /**
@@ -65,13 +84,5 @@ class MySQLDatabase extends Database
     public function delete(Table $table)
     {
         return $this->container->create(DeleteQuery::class, ['root' => $table]);
-    }
-
-    /**
-     * @return Driver
-     */
-    protected function createDriver()
-    {
-        return new MySQLDriver();
     }
 }

@@ -139,10 +139,10 @@ Next, create (and register in your DI container) your `Schema` model:
 $schema = $db->createSchema(UserSchema::class);
 ```
 
-Finally, create (and register) a `Connection` instance - for example:
+Finally, create (and register) a matching `Connection` implementation - for example:
 
 ```php
-$connection = new PDOConnection(new PDO("mysql:dbname=foo;host=127.0.0.1", "root", "root"));
+$connection = $db->createConnection(new PDO("mysql:dbname=foo;host=127.0.0.1", "root", "root"));
 ```
 
 Don't quibble about the fact that you need three different dependencies - it may seem complicated

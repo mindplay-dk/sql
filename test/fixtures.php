@@ -1,7 +1,5 @@
 <?php
 
-use mindplay\sql\model\DatabaseContainer;
-use mindplay\sql\model\Driver;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Schema;
@@ -11,22 +9,13 @@ use mindplay\sql\model\types\IntType;
 use mindplay\sql\model\types\StringType;
 use mindplay\sql\model\types\TimestampType;
 use mindplay\sql\mysql\MySQLDatabase;
-use mindplay\sql\postgres\PostgresDriver;
-
-/**
- * @return Driver
- */
-function create_driver()
-{
-    return new PostgresDriver();
-}
 
 /**
  * @return MySQLDatabase
  */
 function create_db()
 {
-    return new MySQLDatabase(new DatabaseContainer());
+    return new MySQLDatabase();
 }
 
 class MockQuery extends Query

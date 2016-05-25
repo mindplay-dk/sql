@@ -20,9 +20,9 @@ class PreparedPDOStatement implements PreparedStatement
     private $handle;
 
     /**
-     * @var Driver
+     * @var PDOExceptionMapper
      */
-    private $driver;
+    private $exception_mapper;
 
     /**
      * @var TypeProvider
@@ -40,14 +40,14 @@ class PreparedPDOStatement implements PreparedStatement
     private $executed = false;
 
     /**
-     * @param PDOStatement $handle
-     * @param Driver       $driver
-     * @param TypeProvider $types
+     * @param PDOStatement       $handle
+     * @param PDOExceptionMapper $exception_mapper
+     * @param TypeProvider       $types
      */
-    public function __construct(PDOStatement $handle, Driver $driver, TypeProvider $types)
+    public function __construct(PDOStatement $handle, PDOExceptionMapper $exception_mapper, TypeProvider $types)
     {
         $this->handle = $handle;
-        $this->driver = $driver;
+        $this->exception_mapper = $exception_mapper;
         $this->types = $types;
     }
 
@@ -75,7 +75,7 @@ class PreparedPDOStatement implements PreparedStatement
 
             $value_type = gettype($value);
         }
-        
+
         if (isset($PDO_TYPE[$value_type])) {
             $this->handle->bindValue($name, $value, $PDO_TYPE[$value_type]);
 
@@ -95,9 +95,10 @@ class PreparedPDOStatement implements PreparedStatement
         } else {
             list($sql_state, $error_code, $error_message) = $this->handle->errorInfo();
 
-            $exception_type = $this->driver->getExceptionType($sql_state, $error_code, $error_message);
+            $exception_type = $this->exception_mapper->getExceptionType($sql_state, $error_code, $error_message);
 
-            throw new $exception_type($this->handle->queryString, $this->params, "{$sql_state}: {$error_message}", $error_code);
+            throw new $exception_type($this->handle->queryString, $this->params, "{$sql_state}: {$error_message}",
+                $error_code);
         }
     }
 
@@ -111,11 +112,11 @@ class PreparedPDOStatement implements PreparedStatement
         }
 
         $result = $this->handle->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($result === false) {
             return null;
         }
-        
+
         return $result;
     }
 

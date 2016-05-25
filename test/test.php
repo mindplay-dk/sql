@@ -5,7 +5,6 @@ use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
-use mindplay\sql\framework\pdo\PDOConnection;
 use mindplay\sql\framework\pdo\PreparedPDOStatement;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\Result;
@@ -22,10 +21,9 @@ use mindplay\sql\model\types\IntType;
 use mindplay\sql\model\types\JSONType;
 use mindplay\sql\model\types\StringType;
 use mindplay\sql\model\types\TimestampType;
+use mindplay\sql\mysql\MySQLConnection;
 use mindplay\sql\mysql\MySQLDatabase;
-use mindplay\sql\mysql\MySQLDriver;
 use mindplay\sql\postgres\PostgresDatabase;
-use mindplay\sql\postgres\PostgresDriver;
 use Mockery\MockInterface;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -113,11 +111,11 @@ function check_params(Query $query, $expected_params)
 test(
     "can quote table-names",
     function () {
-        $driver = new PostgresDriver();
+        $driver = new PostgresDatabase();
 
         eq($driver->quoteName('foo'), '"foo"');
 
-        $driver = new MySQLDriver();
+        $driver = new MySQLDatabase();
 
         eq($driver->quoteName('foo'), '`foo`');
     }
@@ -152,7 +150,9 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $db = create_db();
+
+        $connection = $db->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -171,7 +171,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('commit')->once();
@@ -194,7 +194,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -213,7 +213,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -228,7 +228,7 @@ test(
             }
         );
 
-        ok(true, "transcation fails");
+        ok(true, "transaction fails");
     }
 );
 
@@ -238,7 +238,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -263,7 +263,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -291,7 +291,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -318,7 +318,7 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = create_db()->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('beginTransaction')->once();
         $mock_pdo->shouldReceive('rollBack')->once();
@@ -452,11 +452,14 @@ test(
         ];
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
-        
-        $preparator = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
 
         $container = new DatabaseContainer();
+
+        $db = new PostgresDatabase($container);
+
         $container->set(BoolType::class, BoolType::get(true, false));
+
+        $connection = $db->createConnection($mock_pdo);
 
         $statement = new SQLQuery($container, $sql);
 
@@ -468,7 +471,7 @@ test(
             $handle->shouldReceive('bindValue')->once()->with($name, $value, $pdo_types[$name])->andReturn($handle);
         }
 
-        $preparator->prepare($statement);
+        $connection->prepare($statement);
 
         ok(true, "mock assertions completed");
     }
@@ -505,7 +508,11 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $container = new DatabaseContainer();
+
+        $db = new PostgresDatabase($container);
+
+        $connection = $db->createConnection($mock_pdo);
 
         $mock_pdo->shouldReceive('prepare')->once()->with($expanded_sql)->andReturn($handle);
 
@@ -519,7 +526,7 @@ test(
             }
         }
 
-        $statement = new SQLQuery(Mockery::mock(TypeProvider::class), $sql);
+        $statement = new SQLQuery($container, $sql);
 
         $statement->apply($params);
         $statement->bind('empty', []);
@@ -543,7 +550,14 @@ test(
         $mock_handle->shouldReceive('bindValue')->with('false', false, PDO::PARAM_BOOL)->once();
         $mock_handle->shouldReceive('bindValue')->with('null', false, PDO::PARAM_NULL)->once();
 
-        $st = new PreparedPDOStatement($mock_handle, create_driver(), new DatabaseContainer());
+        $container = new DatabaseContainer();
+
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
+
+        $connection = new MySQLConnection($mock_pdo, $container);
+
+        $st = new PreparedPDOStatement($mock_handle, $connection, $container);
 
         $st->bind('int', 1);
         $st->bind('float', 1.2);
@@ -619,7 +633,14 @@ test(
         $mock_handle->shouldReceive('fetch')->andReturn(['a' => 2])->once();
         $mock_handle->shouldReceive('fetch')->andReturn(false);
 
-        $st = new PreparedPDOStatement($mock_handle, create_driver(), new DatabaseContainer());
+        /** @var MockInterface|PDO $mock_pdo */
+        $mock_pdo = Mockery::mock(PDO::class);
+
+        $container = new DatabaseContainer();
+
+        $connection = new MySQLConnection($mock_pdo, $container);
+
+        $st = new PreparedPDOStatement($mock_handle, $connection, $container);
 
         eq($st->fetch(), ['a' => 1]);
         eq($st->fetch(), ['a' => 2]);
@@ -672,7 +693,7 @@ test(
                 return $record;
             });
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = new MySQLConnection($mock_pdo, new DatabaseContainer());
 
         $result = $connection->fetch($query)->all();
         
@@ -887,9 +908,11 @@ test(
 test(
     'can bind values to query models',
     function () {
-        $db = new DatabaseContainer(new MySQLDriver());
+        $container = new DatabaseContainer();
 
-        $query = new MockQuery($db);
+        $db = new MySQLDatabase($container);
+
+        $query = new MockQuery($container);
 
         $query->bind('int', 123);
 
@@ -1069,7 +1092,7 @@ test(
 
         $mock_statement->shouldReceive('fetch')->once()->andReturn(['count' => 123]);
 
-        $connection = new PDOConnection($mock_pdo, create_driver(), new DatabaseContainer());
+        $connection = new MySQLConnection($mock_pdo, new DatabaseContainer());
         
         eq($connection->count($db->select($schema->user)), 123);
     }
