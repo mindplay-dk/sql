@@ -3,25 +3,26 @@
 namespace mindplay\sql\postgres;
 
 use mindplay\sql\model\Database;
+use mindplay\sql\model\DatabaseContainer;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
 use mindplay\sql\model\types\FloatType;
 
 class PostgresDatabase extends Database
 {
-    public function __construct()
+    public function __construct(DatabaseContainer $container)
     {
-        parent::__construct();
+        parent::__construct($container);
 
-        $this->container->register(BoolType::class, function () {
+        $container->register(BoolType::class, function () {
             return BoolType::get(true, false);
         });
         
-        $this->container->alias("scalar.boolean", BoolType::class);
+        $container->alias("scalar.boolean", BoolType::class);
 
-        $this->container->register("scalar.double", FloatType::class);
+        $container->register("scalar.double", FloatType::class);
     }
-
+    
     /**
      * @param Table $from
      *

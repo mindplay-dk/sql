@@ -1,5 +1,6 @@
 <?php
 
+use mindplay\sql\model\DatabaseContainer;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\schema\Column;
@@ -25,7 +26,7 @@ function create_driver()
  */
 function create_db()
 {
-    return new MySQLDatabase();
+    return new MySQLDatabase(new DatabaseContainer());
 }
 
 class MockQuery extends Query

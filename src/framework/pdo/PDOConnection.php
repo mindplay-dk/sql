@@ -49,8 +49,9 @@ class PDOConnection implements Connection
     private $transaction_result;
 
     /**
-     * @param PDO    $pdo
-     * @param Driver $driver
+     * @param PDO          $pdo
+     * @param Driver       $driver
+     * @param TypeProvider $types
      */
     public function __construct(PDO $pdo, Driver $driver, TypeProvider $types)
     {

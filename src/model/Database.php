@@ -15,12 +15,15 @@ abstract class Database
      * @var DatabaseContainer
      */
     protected $container;
-    
-    public function __construct()
-    {
-        $this->container = new DatabaseContainer();
 
-        $this->container->set(Driver::class, $this->createDriver());
+    /**
+     * @param DatabaseContainer $container
+     */
+    public function __construct(DatabaseContainer $container)
+    {
+        $this->container = $container;
+        
+        $container->set(Driver::class, $this->createDriver());
     }
     
     /**

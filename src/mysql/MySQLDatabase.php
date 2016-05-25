@@ -3,6 +3,7 @@
 namespace mindplay\sql\mysql;
 
 use mindplay\sql\model\Database;
+use mindplay\sql\model\DatabaseContainer;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\query\DeleteQuery;
 use mindplay\sql\model\query\InsertQuery;
@@ -13,17 +14,17 @@ use mindplay\sql\model\types\FloatType;
 
 class MySQLDatabase extends Database
 {
-    public function __construct()
+    public function __construct(DatabaseContainer $container)
     {
-        parent::__construct();
+        parent::__construct($container);
         
-        $this->container->register(BoolType::class, function () {
+        $container->register(BoolType::class, function () {
             return BoolType::get(1, 0);
         });
         
-        $this->container->alias("scalar.boolean", BoolType::class);
+        $container->alias("scalar.boolean", BoolType::class);
         
-        $this->container->register("scalar.double", FloatType::class);
+        $container->register("scalar.double", FloatType::class);
     }
     
     /**

@@ -1037,7 +1037,7 @@ test(
 test(
     'can apply query flags',
     function () {
-        $db = new MySQLDatabase();
+        $db = create_db();
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -1381,8 +1381,8 @@ SQL;
 test(
     'can build INSERT RETURNING query',
     function () {
-        $db = new PostgresDatabase();
-
+        $db = new PostgresDatabase(new DatabaseContainer());
+        
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
 
