@@ -23,7 +23,7 @@ $bench->add(
 
         $query = $db->select($user)->order("{$user->first_name}, {$user->last_name}")->page(1, 20);
 
-        $query->getTemplate()->getSQL();
+        $query->getSQL();
     }
 );
 
@@ -71,7 +71,7 @@ $bench->add(
             ->bind("dob", strtotime('1975-07-07'), TimestampType::class)
             ->bind("groups", [1,2,3]);
 
-        $query->getTemplate()->getSQL();
+        $query->getSQL();
     }
 );
 
