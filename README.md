@@ -209,6 +209,14 @@ results in batches of multiple records.
 The model includes a Driver abstraction, Query Builders for `INSERT`, `SELECT`, `UPDATE`, `DELETE` and custom
 SQL queries, a Schema model and a Type abstraction, which includes a Mapper implementation for Type conversions.
 
+## Performance
+
+Plenty fast.
+
+A simple [benchmark](test/benchmark.php) of query-builder performance is included - a simple `SELECT` with
+`ORDER` and `LIMIT` clauses builds in ~0.1 msec, and a more complex `SELECT` with two `JOIN` clauses and a
+bunch of conditions and parameters builds in ~0.5 msec. (on my Windows 10 laptop running PHP 7)
+
 ## Architecture
 
 This section contains notes for inquisitive minds.
