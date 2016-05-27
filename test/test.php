@@ -5,6 +5,7 @@ use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
+use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\framework\pdo\PreparedPDOStatement;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\Result;
@@ -15,7 +16,6 @@ use mindplay\sql\model\query\Query;
 use mindplay\sql\model\query\SQLQuery;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Type;
-use mindplay\sql\model\TypeProvider;
 use mindplay\sql\model\types\BoolType;
 use mindplay\sql\model\types\IntType;
 use mindplay\sql\model\types\JSONType;
@@ -26,6 +26,7 @@ use mindplay\sql\mysql\MySQLDatabase;
 use mindplay\sql\postgres\PostgresDatabase;
 use Mockery\MockInterface;
 
+const expected_dbname = "test";
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 require __DIR__ . '/fixtures.php';
@@ -1429,6 +1430,48 @@ SQL;
         check_return_types($query, [
             'id' => IntType::class
         ]);
+    }
+);
+
+test(
+    'can create PDO providers',
+    function () {
+        $expected_host = "some_host";
+        $expected_port = 12345;
+        $expected_dbname = "some_db";
+        $expected_username = "some_user";
+        $expected_password = "some_password";
+        $expected_options = ["some" => "value"];
+
+        foreach ([PDOProvider::DBMS_POSTGRES, PDOProvider::DBMS_MYSQL] as $expected_type) {
+            $provider = new PDOProvider(
+                $expected_type,
+                $expected_dbname,
+                $expected_username,
+                $expected_password,
+                $expected_options,
+                $expected_host,
+                $expected_port
+            );
+
+            eq($provider->getDBMS(), $expected_type);
+            eq($provider->getDSN(), "{$expected_type}:host={$expected_host};port={$expected_port};dbname={$expected_dbname}");
+            eq($provider->getHost(), $expected_host);
+            eq($provider->getPort(), $expected_port);
+            eq($provider->getUsername(), $expected_username);
+            eq($provider->getPassword(), $expected_password);
+            eq($provider->getOptions(), $expected_options);
+        }
+        
+        expect(
+            InvalidArgumentException::class,
+            "should throw for undefined DBMS type",
+            function () {
+                new PDOProvider("foo", "foo", "foo", "foo");
+            }
+        );
+        
+        // note that PDOProvider::getPDO() is untestable because PDO constructor has the side-effect of opening the connection
     }
 );
 

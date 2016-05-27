@@ -1,5 +1,6 @@
 <?php
 
+use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Schema;
