@@ -70,7 +70,7 @@ class PostgresDatabase extends Database implements Driver
      */
     public function update(Table $table)
     {
-        return $this->container->create(PostgresUpdateQuery::class, ['root' => $table]);
+        return $this->container->create(PostgresUpdateQuery::class, ['table' => $table]);
     }
 
     /**

@@ -1304,6 +1304,36 @@ SQL;
 );
 
 test(
+    'can create UPDATE query for PostgreSQL',
+    function () {
+        $db = new PostgresDatabase(new DatabaseContainer());
+
+        /** @var SampleSchema $schema */
+        $schema = $db->getSchema(SampleSchema::class);
+
+        $user = $schema->user;
+
+        $query = $db->update($user)
+            ->setValue($user->first_name, "Rasmus")
+            ->where("{$user->id} = :id")
+            ->bind("id", 123);
+
+        $expected_sql = <<<'SQL'
+UPDATE "user"
+SET "first_name" = :user_first_name
+WHERE "user"."id" = :id
+SQL;
+
+        sql_eq($query, $expected_sql);
+
+        check_params($query, [
+            'user_first_name' => 'Rasmus',
+            'id'              => 123,
+        ]);
+    }
+);
+
+test(
     'can create UPDATE query with alias',
     function () {
         $db = create_db();
