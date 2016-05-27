@@ -7,7 +7,7 @@ use mindplay\sql\model\components\Returning;
 use mindplay\sql\model\components\ReturnVars;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\query\DeleteQuery;
-use mindplay\sql\model\Table;
+use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\TypeProvider;
 
 class PostgresDeleteQuery extends DeleteQuery implements MapperProvider

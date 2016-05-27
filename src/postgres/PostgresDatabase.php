@@ -80,6 +80,6 @@ class PostgresDatabase extends Database implements Driver
      */
     public function delete(Table $table)
     {
-        return $this->container->create(PostgresDeleteQuery::class, ['root' => $table]);
+        return $this->container->create(PostgresDeleteQuery::class, ['table' => $table]);
     }
 }
