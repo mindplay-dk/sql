@@ -1501,7 +1501,7 @@ test(
         $expected_password = "some_password";
         $expected_options = ["some" => "value"];
 
-        foreach ([PDOProvider::DBMS_POSTGRES, PDOProvider::DBMS_MYSQL] as $expected_type) {
+        foreach ([PDOProvider::PROTOCOL_POSTGRES, PDOProvider::PROTOCOL_MYSQL] as $expected_type) {
             $provider = new PDOProvider(
                 $expected_type,
                 $expected_dbname,
@@ -1512,7 +1512,7 @@ test(
                 $expected_port
             );
 
-            eq($provider->getDBMS(), $expected_type);
+            eq($provider->getProtocol(), $expected_type);
             eq($provider->getDSN(), "{$expected_type}:host={$expected_host};port={$expected_port};dbname={$expected_dbname}");
             eq($provider->getHost(), $expected_host);
             eq($provider->getPort(), $expected_port);
