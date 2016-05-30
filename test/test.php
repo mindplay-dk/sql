@@ -26,7 +26,6 @@ use mindplay\sql\mysql\MySQLDatabase;
 use mindplay\sql\postgres\PostgresDatabase;
 use Mockery\MockInterface;
 
-const expected_dbname = "test";
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 require __DIR__ . '/fixtures.php';
