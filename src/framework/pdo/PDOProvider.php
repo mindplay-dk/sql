@@ -18,6 +18,9 @@ use PDO;
  */
 class PDOProvider
 {
+    const PROTOCOL_POSTGRES = "pgsql";
+    const PROTOCOL_MYSQL    = "mysql";
+
     /**
      * @var string
      */
@@ -57,10 +60,7 @@ class PDOProvider
      * @var PDO|null
      */
     private $pdo;
-
-    const PROTOCOL_POSTGRES = "pgsql";
-    const PROTOCOL_MYSQL    = "mysql";
-
+    
     /**
      * @param string      $protocol database protocol name (one of the PROTOCOL_* class constants)
      * @param string      $dbname   name of the database to connect to
