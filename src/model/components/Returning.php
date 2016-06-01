@@ -35,7 +35,7 @@ trait Returning
     /**
      * Add one or more Columns to select and return
      *
-     * @param Column|Column[] one or more Columns to select and return
+     * @param Column|Column[] $cols one or more Columns to select and return
      *
      * @return $this
      */
