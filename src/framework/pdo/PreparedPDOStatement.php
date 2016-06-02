@@ -3,6 +3,7 @@
 namespace mindplay\sql\framework\pdo;
 
 use InvalidArgumentException;
+use mindplay\sql\framework\Logger;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\TypeProvider;
@@ -40,15 +41,22 @@ class PreparedPDOStatement implements PreparedStatement
     private $executed = false;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * @param PDOStatement       $handle
      * @param PDOExceptionMapper $exception_mapper
      * @param TypeProvider       $types
+     * @param Logger             $logger
      */
-    public function __construct(PDOStatement $handle, PDOExceptionMapper $exception_mapper, TypeProvider $types)
+    public function __construct(PDOStatement $handle, PDOExceptionMapper $exception_mapper, TypeProvider $types, Logger $logger = null)
     {
         $this->handle = $handle;
         $this->exception_mapper = $exception_mapper;
         $this->types = $types;
+        $this->logger = $logger;
     }
 
     /**
@@ -90,8 +98,15 @@ class PreparedPDOStatement implements PreparedStatement
      */
     public function execute()
     {
+        $microtime_begin = microtime(true);
+
         if (@$this->handle->execute()) {
             $this->executed = true;
+            if (isset($this->logger)) {
+                $microtime_end = microtime(true);
+                $time_msec = ($microtime_end - $microtime_begin) * 1000;
+                $this->logger->logQuery($this->handle->queryString, $this->params, $time_msec);
+            }
         } else {
             list($sql_state, $error_code, $error_message) = $this->handle->errorInfo();
 

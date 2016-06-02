@@ -5,6 +5,7 @@ use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
+use mindplay\sql\framework\pdo\PDOConnection;
 use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\framework\pdo\PreparedPDOStatement;
 use mindplay\sql\framework\PreparedStatement;
@@ -23,6 +24,7 @@ use mindplay\sql\model\types\StringType;
 use mindplay\sql\model\types\TimestampType;
 use mindplay\sql\mysql\MySQLConnection;
 use mindplay\sql\mysql\MySQLDatabase;
+use mindplay\sql\postgres\PostgresConnection;
 use mindplay\sql\postgres\PostgresDatabase;
 use Mockery\MockInterface;
 
@@ -621,6 +623,38 @@ test(
 //        eq($sql_exception->getMessage(), "XXXXXX: ouch");
 //    }
 //);
+
+test(
+    'connection logs executed queries',
+    function () {
+        $container = new DatabaseContainer();
+
+        /** @var MockInterface|PDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(PDOStatement::class);
+        $mock_handle->shouldReceive('execute')->andReturn(true)->once();
+        $mock_handle->shouldReceive('bindValue')->andReturnNull();
+
+        $params = $time_msec = null;
+
+        /** @var MockInterface|PDO $pdo_mock */
+        $pdo_mock = Mockery::mock(PDO::class);
+        $pdo_mock->shouldReceive('prepare')->andReturn($mock_handle);
+
+        $connection = new PostgresConnection($pdo_mock, $container);
+
+        $logger = new MockLogger(function ($arg_sql, $arg_params, $arg_time_msec) use (&$params, &$time_msec) {
+            $params = $arg_params;
+            $time_msec = $arg_time_msec;
+        });
+        $connection->addLogger($logger);
+
+        $connection->execute(new MockParameterQuery($container));
+
+        eq($params, [ 'foo' => 'bar' ], 'params are logged');
+        ok($time_msec > 0 && $time_msec < 1000, 'duration is logged and reasonable');
+        // I cannot test that the correct SQL is logged because PDO sucks
+    }
+);
 
 test(
     'can fetch; and auto-executes prepared statement on first fetch',
