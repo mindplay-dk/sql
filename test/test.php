@@ -558,8 +558,9 @@ test(
         $mock_pdo = Mockery::mock(PDO::class);
 
         $connection = new MySQLConnection($mock_pdo, $container);
+        $mock_logger = new MockLogger(function () {});
 
-        $st = new PreparedPDOStatement($mock_handle, $connection, $container);
+        $st = new PreparedPDOStatement($mock_handle, $connection, $container, $mock_logger);
 
         $st->bind('int', 1);
         $st->bind('float', 1.2);
@@ -673,8 +674,9 @@ test(
         $container = new DatabaseContainer();
 
         $connection = new MySQLConnection($mock_pdo, $container);
+        $mock_logger = new MockLogger(function () {});
 
-        $st = new PreparedPDOStatement($mock_handle, $connection, $container);
+        $st = new PreparedPDOStatement($mock_handle, $connection, $container, $mock_logger);
 
         eq($st->fetch(), ['a' => 1]);
         eq($st->fetch(), ['a' => 2]);

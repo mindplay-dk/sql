@@ -51,8 +51,12 @@ class PreparedPDOStatement implements PreparedStatement
      * @param TypeProvider       $types
      * @param Logger             $logger
      */
-    public function __construct(PDOStatement $handle, PDOExceptionMapper $exception_mapper, TypeProvider $types, Logger $logger = null)
-    {
+    public function __construct(
+        PDOStatement $handle,
+        PDOExceptionMapper $exception_mapper,
+        TypeProvider $types,
+        Logger $logger
+    ) {
         $this->handle = $handle;
         $this->exception_mapper = $exception_mapper;
         $this->types = $types;
@@ -102,18 +106,20 @@ class PreparedPDOStatement implements PreparedStatement
 
         if (@$this->handle->execute()) {
             $this->executed = true;
-            if (isset($this->logger)) {
-                $microtime_end = microtime(true);
-                $time_msec = ($microtime_end - $microtime_begin) * 1000;
-                $this->logger->logQuery($this->handle->queryString, $this->params, $time_msec);
-            }
+            $microtime_end = microtime(true);
+            $time_msec = ($microtime_end - $microtime_begin) * 1000;
+            $this->logger->logQuery($this->handle->queryString, $this->params, $time_msec);
         } else {
             list($sql_state, $error_code, $error_message) = $this->handle->errorInfo();
 
             $exception_type = $this->exception_mapper->getExceptionType($sql_state, $error_code, $error_message);
 
-            throw new $exception_type($this->handle->queryString, $this->params, "{$sql_state}: {$error_message}",
-                $error_code);
+            throw new $exception_type(
+                $this->handle->queryString,
+                $this->params,
+                "{$sql_state}: {$error_message}",
+                $error_code
+            );
         }
     }
 
