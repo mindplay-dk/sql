@@ -79,7 +79,7 @@ interface Connection
     public function lastInsertId($sequence_name = null);
 
     /**
-     * Add logger for this connection
+     * Add a `Logger` instance, which will be notified when a query is executed.
      *
      * @param Logger $logger
      *
