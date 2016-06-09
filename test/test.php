@@ -8,6 +8,7 @@ use mindplay\sql\framework\mappers\RecordMapper;
 use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\framework\pdo\PreparedPDOStatement;
 use mindplay\sql\framework\PreparedStatement;
+use mindplay\sql\framework\QueryFormatter;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\DatabaseContainer;
@@ -581,6 +582,18 @@ test(
                 $st->bind('foo', [1]);
             }
         );
+    }
+);
+
+test(
+    'can format a query for logging',
+    function () {
+        $sql = "INSERT INTO \"foo\" VALUES(:foo)";
+        $params = [ 'foo' => 'bar' ];
+
+        $pretty_sql = QueryFormatter::formatQuery($sql, $params);
+
+        eq($pretty_sql, "INSERT INTO \"foo\" VALUES('bar')");
     }
 );
 
