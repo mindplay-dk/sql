@@ -11,10 +11,10 @@ interface Logger
      * This function is called every time a query has been executed
      *
      * @param string $sql       SQL statement
-     * @param array  $params    Interpolated parameter
-     * @param float  $time_msec Query duration in milliseconds
+     * @param array  $params    placeholder name/value pairs
+     * @param float  $time_msec execution time (in milliseconds)
      *
      * @return void
      */
-    function logQuery($sql, $params, $time_msec);
+    public function logQuery($sql, $params, $time_msec);
 }
