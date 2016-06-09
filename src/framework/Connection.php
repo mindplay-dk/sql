@@ -77,4 +77,13 @@ interface Connection
      * @return mixed
      */
     public function lastInsertId($sequence_name = null);
+
+    /**
+     * Add logger for this connection
+     *
+     * @param Logger $logger
+     *
+     * @return void
+     */
+    public function addLogger(Logger $logger);
 }

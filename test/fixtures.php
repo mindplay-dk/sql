@@ -1,5 +1,6 @@
 <?php
 
+use mindplay\sql\framework\Logger;
 use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\schema\Column;
@@ -27,6 +28,43 @@ class MockQuery extends Query
     public function getSQL()
     {
         return "SELECT 1";
+    }
+}
+
+class MockParameterQuery extends Query
+{
+    /**
+     * @return string SQL statement (with placeholders)
+     */
+    public function getSQL()
+    {
+        return "SELECT :foo";
+    }
+
+    public function getParams()
+    {
+        return [ 'foo' => 'bar' ];
+    }
+}
+
+/**
+ * This logger just delegates to the supplied callable
+ */
+class MockLogger implements Logger
+{
+    /**
+     * @var callable
+     */
+    private $log_function;
+
+    public function __construct(callable $log_function)
+    {
+        $this->log_function = $log_function;
+    }
+
+    function logQuery($sql, $params, $time_msec)
+    {
+        call_user_func_array($this->log_function, func_get_args());
     }
 }
 

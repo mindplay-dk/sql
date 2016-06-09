@@ -6,6 +6,7 @@ use Exception;
 use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Countable;
+use mindplay\sql\framework\Logger;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\Statement;
@@ -16,7 +17,7 @@ use UnexpectedValueException;
 /**
  * This class implements a Connection adapter for a PDO connection.
  */
-abstract class PDOConnection implements Connection, PDOExceptionMapper
+abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
 {
     /**
      * @var PDO
@@ -43,6 +44,11 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper
     private $transaction_result;
 
     /**
+     * @var Logger[]
+     */
+    private $loggers = [];
+
+    /**
      * To avoid duplicating dependencies, you should use DatabaseContainer::createPDOConnection()
      * rather than calling this constructor directly.
      *
@@ -64,7 +70,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper
 
         $sql = $this->expandPlaceholders($statement->getSQL(), $params);
 
-        $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql), $this, $this->types);
+        $prepared_statement = new PreparedPDOStatement($this->pdo->prepare($sql), $this, $this->types, $this);
         
         foreach ($params as $name => $value) {
             if (is_array($value)) {
@@ -215,4 +221,17 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper
             ? (int) $id
             : $id;
     }
+
+    public function addLogger(Logger $logger)
+    {
+        $this->loggers[] = $logger;
+    }
+
+    function logQuery($sql, $params, $time_msec)
+    {
+        foreach ($this->loggers as $logger) {
+            $logger->logQuery($sql, $params, $time_msec);
+        }
+    }
+
 }
