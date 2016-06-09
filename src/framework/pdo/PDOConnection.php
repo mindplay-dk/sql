@@ -221,17 +221,22 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
             ? (int) $id
             : $id;
     }
-
+    
+    /**
+     * @inheritdoc
+     */
     public function addLogger(Logger $logger)
     {
         $this->loggers[] = $logger;
     }
-
-    function logQuery($sql, $params, $time_msec)
+    
+    /**
+     * @inheritdoc
+     */
+    public function logQuery($sql, $params, $time_msec)
     {
         foreach ($this->loggers as $logger) {
             $logger->logQuery($sql, $params, $time_msec);
         }
     }
-
 }
