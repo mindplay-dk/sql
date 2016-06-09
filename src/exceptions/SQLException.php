@@ -3,6 +3,7 @@
 namespace mindplay\sql\exceptions;
 
 use Exception;
+use mindplay\sql\framework\QueryFormatter;
 use RuntimeException;
 
 /**
@@ -19,25 +20,10 @@ class SQLException extends RuntimeException
      */
     public function __construct($sql, $params = [], $message = 'SQL Error', $code = 0, Exception $previous = null)
     {
-        parent::__construct("{$message}\n" . $this->emulatedPrepare($sql, $params), $code, $previous);
-    }
-    
-    /**
-     * @param string $sql
-     * @param array  $params
-     *
-     * @return string SQL with emulated prepare (for diagnostic purposes only)
-     */
-    private function emulatedPrepare($sql, array $params)
-    {
-        foreach ($params as $name => $value) {
-            $quoted_value = $value === null
-                ? "NULL"
-                : (is_numeric($value) ? $value : "'{$value}'");
-
-            $sql = str_replace(":{$name}", $quoted_value, $sql);
-        }
-
-        return $sql;
+        parent::__construct(
+            "{$message}\n" . QueryFormatter::formatQuery($sql, $params),
+            $code,
+            $previous
+        );
     }
 }
