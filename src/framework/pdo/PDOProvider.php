@@ -85,12 +85,16 @@ class PDOProvider
             $port = $default_port[$protocol];
         }
 
+        if ($host === null) {
+            $host = "localhost";
+        }
+
         $this->protocol = $protocol;
         $this->dsn = "{$protocol}:host={$host};port={$port};dbname={$dbname}";
         $this->username = $username;
         $this->password = $password;
         $this->options = $options ?: [];
-        $this->host = $host ?: "localhost";
+        $this->host = $host;
         $this->port = $port;
     }
 

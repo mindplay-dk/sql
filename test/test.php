@@ -1569,7 +1569,24 @@ test(
             eq($provider->getPassword(), $expected_password);
             eq($provider->getOptions(), $expected_options);
         }
-        
+
+        // test for default hostname:
+
+        $expected_type = PDOProvider::PROTOCOL_POSTGRES;
+
+        $provider = new PDOProvider(
+            $expected_type,
+            $expected_dbname,
+            $expected_username,
+            $expected_password,
+            $expected_options,
+            "localhost",
+            $expected_port
+        );
+
+        eq($provider->getDSN(), "{$expected_type}:host=localhost;port={$expected_port};dbname={$expected_dbname}", "can apply default hostname to DSN");
+        eq($provider->getHost(), "localhost", "reflects default hostname");
+
         expect(
             InvalidArgumentException::class,
             "should throw for undefined DBMS type",
@@ -1577,7 +1594,7 @@ test(
                 new PDOProvider("foo", "foo", "foo", "foo");
             }
         );
-        
+
         // note that PDOProvider::getPDO() is untestable because PDO constructor has the side-effect of opening the connection
     }
 );
