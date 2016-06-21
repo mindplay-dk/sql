@@ -94,12 +94,11 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function fetch(Statement $statement, $batch_size = 1000, array $mappers = [])
+    public function fetch(Statement $statement, $batch_size = 1000)
     {
-        if ($statement instanceof MapperProvider) {
-            // prepend Mappers provided by the Executable:
-            $mappers = array_merge($statement->getMappers(), $mappers);
-        }
+        $mappers = $statement instanceof MapperProvider
+            ? $statement->getMappers()
+            : [];
         
         return new Result(
             $this->prepare($statement),
