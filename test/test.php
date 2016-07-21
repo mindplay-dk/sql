@@ -866,11 +866,22 @@ test(
     function () {
         $type = new JSONType();
 
-        $valid_value = ['foo' => 'bar'];
-        $valid_json = '{"foo":"bar"}';
+        $valid_value = ['foo' => 'bår'];
+        $valid_json = '{"foo":"bår"}';
 
         eq($type->convertToPHP($valid_json), $valid_value, "can convert to PHP value");
         eq($type->convertToSQL($valid_value), $valid_json, "can convert to SQL JSON value");
+
+        $invalid_string = "\xc3\x28"; // invalid 2 Octet Sequence
+
+        expect(
+            RuntimeException::class,
+            "should throw for invalid UTF-8 string",
+            function () use ($type, $invalid_string) {
+                $type->convertToSQL($invalid_string);
+            },
+            '#' . preg_quote('malformed utf-8') . '#i'
+        );
     }
 );
 
