@@ -175,7 +175,13 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
     }
 
     /**
-     * @inheritdoc
+     * @internal do not call this method directly from client-code (see `Countable` interface)
+     *
+     * @ignore
+     *
+     * @see Connection::count()
+     *
+     * @return SelectQuery
      */
     public function createCountStatement()
     {
@@ -184,7 +190,9 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
         $query->return_vars = new ReturnVars($this->root, $this->driver, $this->types);
 
         $query->return_vars->addValue("COUNT(*)", "count", IntType::class);
-        
+
+        $query->mappers = []; // remove existing mappers not applicable to the COUNT result
+
         $query->limit = null;
         $query->offset = null;
         
