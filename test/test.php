@@ -5,18 +5,15 @@ use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
-use mindplay\sql\framework\pdo\PDOConnection;
 use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\framework\pdo\PreparedPDOStatement;
 use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\framework\QueryFormatter;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\Statement;
-use mindplay\sql\model\DatabaseContainer;
 use mindplay\sql\model\DatabaseContainerFactory;
 use mindplay\sql\model\expr;
 use mindplay\sql\model\query\Query;
-use mindplay\sql\model\query\SQLQuery;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Type;
 use mindplay\sql\model\types\BoolType;
@@ -95,7 +92,7 @@ function check_return_types(MapperProvider $query, $expected_types)
 function check_params(Query $query, $expected_params)
 {
     $params = $query->getParams();
-    
+
     $expected_num_params = count($expected_params);
     $num_params = count($params);
 
@@ -457,17 +454,11 @@ test(
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
 
-        $factory = new DatabaseContainerFactory();
-
-        $factory->set(BoolType::class, BoolType::get(true, false));
-
-        $db = new PostgresDatabase($factory);
-
-        $container = $factory->createContainer();
+        $db = new PostgresDatabase();
 
         $connection = $db->createConnection($mock_pdo);
 
-        $statement = new SQLQuery($container, $sql);
+        $statement = $db->sql($sql);
 
         $mock_pdo->shouldReceive('prepare')->once()->with($sql)->andReturn($handle);
 
@@ -514,11 +505,7 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $factory = new DatabaseContainerFactory();
-
-        $db = new PostgresDatabase($factory);
-
-        $container = $factory->createContainer();
+        $db = new PostgresDatabase();
 
         $connection = $db->createConnection($mock_pdo);
 
@@ -534,7 +521,7 @@ test(
             }
         }
 
-        $statement = new SQLQuery($container, $sql);
+        $statement = $db->sql($sql);
 
         $statement->apply($params);
         $statement->bind('empty', []);
@@ -715,7 +702,7 @@ test(
         $mock_pdo = Mockery::mock(PDO::class);
 
         $db = create_db();
-        
+
         /** @var MockInterface|PDOStatement $mock_statement */
         $mock_statement = Mockery::mock(PDOStatement::class);
 
@@ -760,7 +747,7 @@ test(
         $connection = new MySQLConnection($mock_pdo, $container);
 
         $result = $connection->fetch($query)->all();
-        
+
         eq(
             $result,
             [
@@ -904,10 +891,10 @@ test(
     'can map bool values to SQL',
     function () {
         $type = BoolType::get(true, false);
-        
+
         eq($type->convertToPHP(true), true);
         eq($type->convertToPHP(false), false);
-        
+
         eq($type->convertToSQL(true), true);
         eq($type->convertToSQL(false), false);
 
@@ -920,7 +907,7 @@ test(
         eq($type->convertToSQL(false), 0);
 
         $type = BoolType::get("yes", "no");
-        
+
         eq($type->convertToPHP('yes'), true);
         eq($type->convertToPHP('no'), false);
 
@@ -969,7 +956,7 @@ test(
         $columns = $schema->order->listColumns("foo");
 
         eq(count($columns), 2);
-        
+
         foreach ($columns as $column) {
             eq($column->getAlias(), "foo_" . $column->getName());
         }
@@ -1115,9 +1102,9 @@ test(
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
-        
+
         $user = $schema->user;
-        
+
         $count_query = $db
             ->select($user)
             ->columns($user->first_name)// discarded
@@ -1172,7 +1159,7 @@ test(
         $factory = new DatabaseContainerFactory();
 
         $connection = new MySQLConnection($mock_pdo, $factory->createContainer());
-        
+
         eq($connection->count($db->select($schema->user)), 123);
     }
 );
@@ -1220,12 +1207,12 @@ test(
         $schema = $db->getSchema(SampleSchema::class);
 
         $user = $schema->user;
-        
+
         $home_address = $schema->address('home_address');
         $work_address = $schema->address('work_address');
 
         $order = $schema->order;
-        
+
         $num_orders = $db
             ->select($order)
             ->value("COUNT(`order_id`)")
@@ -1274,7 +1261,7 @@ WHERE
     AND (`home_address`.`street_name` LIKE :street_name OR `work_address`.`street_name` LIKE :street_name)
     AND (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) > 3
 SQL;
-        
+
         sql_eq($query, $expected_sql);
     }
 );
@@ -1549,7 +1536,7 @@ test(
         $factory = new DatabaseContainerFactory();
 
         $db = new PostgresDatabase($factory);
-        
+
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
 
@@ -1569,7 +1556,7 @@ SQL;
         sql_eq($query, $expected_sql);
 
         check_params($query, ['c0_1' => 'Fake Street']);
-        
+
         check_return_types($query, [
             'id' => IntType::class
         ]);

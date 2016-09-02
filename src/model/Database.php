@@ -17,7 +17,10 @@ abstract class Database
     protected $container;
 
     /**
-     * @param DatabaseContainer|null $factory
+     * The typical use-case is to omit the `$factory` argument - it exists primarily for
+     * mocking and dependency-injection under test.
+     *
+     * @param DatabaseContainerFactory|null $factory custom factory instance (typically omitted)
      */
     public function __construct(DatabaseContainerFactory $factory = null)
     {
