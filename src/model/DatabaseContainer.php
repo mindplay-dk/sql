@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\model;
 
+use mindplay\sql\model\schema\Schema;
 use mindplay\sql\model\schema\Type;
 use mindplay\unbox\Container;
 use UnexpectedValueException;
@@ -11,23 +12,13 @@ use UnexpectedValueException;
  */
 class DatabaseContainer extends Container implements TypeProvider, TableFactory
 {
-    public function __construct()
-    {
-        parent::__construct();
-        
-        // self-register:
-
-        $this->set(TypeProvider::class, $this);
-        $this->set(TableFactory::class, $this);
-    }
-
     /**
      * @inheritdoc
      */
     public function getType($type_name)
     {
         if (! $this->has($type_name)) {
-            $this->register($type_name); // auto-wiring (for Types with no special constructor dependencies)
+            $this->inject($type_name, $this->create($type_name)); // auto-wiring
         }
 
         $type = $this->get($type_name);
@@ -39,6 +30,28 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
         }
         
         return $type;
+    }
+
+    /**
+     * @param string Schema class-name
+     *
+     * @return Schema
+     */
+    public function getSchema($schema_type)
+    {
+        if (! $this->has($schema_type)) {
+            $this->inject($schema_type, $this->create($schema_type)); // auto-wiring
+        }
+
+        $schema_type = $this->get($schema_type);
+
+        if (! $schema_type instanceof Schema) {
+            $class_name = get_class($schema_type);
+
+            throw new UnexpectedValueException("{$class_name} does not extend the Schema class");
+        }
+
+        return $schema_type;
     }
 
     /**
@@ -55,5 +68,19 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     public function createTable($class_name, $table_name, $alias)
     {
         return $this->create($class_name, ['name' => $table_name, 'alias' => $alias]);
+    }
+
+    /**
+     * Dynamically inject a component into this Container.
+     *
+     * Enables auto-wiring of Schema and Type models.
+     *
+     * @param string $name
+     * @param mixed  $value
+     */
+    protected function inject($name, $value)
+    {
+        $this->values[$name] = $value;
+        $this->active[$name] = true;
     }
 }

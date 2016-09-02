@@ -4,6 +4,7 @@ namespace mindplay\sql\postgres;
 
 use mindplay\sql\model\Database;
 use mindplay\sql\model\DatabaseContainer;
+use mindplay\sql\model\DatabaseContainerFactory;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
@@ -12,17 +13,17 @@ use PDO;
 
 class PostgresDatabase extends Database implements Driver
 {
-    protected function bootstrap(DatabaseContainer $container)
+    protected function bootstrap(DatabaseContainerFactory $factory)
     {
-        $container->set(Driver::class, $this);
+        $factory->set(Driver::class, $this);
         
-        $container->register(BoolType::class, function () {
+        $factory->register(BoolType::class, function () {
             return BoolType::get(true, false);
         });
         
-        $container->alias("scalar.boolean", BoolType::class);
+        $factory->alias("scalar.boolean", BoolType::class);
 
-        $container->register("scalar.double", FloatType::class);
+        $factory->register("scalar.double", FloatType::class);
     }
 
     /**

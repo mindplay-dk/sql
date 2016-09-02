@@ -13,6 +13,7 @@ use mindplay\sql\framework\QueryFormatter;
 use mindplay\sql\framework\Result;
 use mindplay\sql\framework\Statement;
 use mindplay\sql\model\DatabaseContainer;
+use mindplay\sql\model\DatabaseContainerFactory;
 use mindplay\sql\model\expr;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\query\SQLQuery;
@@ -456,11 +457,13 @@ test(
 
         $sql = "SELECT * FROM foo WHERE " . implode(" AND ", array_map(function ($name) { return "{$name} = :{$name}"; }, array_keys($params)));
 
-        $container = new DatabaseContainer();
+        $factory = new DatabaseContainerFactory();
 
-        $db = new PostgresDatabase($container);
+        $factory->set(BoolType::class, BoolType::get(true, false));
 
-        $container->set(BoolType::class, BoolType::get(true, false));
+        $db = new PostgresDatabase($factory);
+
+        $container = $factory->createContainer();
 
         $connection = $db->createConnection($mock_pdo);
 
@@ -511,9 +514,11 @@ test(
 
         $expanded_sql = "SELECT * FROM foo WHERE empty = (null) AND " . implode(" AND ", array_map(function ($name) { return "{$name} IN (:{$name}_1, :{$name}_2)"; }, array_keys($params)));
 
-        $container = new DatabaseContainer();
+        $factory = new DatabaseContainerFactory();
 
-        $db = new PostgresDatabase($container);
+        $db = new PostgresDatabase($factory);
+
+        $container = $factory->createContainer();
 
         $connection = $db->createConnection($mock_pdo);
 
@@ -553,7 +558,9 @@ test(
         $mock_handle->shouldReceive('bindValue')->with('false', false, PDO::PARAM_BOOL)->once();
         $mock_handle->shouldReceive('bindValue')->with('null', false, PDO::PARAM_NULL)->once();
 
-        $container = new DatabaseContainer();
+        $factory = new DatabaseContainerFactory();
+
+        $container = $factory->createContainer();
 
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -641,7 +648,9 @@ test(
 test(
     'connection logs executed queries',
     function () {
-        $container = new DatabaseContainer();
+        $factory = new DatabaseContainerFactory();
+
+        $container = $factory->createContainer();
 
         /** @var MockInterface|PDOStatement $mock_handle */
         $mock_handle = Mockery::mock(PDOStatement::class);
@@ -684,7 +693,9 @@ test(
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
 
-        $container = new DatabaseContainer();
+        $factory = new DatabaseContainerFactory();
+
+        $container = $factory->createContainer();
 
         $connection = new MySQLConnection($mock_pdo, $container);
         $mock_logger = new MockLogger(function () {});
@@ -742,7 +753,11 @@ test(
                 return $record;
             });
 
-        $connection = new MySQLConnection($mock_pdo, new DatabaseContainer());
+        $factory = new DatabaseContainerFactory();
+
+        $container = $factory->createContainer();
+
+        $connection = new MySQLConnection($mock_pdo, $container);
 
         $result = $connection->fetch($query)->all();
         
@@ -968,9 +983,11 @@ test(
 test(
     'can bind values to query models',
     function () {
-        $container = new DatabaseContainer();
+        $factory = new DatabaseContainerFactory();
 
-        $db = new MySQLDatabase($container);
+        $db = new MySQLDatabase($factory);
+
+        $container = $factory->createContainer();
 
         $query = new MockQuery($container);
 
@@ -1152,7 +1169,9 @@ test(
 
         $mock_statement->shouldReceive('fetch')->once()->andReturn(['count' => 123]);
 
-        $connection = new MySQLConnection($mock_pdo, new DatabaseContainer());
+        $factory = new DatabaseContainerFactory();
+
+        $connection = new MySQLConnection($mock_pdo, $factory->createContainer());
         
         eq($connection->count($db->select($schema->user)), 123);
     }
@@ -1365,7 +1384,9 @@ SQL;
 test(
     'can create UPDATE query for PostgreSQL',
     function () {
-        $db = new PostgresDatabase(new DatabaseContainer());
+        $factory = new DatabaseContainerFactory();
+
+        $db = new PostgresDatabase($factory);
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -1494,7 +1515,9 @@ SQL;
 test(
     'can create DELETE query for PostgreSQL',
     function () {
-        $db = new PostgresDatabase(new DatabaseContainer());
+        $factory = new DatabaseContainerFactory();
+
+        $db = new PostgresDatabase($factory);
 
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);
@@ -1523,7 +1546,9 @@ SQL;
 test(
     'can build INSERT RETURNING query',
     function () {
-        $db = new PostgresDatabase(new DatabaseContainer());
+        $factory = new DatabaseContainerFactory();
+
+        $db = new PostgresDatabase($factory);
         
         /** @var SampleSchema $schema */
         $schema = $db->getSchema(SampleSchema::class);

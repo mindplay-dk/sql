@@ -17,19 +17,23 @@ abstract class Database
     protected $container;
 
     /**
-     * @param DatabaseContainer|null $container
+     * @param DatabaseContainer|null $factory
      */
-    public function __construct(DatabaseContainer $container = null)
+    public function __construct(DatabaseContainerFactory $factory = null)
     {
-        $this->container = $container ?: new DatabaseContainer();
+        if ($factory === null) {
+            $factory = new DatabaseContainerFactory();
+        }
 
-        $this->bootstrap($this->container);
+        $this->bootstrap($factory);
+
+        $this->container = $factory->createContainer();
     }
 
     /**
      * @return DatabaseContainer
      */
-    abstract protected function bootstrap(DatabaseContainer $container);
+    abstract protected function bootstrap(DatabaseContainerFactory $factory);
 
     /**
      * @param string Schema class-name
@@ -38,19 +42,7 @@ abstract class Database
      */
     public function getSchema($schema)
     {
-        if (! $this->container->has($schema)) {
-            $this->container->register($schema); // auto-wiring (for Schema with no special constructor dependencies)
-        }
-
-        $schema = $this->container->get($schema);
-
-        if (! $schema instanceof Schema) {
-            $class_name = get_class($schema);
-
-            throw new UnexpectedValueException("{$class_name} does not extend the Schema class");
-        }
-
-        return $schema;
+        return $this->container->getSchema($schema);
     }
     
     /**
@@ -61,5 +53,15 @@ abstract class Database
     public function sql($sql)
     {
         return $this->container->create(SQLQuery::class, ['sql' => $sql]);
+    }
+
+    /**
+     * @return DatabaseContainer
+     */
+    protected function createContainer()
+    {
+        $factory = new DatabaseContainerFactory();
+
+        return $factory->createContainer();
     }
 }
