@@ -54,14 +54,4 @@ abstract class Database
     {
         return $this->container->create(SQLQuery::class, ['sql' => $sql]);
     }
-
-    /**
-     * @return DatabaseContainer
-     */
-    protected function createContainer()
-    {
-        $factory = new DatabaseContainerFactory();
-
-        return $factory->createContainer();
-    }
 }
