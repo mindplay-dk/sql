@@ -69,18 +69,4 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     {
         return $this->create($class_name, ['name' => $table_name, 'alias' => $alias]);
     }
-
-    /**
-     * Dynamically inject a component into this Container.
-     *
-     * Enables auto-wiring of Schema and Type models.
-     *
-     * @param string $name
-     * @param mixed  $value
-     */
-    protected function inject($name, $value)
-    {
-        $this->values[$name] = $value;
-        $this->active[$name] = true;
-    }
 }

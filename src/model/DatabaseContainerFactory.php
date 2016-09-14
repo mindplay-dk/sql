@@ -26,12 +26,6 @@ class DatabaseContainerFactory extends ContainerFactory
      */
     public function createContainer()
     {
-        return new DatabaseContainer(
-            $this->values,
-            $this->factory,
-            $this->factory_map,
-            $this->config,
-            $this->config_map
-        );
+        return new DatabaseContainer($this);
     }
 }
