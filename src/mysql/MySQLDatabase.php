@@ -4,6 +4,7 @@ namespace mindplay\sql\mysql;
 
 use mindplay\sql\model\Database;
 use mindplay\sql\model\DatabaseContainer;
+use mindplay\sql\model\DatabaseContainerFactory;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\query\DeleteQuery;
 use mindplay\sql\model\query\InsertQuery;
@@ -15,17 +16,17 @@ use PDO;
 
 class MySQLDatabase extends Database implements Driver
 {
-    protected function bootstrap(DatabaseContainer $container)
+    protected function bootstrap(DatabaseContainerFactory $factory)
     {
-        $container->set(Driver::class, $this);
+        $factory->set(Driver::class, $this);
 
-        $container->register(BoolType::class, function () {
+        $factory->register(BoolType::class, function () {
             return BoolType::get(1, 0);
         });
 
-        $container->alias("scalar.boolean", BoolType::class);
+        $factory->alias("scalar.boolean", BoolType::class);
 
-        $container->register("scalar.double", FloatType::class);
+        $factory->register("scalar.double", FloatType::class);
     }
     
     /**
