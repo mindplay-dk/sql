@@ -40,7 +40,9 @@ class TimestampType implements Type
             throw new UnexpectedValueException("unable to convert value to int: " . $value);
         }
 
-        $datetime = DateTime::createFromFormat('U', $timestamp, self::$utc_timezone);
+        $datetime = DateTime::createFromFormat('U', $timestamp);
+
+        $datetime->setTimezone(self::$utc_timezone);
 
         return $datetime->format(static::FORMAT);
     }
