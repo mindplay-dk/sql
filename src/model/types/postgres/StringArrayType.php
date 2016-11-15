@@ -11,7 +11,7 @@ use mindplay\sql\model\schema\Type;
  *
  * @see https://github.com/opensoft/doctrine-postgres-types/blob/master/src/Doctrine/DBAL/PostgresTypes/TextArrayType.php
  */
-class StringListType implements Type
+class StringArrayType implements Type
 {
     /**
      * @see http://stackoverflow.com/a/19082849/1160901
