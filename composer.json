@@ -1,6 +1,7 @@
 {
     "type": "library",
     "name": "mindplay/sql",
+    "description": "Database framework and query builder",
     "license": "MIT",
     "authors": [
         {
