@@ -2,6 +2,7 @@
 
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\exceptions\TransactionAbortedException;
+use mindplay\sql\framework\BufferedPSRLogger;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
@@ -26,6 +27,7 @@ use mindplay\sql\mysql\MySQLDatabase;
 use mindplay\sql\postgres\PostgresConnection;
 use mindplay\sql\postgres\PostgresDatabase;
 use Mockery\MockInterface;
+use Psr\Log\LogLevel;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -1619,6 +1621,49 @@ test(
         );
 
         // note that PDOProvider::getPDO() is untestable because PDO constructor has the side-effect of opening the connection
+    }
+);
+
+test(
+    'can log to a PSR-3 logger',
+    function () {
+        $buffer = new BufferedPSRLogger();
+
+        $logger = new MockPSRLogger();
+
+        $buffer->logQuery("SELECT :id", ["id" => 123], 10);
+        $buffer->logQuery("SELECT :id", ["id" => 456], 1234.56789);
+
+        $buffer->flushTo($logger);
+
+        $buffer->logQuery("SELECT :id", ["id" => 789], 100);
+
+        $buffer->flushTo($logger, LogLevel::DEBUG, "Hello!");
+
+        eq(
+            $logger->entries,
+            [
+                [
+                    LogLevel::INFO,
+                    "INFO",
+                    [
+                        "table: SQL Queries" => [
+                            ["time" => "0.010 s", "sql" => "SELECT 123"],
+                            ["time" => "1.235 s", "sql" => "SELECT 456"],
+                        ]
+                    ]
+                ],
+                [
+                    LogLevel::DEBUG,
+                    "Hello!",
+                    [
+                        "table: SQL Queries" => [
+                            ["time" => "0.100 s", "sql" => "SELECT 789"],
+                        ]
+                    ]
+                ]
+            ]
+        );
     }
 );
 

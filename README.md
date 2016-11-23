@@ -189,6 +189,30 @@ foreach ($result as $record) {
 To learn how to build nested queries, joins and other query-types, refer to inline documentation
 in the codebase, and peep at the [unit tests](test/test.php).
 
+## Logging
+
+Logging of queries is supported via the [`Logger`](src/framework/Logger.php) interface - and instance
+can be injected into a `Connection` instance with the `addLogger()` method.
+
+A [`BufferedPSRLogger`](src/framework/BufferedPSRLogger) implementation is available - this will buffer
+executed queries, until you choose to flush them to a [PSR-3](http://www.php-fig.org/psr/psr-3/) logger,
+for example:
+
+```php
+$buffer = new BufferedPSRLogger();
+
+$connection->addLogger($buffer);
+
+// ... execute queries ...
+
+$buffer->flushTo($psr_logger);
+```
+
+Where `$psr_logger` is a `Psr\Log\LoggerInterface` implementation of your choosing.
+
+You may want to check out [`kodus/chrome-logger`](https://github.com/kodus/chrome-logger), which can be
+used to render an SQL query-log via [ChromeLogger](https://craig.is/writing/chrome-logger) in tabular format.
+
 ## Concepts
 
 The concepts used in this library can be roughly divided into two main areas: the framework and the model.

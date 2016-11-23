@@ -1,7 +1,6 @@
 <?php
 
 use mindplay\sql\framework\Logger;
-use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Schema;
@@ -11,6 +10,7 @@ use mindplay\sql\model\types\IntType;
 use mindplay\sql\model\types\StringType;
 use mindplay\sql\model\types\TimestampType;
 use mindplay\sql\mysql\MySQLDatabase;
+use Psr\Log\AbstractLogger;
 
 /**
  * @return MySQLDatabase
@@ -178,5 +178,15 @@ class AddressTable extends Table
     public function street_name($alias)
     {
         return $this->requiredColumn(__FUNCTION__, StringType::class, $alias);
+    }
+}
+
+class MockPSRLogger extends AbstractLogger
+{
+    public $entries = [];
+
+    public function log($level, $message, array $context = [])
+    {
+        $this->entries[] = [$level, $message, $context];
     }
 }

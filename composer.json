@@ -16,7 +16,8 @@
     },
     "require": {
         "php": ">=5.5",
-        "mindplay/unbox": "^2"
+        "mindplay/unbox": "^2",
+        "psr/log": "^1"
     },
     "require-dev": {
         "mindplay/testies": "dev-master",
