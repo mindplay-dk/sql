@@ -33,14 +33,13 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 require __DIR__ . '/fixtures.php';
 
-$config = file_exists(__DIR__ . '/config.json')
-    ? json_decode(file_get_contents(__DIR__ . '/config.json'), true)
-    : [
-        "host"     => "localhost",
-        "user"     => "postgres",
-        "password" => "",
-        "database" => "mindplay_sql_test",
-    ];
+$config = json_decode(
+    file_get_contents(file_exists(__DIR__ . '/config.json')
+        ? __DIR__ . '/config.json'
+        : __DIR__ . '/config.dist.json' // fall back on default settings (these will work on travis)
+    ),
+    true // $assoc
+);
 
 teardown(function () {
     Mockery::close();
@@ -1681,12 +1680,30 @@ test(
     function () use ($config) {
         $provider = new PDOProvider(
             PDOProvider::PROTOCOL_POSTGRES,
-            $config["database"],
-            $config["user"],
-            $config["password"]
+            $config["postgres"]["database"],
+            $config["postgres"]["user"],
+            $config["postgres"]["password"]
         );
 
         $db = new PostgresDatabase();
+
+        $connection = $db->createConnection($provider->getPDO());
+
+        eq($connection->fetch($db->sql('SELECT 123'))->firstCol(), 123);
+    }
+);
+
+test(
+    'can connect to MySQL',
+    function () use ($config) {
+        $provider = new PDOProvider(
+            PDOProvider::PROTOCOL_POSTGRES,
+            $config["mysql"]["database"],
+            $config["mysql"]["user"],
+            $config["mysql"]["password"]
+        );
+
+        $db = new MySQLDatabase();
 
         $connection = $db->createConnection($provider->getPDO());
 
