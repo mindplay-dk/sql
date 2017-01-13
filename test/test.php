@@ -37,7 +37,7 @@ $config = file_exists(__DIR__ . '/config.json')
     ? json_decode(file_get_contents(__DIR__ . '/config.json'), true)
     : [
         "host"     => "localhost",
-        "user"     => "root",
+        "user"     => "postgres",
         "password" => "",
         "database" => "mindplay_sql_test",
     ];
