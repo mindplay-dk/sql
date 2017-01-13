@@ -1,0 +1,6 @@
+{
+    "host": "localhost",
+    "user": "root",
+    "password": "root",
+    "database": "mindplay_sql_test"
+}

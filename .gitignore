@@ -1,4 +1,5 @@
-vendor/
-.idea/
-test/build/
-composer.lock
+/vendor
+/.idea
+/test/build
+/test/config.json
+/composer.lock

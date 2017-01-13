@@ -33,6 +33,15 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 require __DIR__ . '/fixtures.php';
 
+$config = file_exists(__DIR__ . '/config.json')
+    ? json_decode(file_get_contents(__DIR__ . '/config.json'), true)
+    : [
+        "host"     => "localhost",
+        "user"     => "root",
+        "password" => "",
+        "database" => "mindplay_sql_test",
+    ];
+
 teardown(function () {
     Mockery::close();
 });
@@ -1664,6 +1673,24 @@ test(
                 ]
             ]
         );
+    }
+);
+
+test(
+    'can connect to Postgres',
+    function () use ($config) {
+        $provider = new PDOProvider(
+            PDOProvider::PROTOCOL_POSTGRES,
+            $config["database"],
+            $config["user"],
+            $config["password"]
+        );
+
+        $db = new PostgresDatabase();
+
+        $connection = $db->createConnection($provider->getPDO());
+
+        eq($connection->fetch($db->sql('SELECT 123'))->firstCol(), 123);
     }
 );
 
