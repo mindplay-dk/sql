@@ -7,7 +7,7 @@
     },
     "mysql": {
         "host": "localhost",
-        "user": "root",
+        "user": "travis",
         "password": "",
         "database": "mindplay_sql_test"
     }
