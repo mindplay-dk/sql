@@ -27,6 +27,21 @@ plain and obvious that there are differences, both in terms of capabilities and 
 We favor simplicity over ease of use - this library minimally abstracts PDO and stays reasonably close to SQL
 and the relational model, rather than attempting to hide it.
 
+### Contributions
+
+Current target is php 5.5 and later, see `.travis.yml`.
+
+Code adheres to [PSR-2](http://www.php-fig.org/psr/psr-2/) and [PSR-4](http://www.php-fig.org/psr/psr-4/).
+
+To run the test-suite:
+
+    php test/test.php
+
+To run only the unit or integration suites:
+
+    php test/test.php --unit
+    php test/test.php --integration
+
 ## Quick Start
 
 Every project needs a `Schema` class and one `Table` class for every table in that schema.
