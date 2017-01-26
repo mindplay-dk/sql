@@ -13,4 +13,12 @@ interface Driver
      * @return string quoted name
      */
     public function quoteName($name);
+
+    /**
+     * @param string|null $schema
+     * @param string      $table
+     *
+     * @return string quoted, schema-qualified table-name
+     */
+    public function quoteTableName($schema, $table);
 }

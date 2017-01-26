@@ -43,7 +43,17 @@ class PostgresDatabase extends Database implements Driver
     {
         return '"' . $name . '"';
     }
-    
+
+    /**
+     * @inheritdoc
+     */
+    public function quoteTableName($schema, $table)
+    {
+        return $schema
+            ? '"' . $schema . '"."' . $table . '"'
+            : '"' . $table . '"';
+    }
+
     /**
      * @param Table $from
      *

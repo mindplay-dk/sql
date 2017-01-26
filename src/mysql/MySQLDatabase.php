@@ -46,7 +46,17 @@ class MySQLDatabase extends Database implements Driver
     {
         return '`' . $name . '`';
     }
-    
+
+    /**
+     * @inheritdoc
+     */
+    public function quoteTableName($schema, $table)
+    {
+        return $schema
+            ? "`{$schema}_{$table}`"
+            : "`{$table}`";
+    }
+
     /**
      * @param Table $from
      *

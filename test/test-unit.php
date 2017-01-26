@@ -26,15 +26,26 @@ use Mockery\MockInterface;
 use Psr\Log\LogLevel;
 
 test(
-    "can quote table-names",
+    "can quote schema/table/column-names for Postgres",
     function () {
         $driver = new PostgresDatabase();
 
         eq($driver->quoteName('foo'), '"foo"');
 
+        eq($driver->quoteTableName(null, "foo"), '"foo"');
+        eq($driver->quoteTableName("foo", "bar"), '"foo"."bar"');
+    }
+);
+
+test(
+    "can quote/prefix schema/table/column-names for MySQL",
+    function () {
         $driver = new MySQLDatabase();
 
         eq($driver->quoteName('foo'), '`foo`');
+
+        eq($driver->quoteTableName(null, "foo"), '`foo`');
+        eq($driver->quoteTableName("foo", "bar"), '`foo_bar`');
     }
 );
 
