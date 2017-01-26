@@ -28,7 +28,7 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
 
             throw new UnexpectedValueException("{$class_name} does not implement the Type interface");
         }
-        
+
         return $type;
     }
 
@@ -61,12 +61,16 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     {
         return $this->has($type_name);
     }
-    
+
     /**
      * @inheritdoc
      */
-    public function createTable($class_name, $table_name, $alias)
+    public function createTable(Schema $schema, $class_name, $table_name, $alias)
     {
-        return $this->create($class_name, ['name' => $table_name, 'alias' => $alias]);
+        return $this->create($class_name, [
+            Schema::class => $schema,
+            'name'        => $table_name,
+            'alias'       => $alias,
+        ]);
     }
 }

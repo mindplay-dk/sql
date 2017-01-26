@@ -817,6 +817,8 @@ test(
 
         ok($user instanceof UserTable);
 
+        eq($user->getSchema(), $schema);
+
         ok($user->first_name instanceof Column);
 
         eq($user->first_name->getName(), 'first_name');

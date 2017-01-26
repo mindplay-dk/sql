@@ -13,6 +13,11 @@ use ReflectionMethod;
 abstract class Table
 {
     /**
+     * @var Schema
+     */
+    private $schema;
+
+    /**
      * @var Driver
      */
     private $driver;
@@ -33,19 +38,27 @@ abstract class Table
     private $alias;
 
     /**
-     * Table constructor.
-     *
+     * @param Schema       $schema
      * @param Driver       $driver
      * @param TypeProvider $types
      * @param string       $name
      * @param string|null  $alias
      */
-    public function __construct(Driver $driver, TypeProvider $types, $name, $alias)
+    public function __construct(Schema $schema, Driver $driver, TypeProvider $types, $name, $alias)
     {
+        $this->schema = $schema;
         $this->driver = $driver;
         $this->types = $types;
         $this->name = $name;
         $this->alias = $alias;
+    }
+
+    /**
+     * @return Schema owner Schema instance
+     */
+    public function getSchema()
+    {
+        return $this->schema;
     }
 
     /**
@@ -63,7 +76,6 @@ abstract class Table
     {
         return $this->alias;
     }
-
 
     /**
      * @return string table expression (e.g. "{table} AS {alias}" for use in the FROM clause of an SQL statement)

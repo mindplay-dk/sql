@@ -31,7 +31,7 @@ abstract class Schema
      */
     protected function createTable($class_name, $table_name, $alias = null)
     {
-        return $this->factory->createTable($class_name, $table_name, $alias);
+        return $this->factory->createTable($this, $class_name, $table_name, $alias);
     }
 
     /**
