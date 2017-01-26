@@ -104,6 +104,20 @@ class SampleSchema extends Schema
     {
         return $this->createTable(OrderTable::class, __FUNCTION__, $alias);
     }
+
+    // WARNING: the following is for testing only - obviously NEVER do anything like this in production code!
+
+    private $name;
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
 }
 
 /**

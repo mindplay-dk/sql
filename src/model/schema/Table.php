@@ -84,9 +84,13 @@ abstract class Table
     {
         $alias = $this->getAlias();
 
-        return $alias
-            ? $this->driver->quoteName($this->getName()) . ' AS ' . $this->driver->quoteName($alias)
-            : $this->driver->quoteName($this->getName());
+        $quoted_table_name = $this->driver->quoteTableName($this->schema->getName(), $this->getName());
+
+        if ($alias) {
+            return $quoted_table_name . ' AS ' . $this->driver->quoteName($alias);
+        }
+
+        return $quoted_table_name;
     }
 
     /**
@@ -174,7 +178,9 @@ abstract class Table
      */
     public function __toString()
     {
-        return $this->driver->quoteName($this->alias ?: $this->name);
+        return $this->alias
+            ? $this->driver->quoteName($this->alias)
+            : $this->driver->quoteTableName($this->schema->getName(), $this->name);
     }
 
     /**

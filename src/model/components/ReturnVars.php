@@ -84,9 +84,11 @@ class ReturnVars
 
             $table = $col->getTable();
 
-            $table_name = $table->getAlias() ?: $table->getName();
+            $quoted_table_name = $table->getAlias()
+                ? $this->driver->quoteName($table->getAlias())
+                : $this->driver->quoteTableName($table->getSchema()->getName(), $table->getName());
 
-            $column_expr = $this->driver->quoteName($table_name) . '.' . $this->driver->quoteName($col->getName());
+            $column_expr = $quoted_table_name . '.' . $this->driver->quoteName($col->getName());
 
             $this->vars[$col_name] = $alias
                 ? "{$column_expr} AS " . $this->driver->quoteName($col_name)

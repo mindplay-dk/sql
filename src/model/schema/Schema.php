@@ -23,6 +23,19 @@ abstract class Schema
     }
 
     /**
+     * This name is used to qualify table-references, e.g. using schema-names in Postgres, or
+     * table-name prefixes in MySQL.
+     *
+     * The default implementation returns NULL - override this in your Schema implementation, if needed.
+     *
+     * @return string|null optional Schema-name, or NULL
+     */
+    public function getName()
+    {
+        return null;
+    }
+
+    /**
      * @param string      $class_name Table class-name
      * @param string      $table_name relational table-name
      * @param string|null $alias      optional Table alias

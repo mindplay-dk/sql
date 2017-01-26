@@ -22,6 +22,8 @@ class UpdateQuery extends ProjectionQuery
      */
     public function setValue($column, $value)
     {
+        // TODO qualify table-references to support UPDATE queries with JOINs
+
         if ($column instanceof Column) {
             $name = $this->getPlaceholder($column);
 
@@ -47,6 +49,8 @@ class UpdateQuery extends ProjectionQuery
      */
     public function setExpr($column, $expr)
     {
+        // TODO qualify table-references to support UPDATE queries with JOINs
+
         if ($column instanceof Column) {
             $name = $this->getPlaceholder($column);
 
