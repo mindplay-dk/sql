@@ -27,6 +27,17 @@ plain and obvious that there are differences, both in terms of capabilities and 
 We favor simplicity over ease of use - this library minimally abstracts PDO and stays reasonably close to SQL
 and the relational model, rather than attempting to hide it.
 
+### Project Status
+
+Per [SimVersion](https://simversion.github.io/), the `0.x` release series is *feature-incomplete*, *not* "unstable",
+and will not transition to `1.x` until it is feature-complete.
+
+The project has been widely used on many internal projects in our organization - it is "stable", but is still
+subject to changes, and will remain so for the foreseeable future.
+
+The public API has been largely stable for many releases - at this point, most breaking changes are changes to
+the internal `protected` portion of the API; typically, a major `0.x+1` release has very little impact on client code.
+
 ### Contributions
 
 Current target is php 5.5 and later, see `.travis.yml`.
