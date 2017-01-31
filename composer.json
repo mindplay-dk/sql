@@ -16,6 +16,7 @@
     },
     "require": {
         "php": ">=5.5",
+        "ext-pdo": "*",
         "mindplay/unbox": "^2",
         "psr/log": "^1"
     },
@@ -24,5 +25,9 @@
         "mindplay/benchpress": "dev-master",
         "mockery/mockery": "~0.9.4",
         "phpunit/php-code-coverage": ">=2, <4"
+    },
+    "suggest": {
+        "ext-pdo_pgsql": "for PostgreSQL support (duh.)",
+        "ext-pdo_mysql": "for MySQL support (hello, Captain Obvious.)"
     }
 }
