@@ -2,7 +2,12 @@
 
 namespace mindplay\sql\framework;
 
-class QueryFormatter
+/**
+ * This is a pseudo-namespace for a simple query-formatter *strictly* for diagnostic
+ * purposes - it implements a simple emulation of PDO placeholder interpolation, so
+ * that queries can be rendered in error-messages with actual parameter values.
+ */
+abstract class QueryFormatter
 {
     /**
      * @param string $sql
@@ -12,14 +17,14 @@ class QueryFormatter
      */
     public static function formatQuery($sql, $params)
     {
+        $quoted_params = [];
+
         foreach ($params as $name => $value) {
-            $quoted_value = $value === null
+            $quoted_params[":{$name}"] = $value === null
                 ? "NULL"
                 : (is_numeric($value) ? $value : "'{$value}'");
-
-            $sql = str_replace(":{$name}", $quoted_value, $sql);
         }
 
-        return $sql;
+        return strtr($sql, $quoted_params);
     }
 }

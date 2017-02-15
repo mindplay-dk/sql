@@ -513,12 +513,13 @@ test(
 test(
     'can format a query for logging',
     function () {
-        $sql = "INSERT INTO \"foo\" VALUES(:foo)";
-        $params = [ 'foo' => 'bar' ];
+        $sql = "INSERT INTO \"foo\" VALUES(:foo, :bar)";
+
+        $params = [ 'foo' => 'hey:bar', 'bar' => 'baz' ];
 
         $pretty_sql = QueryFormatter::formatQuery($sql, $params);
 
-        eq($pretty_sql, "INSERT INTO \"foo\" VALUES('bar')");
+        eq($pretty_sql, "INSERT INTO \"foo\" VALUES('hey:bar', 'baz')");
     }
 );
 
