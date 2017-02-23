@@ -8,9 +8,9 @@ namespace mindplay\sql\framework;
 interface Indexer
 {
     /**
-     * @param array $record the record from which to obtain an index-value
+     * @param array|object $record the record from which to obtain an index-value
      *
      * @return int|string the index-value
      */
-    public function index(array $record);
+    public function index($record);
 }

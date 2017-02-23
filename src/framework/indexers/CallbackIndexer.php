@@ -22,7 +22,7 @@ class CallbackIndexer implements Indexer
         $this->callback = $callback;
     }
 
-    public function index(array $record)
+    public function index($record)
     {
         return call_user_func($this->callback, $record);
     }

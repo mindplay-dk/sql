@@ -23,7 +23,7 @@ class ValueIndexer implements Indexer
         $this->name = $name;
     }
 
-    public function index(array $record)
+    public function index($record)
     {
         if (!isset($record[$this->name])) {
             throw new UnexpectedValueException("the given record does not contain a value named: {$this->name}");
