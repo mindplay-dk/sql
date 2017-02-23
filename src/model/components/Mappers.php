@@ -79,6 +79,15 @@ trait Mappers
      * Define an {@see Indexer}, callable, Column, or Column-name to use
      * to compute an index-value for the returned records.
      *
+     * Note that this can lead to index-collisions - for example, using a foreign key
+     * in a query with multiple records for the same foreign key, may cause the same
+     * foreign key to occur as an index multiple times; this will cause a run-time
+     * exception when calling e.g. {@see Result::all()}.
+     *
+     * Note that iterating over the `Result` instance directly (and *not* calling the
+     * `all()` method) does permit iteration over results with duplicate indices - this
+     * can be useful e.g. when collecting child records to append to a parent.
+     *
      * @param Indexer|Column|callable|string $indexer
      *
      * @return $this
