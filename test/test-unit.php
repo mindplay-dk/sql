@@ -3,6 +3,7 @@
 use mindplay\sql\exceptions\SQLException;
 use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\BufferedPSRLogger;
+use mindplay\sql\framework\indexers\ValueIndexer;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
 use mindplay\sql\framework\pdo\PDOProvider;
@@ -586,67 +587,135 @@ test(
     }
 );
 
+/**
+ * @param callable $callback function (PDO $pdo, SelectQuery $query)
+ */
+function with_mock_query($callback)
+{
+    /**
+     * @var MockInterface|PDO $mock_pdo
+     */
+    $mock_pdo = Mockery::mock(PDO::class);
+
+    $db = create_db();
+
+    /**
+     * @var MockInterface|PDOStatement $mock_statement
+     */
+    $mock_statement = Mockery::mock(PDOStatement::class);
+
+    $mock_pdo
+        ->shouldReceive('prepare')
+        ->once()
+        ->andReturn($mock_statement);
+
+    $mock_statement
+        ->shouldReceive('execute')
+        ->once()
+        ->andReturn(true);
+
+    $mock_statement
+        ->shouldReceive('fetch')
+        ->once()
+        ->andReturn(['id' => '123', 'first_name' => 'Rasmus']);
+
+    $mock_statement
+        ->shouldReceive('fetch')
+        ->once()
+        ->andReturn(['id' => '456', 'first_name' => 'Thomas']);
+
+    $mock_statement
+        ->shouldReceive('fetch')
+        ->once()
+        ->andReturn(false);
+
+    /**
+     * @var SampleSchema $schema
+     */
+    $schema = $db->getSchema(SampleSchema::class);
+
+    $user = $schema->user;
+
+    $query = $db
+        ->select($user)
+        ->columns([$user->id, $user->first_name]);
+
+    $callback($mock_pdo, $query);
+}
+
 test(
     'can apply Mapper to records',
     function () {
-        /** @var MockInterface|PDO $mock_pdo */
-        $mock_pdo = Mockery::mock(PDO::class);
+        with_mock_query(function (PDO $pdo, SelectQuery $query) {
+            $factory = new DatabaseContainerFactory();
 
-        $db = create_db();
+            $container = $factory->createContainer();
 
-        /** @var MockInterface|PDOStatement $mock_statement */
-        $mock_statement = Mockery::mock(PDOStatement::class);
+            $connection = new MySQLConnection($pdo, $container);
 
-        $mock_pdo
-            ->shouldReceive('prepare')
-            ->once()
-            ->andReturn($mock_statement);
-
-        $mock_statement
-            ->shouldReceive('execute')
-            ->once()
-            ->andReturn(true);
-
-        $mock_statement
-            ->shouldReceive('fetch')
-            ->once()
-            ->andReturn(['id' => '123', 'first_name' => 'Rasmus']);
-
-        $mock_statement
-            ->shouldReceive('fetch')
-            ->once()
-            ->andReturn(false);
-
-        /** @var SampleSchema $schema */
-        $schema = $db->getSchema(SampleSchema::class);
-
-        $user = $schema->user;
-
-        $query = $db
-            ->select($user)
-            ->columns([$user->id, $user->first_name])
-            ->mapRecords(function ($record) {
+            $query->mapRecords(function ($record) {
                 $record['mapped'] = true;
 
                 return $record;
             });
 
+            $result = $connection->fetch($query)->all();
+
+            eq(
+                $result,
+                [
+                    ['id' => 123, 'first_name' => 'Rasmus', 'mapped' => true],
+                    ['id' => 456, 'first_name' => 'Thomas', 'mapped' => true],
+                ]
+            );
+        });
+
+        Mockery::close();
+    }
+);
+
+function test_with_indexer($indexer, $why)
+{
+    with_mock_query(function (PDO $pdo, SelectQuery $query) use ($indexer, $why) {
         $factory = new DatabaseContainerFactory();
 
         $container = $factory->createContainer();
 
-        $connection = new MySQLConnection($mock_pdo, $container);
+        $connection = new MySQLConnection($pdo, $container);
+
+        $query->index($indexer);
 
         $result = $connection->fetch($query)->all();
 
         eq(
             $result,
             [
-                ['id' => 123, 'first_name' => 'Rasmus', 'mapped' => true],
-            ]
+                123 => ['id' => 123, 'first_name' => 'Rasmus'],
+                456 => ['id' => 456, 'first_name' => 'Thomas'],
+            ],
+            $why
         );
+    });
 
-        Mockery::close();
+    Mockery::close();
+}
+
+test(
+    'can apply various types of indexes to records',
+    function () {
+        test_with_indexer("id", "can index using column-name");
+        test_with_indexer(create_db()->getSchema(SampleSchema::class)->user->id, "can index using Column object");
+        test_with_indexer(function ($row) { return $row['id']; }, "can index using custom callback function");
+        test_with_indexer(new ValueIndexer("id"), "can index with user-supplied Indexer");
+
+        expect(
+            UnexpectedValueException::class,
+            "should throw for missing index-value",
+            function () {
+                test_with_indexer("foo", "wrong name");
+            },
+            "/the given record does not contain a value named: foo/"
+        );
     }
 );
 

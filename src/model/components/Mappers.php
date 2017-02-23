@@ -2,12 +2,17 @@
 
 namespace mindplay\sql\model\components;
 
+use mindplay\sql\framework\Indexer;
+use mindplay\sql\framework\indexers\CallbackIndexer;
+use mindplay\sql\framework\indexers\ValueIndexer;
 use mindplay\sql\framework\Mapper;
 use mindplay\sql\framework\mappers\BatchMapper;
 use mindplay\sql\framework\mappers\RecordMapper;
+use mindplay\sql\model\schema\Column;
+use UnexpectedValueException;
 
 /**
- * This trait implements support for mapping of results.
+ * This trait implements support for mapping and indexing of results.
  */
 trait Mappers
 {
@@ -15,6 +20,11 @@ trait Mappers
      * @var Mapper[] list of Mappers
      */
     protected $mappers = [];
+
+    /**
+     * @var Indexer|null
+     */
+    protected $indexer;
 
     /**
      * Append a Mapper instance to apply when each batch of a record-set is fetched.
@@ -62,6 +72,31 @@ trait Mappers
     {
         $this->mappers[] = new BatchMapper($mapper);
         
+        return $this;
+    }
+
+    /**
+     * Define an {@see Indexer}, callable, Column, or Column-name to use
+     * to compute an index-value for the returned records.
+     *
+     * @param Indexer|Column|callable|string $indexer
+     *
+     * @return $this
+     */
+    public function index($indexer)
+    {
+        if ($indexer instanceof Indexer) {
+            $this->indexer = $indexer;
+        } elseif ($indexer instanceof Column) {
+            $this->indexer = new ValueIndexer($indexer->getAlias() ?: $indexer->getName());
+        } elseif (is_string($indexer)) {
+            $this->indexer = new ValueIndexer($indexer);
+        } elseif (is_callable($indexer, true)) {
+            $this->indexer = new CallbackIndexer($indexer);
+        } else {
+            throw new UnexpectedValueException("unsupported indexer: " . print_r($indexer, true));
+        }
+
         return $this;
     }
 }

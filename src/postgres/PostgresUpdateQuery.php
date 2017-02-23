@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\postgres;
 
+use mindplay\sql\framework\IndexerProvider;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\model\components\Returning;
 use mindplay\sql\model\components\ReturnVars;
@@ -10,7 +11,7 @@ use mindplay\sql\model\query\UpdateQuery;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\TypeProvider;
 
-class PostgresUpdateQuery extends UpdateQuery implements MapperProvider
+class PostgresUpdateQuery extends UpdateQuery implements MapperProvider, IndexerProvider
 {
     use Returning;
 

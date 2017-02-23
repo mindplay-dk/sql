@@ -6,6 +6,7 @@ use Exception;
 use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\Connection;
 use mindplay\sql\framework\Countable;
+use mindplay\sql\framework\IndexerProvider;
 use mindplay\sql\framework\Logger;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\framework\Result;
@@ -100,10 +101,15 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
             ? $statement->getMappers()
             : [];
         
+        $indexer = $statement instanceof IndexerProvider
+            ? $statement->getIndexer()
+            : null;
+
         return new Result(
             $this->prepare($statement),
             $batch_size,
-            $mappers    
+            $mappers,
+            $indexer
         );
     }
 

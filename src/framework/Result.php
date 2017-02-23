@@ -31,15 +31,22 @@ class Result implements IteratorAggregate
     private $mappers;
 
     /**
+     * @var Indexer|null
+     */
+    private $indexer;
+
+    /**
      * @param PreparedStatement $statement  prepared statement
      * @param int               $batch_size batch-size (when fetching large result sets)
      * @param Mapper[]          $mappers    list of Mappers to apply while fetching results
+     * @param Indexer|null      $indexer    optional Indexer (used to customize Generator keys)
      */
-    public function __construct(PreparedStatement $statement, $batch_size, array $mappers)
+    public function __construct(PreparedStatement $statement, $batch_size, array $mappers, Indexer $indexer = null)
     {
         $this->statement = $statement;
         $this->batch_size = $batch_size;
         $this->mappers = $mappers;
+        $this->indexer = $indexer;
     }
 
     /**
@@ -135,8 +142,16 @@ class Result implements IteratorAggregate
 
             // return each record from the current batch:
 
-            foreach ($batch as $record) {
-                yield $record;
+            if ($this->indexer) {
+                foreach ($batch as $record) {
+                    $index = $this->indexer->index($record);
+
+                    yield $index => $record;
+                }
+            } else {
+                foreach ($batch as $record) {
+                    yield $record;
+                }
             }
         } while ($fetching);
     }
