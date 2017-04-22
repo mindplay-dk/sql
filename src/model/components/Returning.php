@@ -69,4 +69,12 @@ trait Returning
     {
         return array_merge([$this->return_vars->createTypeMapper()], $this->mappers);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIndexer()
+    {
+        return $this->indexer;
+    }
 }

@@ -3,6 +3,7 @@
 namespace mindplay\sql\model\query;
 
 use mindplay\sql\framework\Countable;
+use mindplay\sql\framework\IndexerProvider;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\model\components\Mappers;
 use mindplay\sql\model\components\ReturnVars;
@@ -22,7 +23,7 @@ use mindplay\sql\model\types\IntType;
  * Note that, when constructing nested queries, parameters must be bound against the
  * parent query - binding parameters or applying Mappers against a nested query has no effect.
  */
-class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
+class SelectQuery extends ProjectionQuery implements MapperProvider, IndexerProvider, Countable
 {
     use Mappers;
 
@@ -136,6 +137,14 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
     public function getMappers()
     {
         return array_merge([$this->return_vars->createTypeMapper()], $this->mappers);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIndexer()
+    {
+        return $this->indexer;
     }
 
     /**
