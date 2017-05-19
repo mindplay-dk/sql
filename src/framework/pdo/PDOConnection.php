@@ -62,6 +62,14 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     }
 
     /**
+     * @return PDO the internal PDO connection object
+     */
+    public function getPDO()
+    {
+        return $this->pdo;
+    }
+
+    /**
      * @inheritdoc
      */
     public function prepare(Statement $statement)
