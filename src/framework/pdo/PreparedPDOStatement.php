@@ -110,15 +110,15 @@ class PreparedPDOStatement implements PreparedStatement
             $time_msec = ($microtime_end - $microtime_begin) * 1000;
             $this->logger->logQuery($this->handle->queryString, $this->params, $time_msec);
         } else {
-            list($sql_state, $error_code, $error_message) = $this->handle->errorInfo();
+            list($sql_state_error_code, $driver_error_code, $error_message) = $this->handle->errorInfo();
 
-            $exception_type = $this->exception_mapper->getExceptionType($sql_state, $error_code, $error_message);
+            $exception_type = $this->exception_mapper->getExceptionType($sql_state_error_code, $driver_error_code, $error_message);
 
             throw new $exception_type(
                 $this->handle->queryString,
                 $this->params,
-                "{$sql_state}: {$error_message}",
-                $error_code
+                "{$driver_error_code}: {$error_message}",
+                $sql_state_error_code
             );
         }
     }
