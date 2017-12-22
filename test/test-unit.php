@@ -15,6 +15,7 @@ use mindplay\sql\model\expr;
 use mindplay\sql\model\query\SelectQuery;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\types\BoolType;
+use mindplay\sql\model\types\DateType;
 use mindplay\sql\model\types\IntType;
 use mindplay\sql\model\types\JSONType;
 use mindplay\sql\model\types\StringType;
@@ -755,6 +756,19 @@ test(
 );
 
 test(
+    'can map DATE to Unix timestamps',
+    function () {
+        $type = new DateType();
+
+        $valid_date = '2015-11-04';
+        $valid_timestamp = 1446595200;
+
+        eq($type->convertToPHP($valid_date), $valid_timestamp, "can convert to PHP value");
+        eq($type->convertToSQL($valid_timestamp), $valid_date, "can convert to SQL DATETIME value");
+    }
+);
+
+test(
     'can map PHP values to JSON',
     function () {
         $type = new JSONType();
@@ -840,7 +854,7 @@ test(
 
         $columns = $user->listColumns();
 
-        eq(count($columns), 6);
+        eq(count($columns), 7);
 
         foreach ($columns as $column) {
             ok($column instanceof Column);
@@ -1084,6 +1098,7 @@ test(
             'first_name'      => StringType::class,
             'last_name'       => StringType::class,
             'dob'             => TimestampType::class,
+            'birthday'        => DateType::class,
             'home_address_id' => IntType::class,
             'deleted'         => BoolType::class,
         ];

@@ -6,6 +6,7 @@ use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Schema;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\types\BoolType;
+use mindplay\sql\model\types\DateType;
 use mindplay\sql\model\types\IntType;
 use mindplay\sql\model\types\StringType;
 use mindplay\sql\model\types\TimestampType;
@@ -148,6 +149,11 @@ class UserTable extends Table
     public function dob($alias)
     {
         return $this->requiredColumn(__FUNCTION__, TimestampType::class, $alias);
+    }
+
+    public function birthday($alias)
+    {
+        return $this->requiredColumn(__FUNCTION__, DateType::class, $alias);
     }
 
     public function home_address_id($alias)
