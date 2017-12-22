@@ -57,7 +57,7 @@ class TimestampType implements Type
             return $value; // return NULL value as-is
         }
 
-        $datetime = DateTime::createFromFormat(static::FORMAT, $value, self::$utc_timezone);
+        $datetime = DateTime::createFromFormat('!' . static::FORMAT, $value, self::$utc_timezone);
 
         if ($datetime === false) {
             throw new UnexpectedValueException("unable to convert value from int: " . $value);
