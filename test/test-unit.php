@@ -764,7 +764,7 @@ test(
         $valid_timestamp = 1446595200;
 
         eq($type->convertToPHP($valid_date), $valid_timestamp, "can convert to PHP value");
-        eq($type->convertToSQL($valid_timestamp), $valid_date, "can convert to SQL DATETIME value");
+        eq($type->convertToSQL($valid_timestamp), $valid_date, "can convert to SQL DATE value");
     }
 );
 
