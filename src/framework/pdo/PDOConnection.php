@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\framework\pdo;
 
+use Throwable;
 use Exception;
 use mindplay\sql\exceptions\TransactionAbortedException;
 use mindplay\sql\framework\Connection;
@@ -152,8 +153,10 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
 
         try {
             $commit = call_user_func($func);
-        } catch (Exception $exception) {
-            $commit = false;
+        } catch (Throwable $error) {
+            $commit = false; // PHP 7+
+        } catch (Exception $error) {
+            $commit = false; // PHP < 7 (compatibility)
         }
 
         $this->transaction_result = ($commit === true) && $this->transaction_result;
