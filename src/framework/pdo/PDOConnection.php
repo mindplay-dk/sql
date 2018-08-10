@@ -153,9 +153,9 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
 
         try {
             $commit = call_user_func($func);
-        } catch (Throwable $error) {
+        } catch (Throwable $exception) {
             $commit = false; // PHP 7+
-        } catch (Exception $error) {
+        } catch (Exception $exception) {
             $commit = false; // PHP < 7 (compatibility)
         }
 
