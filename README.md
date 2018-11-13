@@ -162,7 +162,7 @@ Next, create (and register in your DI container) your `Schema` model:
 
 ```php
 /** @var UserSchema $schema */
-$schema = $db->createSchema(UserSchema::class);
+$schema = $db->getSchema(UserSchema::class);
 ```
 
 Finally, create (and register) a matching `Connection` implementation - for example:
