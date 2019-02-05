@@ -6,7 +6,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 /**
- * This class implements a buffered PSR-3 query logger.
+ * This class implements a buffered query logger.
  *
  * To flush recorded log-entries to a PSR-3 logger, call the `flushTo()` method, e.g. at
  * the end of an HTTP request.
@@ -23,7 +23,7 @@ class BufferedPSRLogger implements Logger
     private $entries = [];
 
     /**
-     * Flush all recorded query log-entries as a single PSR-3 log-entry
+     * Flush all recorded query log-entries to a single PSR-3 log-entry
      *
      * @param LoggerInterface $logger the PSR Logger to which the query-log will be flushed
      * @param string|mixed    $log_level PSR-3 log level (defaults to INFO)
