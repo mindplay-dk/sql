@@ -26,7 +26,7 @@ test(
     'can connect to MySQL',
     function () use ($config) {
         $provider = new PDOProvider(
-            PDOProvider::PROTOCOL_POSTGRES,
+            PDOProvider::PROTOCOL_MYSQL,
             $config["mysql"]["database"],
             $config["mysql"]["user"],
             $config["mysql"]["password"]
@@ -36,7 +36,7 @@ test(
 
         $connection = $db->createConnection($provider->getPDO());
 
-        eq($connection->fetch($db->sql('SELECT 123'))->firstCol(), 123);
+        eq($connection->fetch($db->sql('SELECT 123'))->firstCol(), "123");
     }
 );
 
