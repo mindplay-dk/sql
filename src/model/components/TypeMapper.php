@@ -5,6 +5,7 @@ namespace mindplay\sql\model\components;
 use mindplay\sql\framework\Mapper;
 use mindplay\sql\model\schema\Type;
 use OutOfBoundsException;
+use Traversable;
 use UnexpectedValueException;
 
 /**
@@ -31,11 +32,11 @@ class TypeMapper implements Mapper
     /**
      * @param array $record_set
      *
-     * @return array
+     * @return array|Traversable
      */
     public function map(array $record_set)
     {
-        foreach ($record_set as $index => &$record) {
+        foreach ($record_set as $index => $record) {
             if (! is_array($record)) {
                 throw new UnexpectedValueException("unexpected record type: " . gettype($record));
             }
@@ -47,8 +48,8 @@ class TypeMapper implements Mapper
 
                 $record[$name] = $type->convertToPHP($record[$name]);
             }
-        }
 
-        return $record_set;
+            yield $record;
+        }
     }
 }

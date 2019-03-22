@@ -5,6 +5,7 @@ namespace mindplay\sql\framework;
 use Iterator;
 use IteratorAggregate;
 use RuntimeException;
+use Traversable;
 
 /**
  * This class represents the result of fetching a `PreparedStatement`, e.g. the results of
@@ -125,6 +126,10 @@ class Result implements IteratorAggregate
 
             foreach ($this->mappers as $index => $mapper) {
                 $batch = $mapper->map($batch);
+
+                if ($batch instanceof Traversable) {
+                    $batch = iterator_to_array($batch);
+                }
 
                 if (count($batch) !== $num_records) {
                     $count = count($batch);
