@@ -84,7 +84,7 @@ class MySQLDatabase extends Database implements Driver
      */
     public function update(Table $table)
     {
-        return $this->container->create(UpdateQuery::class, [Table::class => $table]);
+        return $this->container->create(MySQLUpdateQuery::class, [Table::class => $table]);
     }
 
     /**
@@ -94,6 +94,6 @@ class MySQLDatabase extends Database implements Driver
      */
     public function delete(Table $table)
     {
-        return $this->container->create(DeleteQuery::class, [Table::class => $table]);
+        return $this->container->create(MySQLDeleteQuery::class, [Table::class => $table]);
     }
 }

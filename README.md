@@ -616,6 +616,8 @@ $query = $db
     ->setExpr($user->last_logged_in, "NOW()");
 ```
 
+In addition, PostgreSQL supports `returning()`, and MySQL supports `limit()` and `order()`.
+
 Note that building [nested queries](#nested) is possible with the UPDATE query-builder.
 
 #### `DELETE` Queries
@@ -631,6 +633,8 @@ $query = $db
     ->where("{$user->id} = :id")
     ->bind("id", 123);
 ```
+
+In addition, PostgreSQL supports `returning()`, and MySQL supports `limit()` and `order()`.
 
 Note that building [nested queries](#nested) is possible with the DELETE query-builder.
 

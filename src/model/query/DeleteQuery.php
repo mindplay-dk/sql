@@ -37,19 +37,6 @@ class DeleteQuery extends Query
             ? "\nWHERE " . $this->buildConditions()
             : ''; // no conditions present
 
-        // TODO move ORDER BY and LIMIT support to MySQL-specific UPDATE and DELETE query-builders
-
-//        $order = count($this->order)
-//            ? "\nORDER BY " . $this->buildOrderTerms()
-//            : ''; // no order terms
-//
-//        $limit = $this->limit !== null
-//            ? "\nLIMIT {$this->limit}"
-//            . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
-//            : ''; // no limit or offset
-
-        // return "{$delete}{$where}{$order}{$limit}";
-
         return "{$delete}{$where}";
     }
 }

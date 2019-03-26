@@ -127,19 +127,6 @@ class UpdateQuery extends Query
             ? "\nWHERE " . $this->buildConditions()
             : ''; // no conditions present
 
-        // TODO move ORDER BY and LIMIT to MySQL-specific UPDATE and DELETE query-builders
-
-//        $order = count($this->order)
-//            ? "\nORDER BY " . $this->buildOrderTerms()
-//            : ''; // no order terms
-//
-//        $limit = $this->limit !== null
-//            ? "\nLIMIT {$this->limit}"
-//            . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
-//            : ''; // no limit or offset
-
-//        return "{$update}{$set}{$where}{$order}{$limit}";
-
         return "{$update}{$set}{$where}";
     }
 
