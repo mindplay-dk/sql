@@ -2,11 +2,12 @@
 
 namespace mindplay\sql\model\query;
 
-use InvalidArgumentException;
 use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\MapperProvider;
 use mindplay\sql\model\components\Conditions;
 use mindplay\sql\model\components\Mappers;
+use mindplay\sql\model\components\Order;
+use mindplay\sql\model\components\Range;
 use mindplay\sql\model\components\ReturnVars;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\schema\Column;
@@ -28,6 +29,8 @@ class SelectQuery extends Query implements MapperProvider, Countable
 {
     use Mappers;
     use Conditions;
+    use Order;
+    use Range;
 
     /**
      * @var Driver
@@ -63,21 +66,6 @@ class SelectQuery extends Query implements MapperProvider, Countable
      * @var string[] list of HAVING expressions
      */
     protected $having = [];
-
-    /**
-     * @var string[] list of ORDER BY terms
-     */
-    protected $order = [];
-
-    /**
-     * @var int|null
-     */
-    protected $offset;
-
-    /**
-     * @var int|null
-     */
-    protected $limit;
 
     /**
      * @param Table        $root
@@ -209,18 +197,6 @@ class SelectQuery extends Query implements MapperProvider, Countable
     }
 
     /**
-     * @param string $expr order-by expression (which may include a trailing "ASC" or "DESC" modifier)
-     *
-     * @return $this
-     */
-    public function order($expr)
-    {
-        $this->order[] = "{$expr}";
-
-        return $this;
-    }
-
-    /**
      * @param Table  $table
      * @param string $expr join condition
      *
@@ -251,51 +227,6 @@ class SelectQuery extends Query implements MapperProvider, Countable
     public function rightJoin(Table $table, $expr)
     {
         return $this->addJoin("RIGHT", $table, $expr);
-    }
-
-    /**
-     * @param int      $limit  max. number of records
-     * @param int|null $offset base-0 record number offset
-     *
-     * @return $this
-     *
-     * @throws InvalidArgumentException if the given limit is less than 1, or if the given offset if less than 0
-     */
-    public function limit($limit, $offset = null)
-    {
-        if ($limit < 1) {
-            throw new InvalidArgumentException("limit out of range: {$limit}");
-        }
-
-        if ($offset < 0) {
-            throw new InvalidArgumentException("offset out of range: {$offset}");
-        }
-
-        $this->limit = $limit;
-        $this->offset = $offset;
-
-        return $this;
-    }
-
-    /**
-     * @param int $page_num  base-1 page number
-     * @param int $page_size number of records per page
-     *
-     * @return $this
-     *
-     * @throws InvalidArgumentException if the given page number or page size are less than 1
-     */
-    public function page($page_num, $page_size)
-    {
-        if ($page_size < 1) {
-            throw new InvalidArgumentException("page size out of range: {$page_size}");
-        }
-
-        if ($page_num < 1) {
-            throw new InvalidArgumentException("page number out of range: {$page_num}");
-        }
-
-        return $this->limit($page_size, ($page_num - 1) * $page_size);
     }
 
     /**
@@ -385,23 +316,5 @@ class SelectQuery extends Query implements MapperProvider, Countable
     protected function buildHaving()
     {
         return implode(" AND ", $this->having);
-    }
-
-    /**
-     * @return string order terms (for use in the ORDER BY clause of an SQL statement)
-     */
-    protected function buildOrderTerms()
-    {
-        return implode(', ', $this->order);
-    }
-
-    /**
-     * @return string the LIMIT/OFFSET clause (or an empty string, if no limit has been set)
-     */
-    protected function buildLimit()
-    {
-        return $this->limit !== null
-            ? "\nLIMIT {$this->limit}" . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
-            : ''; // no limit or offset
     }
 }
