@@ -61,7 +61,7 @@ class PostgresDatabase extends Database implements Driver
      */
     public function select(Table $from)
     {
-        return $this->container->create(PostgresSelectQuery::class, ['root' => $from]);
+        return $this->container->create(PostgresSelectQuery::class, [Table::class => $from]);
     }
     
     /**
@@ -71,7 +71,7 @@ class PostgresDatabase extends Database implements Driver
      */
     public function insert(Table $into)
     {
-        return $this->container->create(PostgresInsertQuery::class, ['table' => $into]);
+        return $this->container->create(PostgresInsertQuery::class, [Table::class => $into]);
     }
 
     /**
@@ -81,7 +81,7 @@ class PostgresDatabase extends Database implements Driver
      */
     public function update(Table $table)
     {
-        return $this->container->create(PostgresUpdateQuery::class, ['table' => $table]);
+        return $this->container->create(PostgresUpdateQuery::class, [Table::class => $table]);
     }
 
     /**
@@ -91,6 +91,6 @@ class PostgresDatabase extends Database implements Driver
      */
     public function delete(Table $table)
     {
-        return $this->container->create(PostgresDeleteQuery::class, ['table' => $table]);
+        return $this->container->create(PostgresDeleteQuery::class, [Table::class => $table]);
     }
 }

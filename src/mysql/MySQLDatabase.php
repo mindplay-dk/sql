@@ -64,7 +64,7 @@ class MySQLDatabase extends Database implements Driver
      */
     public function select(Table $from)
     {
-        return $this->container->create(MySQLSelectQuery::class, ['root' => $from]);
+        return $this->container->create(MySQLSelectQuery::class, [Table::class => $from]);
     }
 
     /**
@@ -74,7 +74,7 @@ class MySQLDatabase extends Database implements Driver
      */
     public function insert(Table $into)
     {
-        return $this->container->create(InsertQuery::class, ['table' => $into]);
+        return $this->container->create(InsertQuery::class, [Table::class => $into]);
     }
 
     /**
@@ -84,7 +84,7 @@ class MySQLDatabase extends Database implements Driver
      */
     public function update(Table $table)
     {
-        return $this->container->create(UpdateQuery::class, ['root' => $table]);
+        return $this->container->create(UpdateQuery::class, [Table::class => $table]);
     }
 
     /**
@@ -94,6 +94,6 @@ class MySQLDatabase extends Database implements Driver
      */
     public function delete(Table $table)
     {
-        return $this->container->create(DeleteQuery::class, ['root' => $table]);
+        return $this->container->create(DeleteQuery::class, [Table::class => $table]);
     }
 }

@@ -266,14 +266,7 @@ Factory-methods are available for the following query-builders:
 
 All of the query-builders support parameter binding via `bind()` and `apply()`.
 
-Query-builders for `SELECT`, `UPDATE` and `DELETE` queries support features common to "projection" queries, e.g.:
-
-TODO this is wrong! https://github.com/mindplay-dk/sql/issues/45
-
-  * Conditions via the `where()` method.
-  * Ordering via the `order()` method.
-  * Joins via the `innerJoin()`, `leftJoin()` and `outerJoin()` methods.
-  * Limits via the `limit()` and `page()` methods.
+Query-builders for `SELECT`, `UPDATE` and `DELETE` queries support conditions via the `where()` method.
 
 In addition, some query-builders support a few features specific to those types of queries.
 
@@ -314,6 +307,18 @@ Note that `apply()` works for scalar types (and arrays of those) only - explicit
 specific types requires multiple calls to `bind()`.
 
 #### `SELECT` Queries
+
+The SELECT query-builder supports by far the widest range of API methods:
+
+  * Projections of columns and SQL expressions.
+  * Conditions via the `where()` method.
+  * Ordering via the `order()` method.
+  * Joins via the `innerJoin()`, `leftJoin()` and `outerJoin()` methods.
+  * Limits via the `limit()` and `page()` methods.
+
+We'll cover all of these in the following sections.
+
+##### Projections
 
 To create a SELECT query-builder, you must specify the root of the projection - for example:
 
@@ -374,13 +379,22 @@ $query = $db
 Note also the use of `table($user)` in this example - we're selecting the entire table (all of the
 columns) as well as the custom `age` expression.
 
+##### Having
+
 Building on the above example, we can add an SQL `HAVING` clause to select users of legal drinking age:
 
 ```php
 $query->having("age >= 21");
 ```
 
-And finally, we can build an aggregate query by adding an SQL `GROUP BY` clause - for example, here
+Repeated calls to `having()` will append to the list of `HAVING` expressions.
+
+(Note that this particular example could be optimized by duplicating the `DATEDIFF` expression
+and adding the `>= 21` condition to the `where()` clause instead.)
+
+##### Grouping
+
+We can build an aggregate query by adding an SQL `GROUP BY` clause - for example, here
 we create a projection of the number of users grouped by country name:
 
 ```php
@@ -393,147 +407,14 @@ $query = $db
     ->value("COUNT({$user})", "num_users");
 ```
 
-Generic features like [conditions](#conditions), [JOIN](#join)s and [nested queries](#nested) are covered separately,
-because these aren't specific to the SELECT query-builder, but are also supported by UPDATE and DELETE query-builders,
-all of which support the use of projections.
-
-#### `INSERT` Queries
-
-This is probably the simplest of the available query-builders.
-
-To create an INSERT query-builder, you must specify the destination table - and then call the `add()`
-method to add one or more records - for example:
-
-```php
-$user = $schema->user;
-
-$query = $db
-    ->insert($user)
-    ->add([
-        "first_name" => "Rasmus",
-        "last_name" => "Schultz",
-        "dob" => 951030427,
-    ]);
-```
-
-Note that the array keys must match column-names in the destination table - so that type-conversions for the
-columns can be applied.
-
-If you think this approach is too fragile, you can choose to get the column-names from the schema model instead:
-
-```php
-$user = $schema->user;
-
-$query = $db
-    ->insert($user)
-    ->add([
-        $user->first_name->getName() => "Rasmus",
-        $user->last_name->getName() => "Schultz",
-        $user->dob->getName() => 951030427,
-    ]);
-```
-
-This is safer (in terms of static analysis) but a bit verbose.
-
-Note that, if you add multiple records, when executed, these will be inserted with a single INSERT statement.
-
-#### `UPDATE` Queries
-
-To create an UPDATE query-builder, you must specify the table to be updated, and then designate the
-value to be applied - for example, here we update the `user` table where `user.id = 123`, setting the
-value of the `first_name` column:
-
-```php
-$user = $schema->user;
-
-$query = $db
-    ->update($user)
-    ->where("{$user->id} = :id")
-    ->bind("id", 123)
-    ->setValue($user->first_name, "Rasmus");
-```
-
-For convenience, you could also use `assign()` with a key/value array instead:
-
-```php
-$query->assign([
-    "first_name" => "Rasmus"
-]);
-```
-
-In either case, type-conversions will automatically be applied according to the column-type.
-
-You can also use `setExpr()`, which lets you specify a custom SQL expression to compute a value - for example,
-here we update the `last_logged_in` column using the SQL `NOW()` function to get the DB server's current date/time:
-
-```php
-$user = $schema->user;
-
-$query = $db
-    ->update($user)
-    ->where("{$user->id} = :id")
-    ->bind("id", 123)
-    ->setExpr($user->last_logged_in, "NOW()");
-```
-
-While these are less commonly used, UPDATE queries do support the use of projections, and the UPDATE query-builder
-therefore does support generic features like [JOIN](#join)s and [nested queries](#nested).
-
-#### `DELETE` Queries
-
-To create a DELETE query-builder, you must specify the table from which to delete - for example,
-here we delete from the `user` table where `user.id = 123`:
-
-```php
-$user = $schema->user;
-
-$query = $db
-    ->delete($user)
-    ->where("{$user->id} = :id")
-    ->bind("id", 123);
-```
-
-The DELETE query-builder doesn't have any special features, just everything common to projection-queries -
-conditions, parameter binding and (less commonly used) generic features like [JOIN](#join)s and
-[nested queries](#nested).
-
-#### Custom SQL Queries
-
-The `SQLQuery` type lets you leverage all the framework features for "hand-written" SQL queries - e.g.
-parameter binding (with array support), column references, types, mappers, result iteration, etc.
-
-Don't think of custom SQL queries as a "last resort" - use query-builders for queries that are
-dynamic in nature, but don't shy away from raw SQL because it "looks" or "feels" wrong: a static query
-is often both simpler and easier to understand when written using plain SQL syntax.
-
-For example, to create a simple SQL query counting new users created in the past month:
-
-```php
-$user = $schema->user;
-
-$query = $db
-    ->sql("SELECT COUNT({$user}) as num_users FROM {$user} WHERE {$user->created} > :first_date")
-    ->bind("first_date",  time() + 30*24*60*60, TimestampType::class);
-```
-
-This approach has several benefits over raw SQL with PDO:
-
-  1. The use of the table/column-model ensures that the referenced column exists in your schema, gets
-     correctly qualified and quoted, enable static analysis (and safe renaming) in an IDE, etc.
-  
-  2. You can `bind()` values to placeholders with type-conversions, which enables you to write
-     code with the same types you use in your application model. (in this example an integer timestamp.)
-  
-  3. Various convenience features like result iteration, batching and mapping are fully supported.
-
-For static, one-off queries, this approach is definitely worth considering.
+Note that repeated calls to `groupBy()` will append to the list of `GROUP BY` terms.
 
 <a name="conditions"></a>
-#### Conditions (`WHERE`)
+##### Conditions (`WHERE`)
 
-The `where()` method is supported by the SELECT, UPDATE and DELETE query-builders.
+Note that the `where()` method is supported by the SELECT, UPDATE and DELETE query-builders.
 
-When your add multiple conditions with `where()`, these are combined with the `AND` operator - so
+When you add multiple conditions with `where()`, these are combined with the `AND` operator - so
 your query has to match *all* of the conditions applied to it.
 
 > ⚠ Literal SQL expressions in `where()` conditions must always use `:name` placeholders - resist
@@ -600,6 +481,189 @@ This produces an SQL query like:
 > This is very much *by design*, since we can't combine zero conditions into one meaningful condition -
 > if some list of conditions in your domain is zero-or-more, you need to actively decide if this
 > should generate no added condition, an `IS NULL` condition, or something else entirely.
+
+<a name="join"></a>
+##### Joins
+
+Various JOIN-methods are supported by the SELECT, UPDATE and DELETE query-builders, including
+`innerJoin()`, `leftJoin()` and `rightJoin()`.
+
+All the JOIN-methods accept the same arguments, e.g. `leftJoin(Table $table, string $expr)`, and so on.
+
+The `$table` argument designates the table to JOIN with, and the `$expr` argument specifies the `ON` clause.
+
+Let's examine a typical use-case with `customer` and `order` tables - and let's say we want a list
+of customer records, and the number of orders each customer has placed:
+
+```php
+$customer = $schema->customer;
+$order = $schema->order;
+
+$query = $db
+    ->select($customer)
+    ->table($customer)
+    ->leftJoin($order, "{$order->customer_id} = {$customer->id}")
+    ->value("COUNT({$order})", "num_orders")
+    ->groupBy($customer->id);
+```
+
+This produces an SQL query like:
+
+    SELECT
+      customer.*,
+      COUNT(order) AS num_orders
+    FROM
+      customer
+    LEFT JOIN
+      order ON order.customer_id = customer.id
+    GROUP BY
+      customer.id
+
+Note the use of `groupBy()` and `value()`, which are specific to the SELECT query-builder.
+
+Note that self-join is possible by naming the relational variables - for example, in the typical
+use-case with an `employee` table, where a `supervisor_id` references another `employee`, we can
+create a second alias, e.g. `employee AS supervisor` to get a list of employees including the
+name of their direct supervisor:
+
+```php
+$employee = $schema->employee;
+$supervisor = $schema->employee("supervisor"); // e.g. "employee AS supervisor"
+
+$query = $db
+    ->select($employee)
+    ->table($employee)
+    ->leftJoin($supervisor, "{$supervisor->id} = {$emplyoee->supervisor_id}")
+    ->columns($supervisor->name);
+```
+
+#### `INSERT` Queries
+
+This is probably the simplest of the available query-builders.
+
+To create an INSERT query-builder, you must specify the destination table - and then call the `add()`
+method to add one or more records - for example:
+
+```php
+$user = $schema->user;
+
+$query = $db
+    ->insert($user)
+    ->add([
+        "first_name" => "Rasmus",
+        "last_name" => "Schultz",
+        "dob" => 951030427,
+    ]);
+```
+
+Note that the array keys must match column-names in the destination table - so that type-conversions for the
+columns can be applied.
+
+If you think this approach is too fragile, you can choose to get the column-names from the schema model instead:
+
+```php
+$user = $schema->user;
+
+$query = $db
+    ->insert($user)
+    ->add([
+        $user->first_name->getName() => "Rasmus",
+        $user->last_name->getName() => "Schultz",
+        $user->dob->getName() => 951030427,
+    ]);
+```
+
+This is safer (in terms of static analysis) but a bit verbose.
+
+Note that, if you add multiple records, when executed, these will be inserted with a single INSERT statement.
+
+#### `UPDATE` Queries
+
+To create an UPDATE query-builder, you must specify the table to be updated and the [conditions](#conditions),
+and then designate the value to be applied - for example, here we update the `user` table where `user.id = 123`,
+setting the value of the `first_name` column:
+
+```php
+$user = $schema->user;
+
+$query = $db
+    ->update($user)
+    ->where("{$user->id} = :id")
+    ->bind("id", 123)
+    ->setValue($user->first_name, "Rasmus");
+```
+
+For convenience, you could also use `assign()` with a key/value array instead:
+
+```php
+$query->assign([
+    "first_name" => "Rasmus"
+]);
+```
+
+In either case, type-conversions will automatically be applied according to the column-type.
+
+You can also use `setExpr()`, which lets you specify a custom SQL expression to compute a value - for example,
+here we update the `last_logged_in` column using the SQL `NOW()` function to get the DB server's current date/time:
+
+```php
+$user = $schema->user;
+
+$query = $db
+    ->update($user)
+    ->where("{$user->id} = :id")
+    ->bind("id", 123)
+    ->setExpr($user->last_logged_in, "NOW()");
+```
+
+Note that building [nested queries](#nested) is possible with the UPDATE query-builder.
+
+#### `DELETE` Queries
+
+To create a DELETE query-builder, you must specify the table from which to delete and the
+[conditions](#conditions) - for example, here we delete from the `user` table where `user.id = 123`:
+
+```php
+$user = $schema->user;
+
+$query = $db
+    ->delete($user)
+    ->where("{$user->id} = :id")
+    ->bind("id", 123);
+```
+
+Note that building [nested queries](#nested) is possible with the DELETE query-builder.
+
+#### Custom SQL Queries
+
+The `SQLQuery` type lets you leverage all the framework features for "hand-written" SQL queries - e.g.
+parameter binding (with array support), column references, types, mappers, result iteration, etc.
+
+Don't think of custom SQL queries as a "last resort" - use query-builders for queries that are
+dynamic in nature, but don't shy away from raw SQL because it "looks" or "feels" wrong: a static query
+is often both simpler and easier to understand when written using plain SQL syntax.
+
+For example, to create a simple SQL query counting new users created in the past month:
+
+```php
+$user = $schema->user;
+
+$query = $db
+    ->sql("SELECT COUNT({$user}) as num_users FROM {$user} WHERE {$user->created} > :first_date")
+    ->bind("first_date",  time() + 30*24*60*60, TimestampType::class);
+```
+
+This approach has several benefits over raw SQL with PDO:
+
+  1. The use of the table/column-model ensures that the referenced column exists in your schema, gets
+     correctly qualified and quoted, enable static analysis (and safe renaming) in an IDE, etc.
+  
+  2. You can `bind()` values to placeholders with type-conversions, which enables you to write
+     code with the same types you use in your application model. (in this example an integer timestamp.)
+  
+  3. Various convenience features like result iteration, batching and mapping are fully supported.
+
+For static, one-off queries, this approach is definitely worth considering.
 
 <a name="nested"></a>
 #### Nested Queries
@@ -694,61 +758,6 @@ $query = $db
 One approach isn't "better" or "worse" than the other - building an inline SQL statement in this way
 produces the exact same SQL query, so it is mostly a question of whether the sub-query is dynamic
 or static in nature.
-
-<a name="join"></a>
-#### Joins
-
-Various JOIN-methods are supported by the SELECT, UPDATE and DELETE query-builders, including
-`innerJoin()`, `leftJoin()` and `rightJoin()`.
-
-All the JOIN-methods accept the same arguments, e.g. `leftJoin(Table $table, string $expr)`, and so on.
-
-The `$table` argument designates the table to JOIN with, and the `$expr` argument specifies the `ON` clause.
-
-Let's examine a typical use-case with `customer` and `order` tables - and let's say we want a list
-of customer records, and the number of orders each customer has placed:
-
-```php
-$customer = $schema->customer;
-$order = $schema->order;
-
-$query = $db
-    ->select($customer)
-    ->table($customer)
-    ->leftJoin($order, "{$order->customer_id} = {$customer->id}")
-    ->value("COUNT({$order})", "num_orders")
-    ->groupBy($customer->id);
-```
-
-This produces an SQL query like:
-
-    SELECT
-      customer.*,
-      COUNT(order) AS num_orders
-    FROM
-      customer
-    LEFT JOIN
-      order ON order.customer_id = customer.id
-    GROUP BY
-      customer.id
-
-Note the use of `groupBy()` and `value()`, which are specific to the SELECT query-builder.
-
-Note that self-join is possible by naming the relational variables - for example, in the typical
-use-case with an `employee` table, where a `supervisor_id` references another `employee`, we can
-create a second alias, e.g. `employee AS supervisor` to get a list of employees including the
-name of their direct supervisor:
-
-```php
-$employee = $schema->employee;
-$supervisor = $schema->employee("supervisor"); // e.g. "employee AS supervisor"
-
-$query = $db
-    ->select($employee)
-    ->table($employee)
-    ->leftJoin($supervisor, "{$supervisor->id} = {$emplyoee->supervisor_id}")
-    ->columns($supervisor->name);
-```
 
 ### Executing Queries 
 

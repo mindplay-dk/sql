@@ -1450,13 +1450,11 @@ test(
 
         $query = $db->delete($user)
             ->where("{$user->id} = :id")
-            ->bind("id", 123)
-            ->limit(1);
+            ->bind("id", 123);
 
         $expected_sql = <<<'SQL'
 DELETE FROM `user`
 WHERE `user`.`id` = :id
-LIMIT 1
 SQL;
 
         sql_eq($query, $expected_sql);
@@ -1481,13 +1479,11 @@ test(
 
         $query = $db->delete($user)
             ->where("{$user->id} = :id")
-            ->bind("id", 123)
-            ->limit(1);
+            ->bind("id", 123);
 
         $expected_sql = <<<'SQL'
 DELETE FROM "user"
 WHERE "user"."id" = :id
-LIMIT 1
 SQL;
 
         sql_eq($query, $expected_sql);
