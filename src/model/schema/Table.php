@@ -134,23 +134,32 @@ abstract class Table
     }
 
     /**
-     * @param string      $name
-     * @param string      $type Type class-name
-     * @param string|null $alias
-     * @param mixed       $default
+     * Creates a required Column.
+     *
+     * A value *must* be specified when building an `INSERT` query - if you don't specify a value
+     * for this Column, the INSERT query-builder will throw an exception.
+     *
+     * @param string      $name  Column name
+     * @param string      $type  Type class-name
+     * @param string|null $alias Optional alias
      *
      * @return Column
      */
-    protected function requiredColumn($name, $type, $alias = null, $default = null)
+    protected function requiredColumn($name, $type, $alias = null)
     {
-        return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, true, $default, false);
+        return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, true, null, false);
     }
 
     /**
-     * @param string      $name
-     * @param string      $type Type class-name
-     * @param string|null $alias
-     * @param mixed       $default
+     * Creates an optional Column.
+     *
+     * A value is optional (and may have a `$default`) when building an `INSERT` query - if you don't
+     * specify a value for this Column, the INSERT query-builder will automatically assign the `$default`.
+     *
+     * @param string      $name    Column name
+     * @param string      $type    Type class-name
+     * @param string|null $alias   Optional alias
+     * @param mixed       $default Optional default PHP value (Type-conversion will be applied.)
      *
      * @return Column
      */
@@ -160,9 +169,16 @@ abstract class Table
     }
 
     /**
-     * @param string      $name
-     * @param string      $type Type class-name
-     * @param string|null $alias
+     * Creates an auto-defined Column.
+     *
+     * A value should *not* by specified when building an `INSERT` query.
+     *
+     * Use this for Columns that the database itself will populate, e.g. auto-incrementing keys or
+     * columns that are otherwise initialized by the database itself.
+     *
+     * @param string      $name  Column name
+     * @param string      $type  Type class-name
+     * @param string|null $alias Optional alias
      *
      * @return Column
      */
