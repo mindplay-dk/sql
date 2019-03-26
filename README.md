@@ -130,6 +130,8 @@ The following `protected` factory-methods are available to help create `Column` 
   * `autoColumn()` for columns that the database itself will populate, e.g. auto-incrementing or
     columns that are otherwise initialized by the database itself.
 
+Refer to the [`Table`](src/model/schema/Table.php) API for arguments.
+
 Note that "required" and "optional" do not necessarily correlate 1:1 with `IS NULL` in your schema.
 For example, a column could be "required" but still allow SQL `NULL` values - in this case, "required"
 means you must explicitly supply a null-value e.g. to the INSERT query-builder, which may be safer and
@@ -137,7 +139,17 @@ more explicit for some use-cases.
 
 #### Column Types
 
-TODO `mindplay\sql\model\types`
+Every `Column` references a `Type` by it's class-name. (e.g. `DateType::class`, etc.)
+
+`Type` implementations are responsible for converting between SQL values and PHP values, in both directions.
+
+`Type` implementations are auto-wired in the DI container internally - you don't need to explicitly
+register a custom `Type` implementation.
+
+Built-in types are available for the scalar PHP types (`string`, `int`, `float`, `bool` and `null`) as well
+as a few other SQL types.
+
+For available types and documentation, look in the `mindplay\sql\model\types` namespace.
 
 ### Creating Schema Models
 
