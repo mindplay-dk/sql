@@ -1,3 +1,5 @@
+TODO deprecation of `PDOProvider` in favor of `PDOConnector`
+
 ### Version 0.7.6
 
 This bugfix release includes some minor breaking changes.

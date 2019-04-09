@@ -235,6 +235,8 @@ database model and query-builders operate entirely in the abstract with no depen
 database connection, which is great, as it enables you to write (and unit-test) complex query-builders
 independently of any database connection.
 
+TODO documentation for `PDOConnector`
+
 ### Building Queries
 
 Creating a query begins with the `Database` model and your `Schema`-type.

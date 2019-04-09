@@ -15,6 +15,8 @@ use PDO;
  * provider does not construct `PDO` and open the connection until you ask for the `PDO` instance.
  *
  * Also, `PDO` has no ability to report properties like database-name, username, etc. if you need them.
+ *
+ * @deprecated in favor of {@see PDOConnector}
  */
 class PDOProvider
 {
