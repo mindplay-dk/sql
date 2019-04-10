@@ -75,7 +75,7 @@ test(
 );
 
 test(
-    'transaction() commits when function returns true',
+    'transaction() commits when callback returns true',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -119,7 +119,7 @@ test(
 );
 
 test(
-    'transact() rolls back when function returns false',
+    'transact() rolls back when callback returns false',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -138,7 +138,7 @@ test(
 );
 
 test(
-    'transact() rolls back when function returns void',
+    'transact() rolls back when callback returns void',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -163,7 +163,7 @@ test(
 );
 
 test(
-    'transact() rolls back and re-throws when function throws an exception',
+    'transact() rolls back and re-throws when callback throws an exception',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -188,7 +188,7 @@ test(
 );
 
 test(
-    'transact() rolls back and re-throws when nested function throws an exception',
+    'transact() rolls back and re-throws when nested transaction callback throws an exception',
     function () {
         /** @var MockInterface|PDO $mock_pdo */
         $mock_pdo = Mockery::mock(PDO::class);
@@ -1014,6 +1014,8 @@ test(
     }
 );
 
+// TODO test for MySQL-specific UPDATE with LIMIT and ORDER BY
+
 test(
     'can rewrite SELECT query into SELECT COUNT(*) query',
     function () {
@@ -1450,13 +1452,11 @@ test(
 
         $query = $db->delete($user)
             ->where("{$user->id} = :id")
-            ->bind("id", 123)
-            ->limit(1);
+            ->bind("id", 123);
 
         $expected_sql = <<<'SQL'
 DELETE FROM `user`
 WHERE `user`.`id` = :id
-LIMIT 1
 SQL;
 
         sql_eq($query, $expected_sql);
@@ -1466,6 +1466,8 @@ SQL;
         ]);
     }
 );
+
+// TODO test for MySQL-specific DELETE with LIMIT and ORDER BY
 
 test(
     'can create DELETE query for PostgreSQL',
@@ -1481,13 +1483,11 @@ test(
 
         $query = $db->delete($user)
             ->where("{$user->id} = :id")
-            ->bind("id", 123)
-            ->limit(1);
+            ->bind("id", 123);
 
         $expected_sql = <<<'SQL'
 DELETE FROM "user"
 WHERE "user"."id" = :id
-LIMIT 1
 SQL;
 
         sql_eq($query, $expected_sql);

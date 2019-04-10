@@ -4,7 +4,10 @@ namespace mindplay\sql\model\query;
 
 use mindplay\sql\framework\Countable;
 use mindplay\sql\framework\MapperProvider;
+use mindplay\sql\model\components\Conditions;
 use mindplay\sql\model\components\Mappers;
+use mindplay\sql\model\components\Order;
+use mindplay\sql\model\components\Range;
 use mindplay\sql\model\components\ReturnVars;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\schema\Column;
@@ -22,9 +25,27 @@ use mindplay\sql\model\types\IntType;
  * Note that, when constructing nested queries, parameters must be bound against the
  * parent query - binding parameters or applying Mappers against a nested query has no effect.
  */
-class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
+class SelectQuery extends Query implements MapperProvider, Countable
 {
     use Mappers;
+    use Conditions;
+    use Order;
+    use Range;
+
+    /**
+     * @var Driver
+     */
+    protected $driver;
+
+    /**
+     * @var Table root Table of this query (from which JOIN clauses may extend the projection)
+     */
+    protected $root;
+
+    /**
+     * @var string[] list of JOIN clauses extending from the root Table of this query
+     */
+    protected $joins = [];
 
     /**
      * @var bool[] map where flag => true
@@ -53,8 +74,10 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
      */
     public function __construct(Table $root, Driver $driver, TypeProvider $types)
     {
-        parent::__construct($root, $driver, $types);
-        
+        parent::__construct($types);
+
+        $this->root = $root;
+        $this->driver = $driver;
         $this->return_vars = new ReturnVars($root, $driver, $types);
     }
 
@@ -139,42 +162,6 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getSQL()
-    {
-        $flags = $this->buildFlags();
-
-        $select = "SELECT " . ($flags ? "{$flags} " : "")
-            . $this->return_vars->buildReturnVars();
-
-        $from = "\nFROM " . $this->buildNodes();
-
-        $where = count($this->conditions)
-            ? "\nWHERE " . $this->buildConditions()
-            : ''; // no conditions present
-        
-        $group_by = count($this->group_by)
-            ? "\nGROUP BY " . implode(", ", $this->group_by)
-            : ""; // no group-by expressions
-
-        $having = count($this->having)
-            ? "\nHAVING " . $this->buildHaving()
-            : ''; // no having clause present
-        
-        $order = count($this->order)
-            ? "\nORDER BY " . $this->buildOrderTerms()
-            : ''; // no order terms
-
-        $limit = $this->limit !== null
-            ? "\nLIMIT {$this->limit}"
-            . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
-            : ''; // no limit or offset
-
-        return "{$select}{$from}{$where}{$group_by}{$having}{$order}{$limit}";
-    }
-
-    /**
      * @internal do not call this method directly from client-code (see `Countable` interface)
      *
      * @ignore
@@ -195,9 +182,9 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
 
         $query->limit = null;
         $query->offset = null;
-        
+
         $query->order = [];
-        
+
         return $query;
     }
 
@@ -210,11 +197,88 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
     }
 
     /**
-     * @return string combined condition expression (for use in the WHERE clause of an SQL statement)
+     * @param Table  $table
+     * @param string $expr join condition
+     *
+     * @return $this
      */
-    protected function buildHaving()
+    public function innerJoin(Table $table, $expr)
     {
-        return implode(" AND ", $this->having);
+        return $this->addJoin("INNER", $table, $expr);
+    }
+
+    /**
+     * @param Table  $table
+     * @param string $expr join condition
+     *
+     * @return $this
+     */
+    public function leftJoin(Table $table, $expr)
+    {
+        return $this->addJoin("LEFT", $table, $expr);
+    }
+
+    /**
+     * @param Table  $table
+     * @param string $expr join condition
+     *
+     * @return $this
+     */
+    public function rightJoin(Table $table, $expr)
+    {
+        return $this->addJoin("RIGHT", $table, $expr);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSQL()
+    {
+        $flags = $this->buildFlags();
+
+        $select = "SELECT " . ($flags ? "{$flags} " : "")
+            . $this->return_vars->buildReturnVars();
+
+        $from = "\nFROM " . $this->buildNodes();
+
+        $where = count($this->conditions)
+            ? "\nWHERE " . $this->buildConditions()
+            : ''; // no conditions present
+
+        $group_by = count($this->group_by)
+            ? "\nGROUP BY " . implode(", ", $this->group_by)
+            : ""; // no group-by expressions
+
+        $having = count($this->having)
+            ? "\nHAVING " . $this->buildHaving()
+            : ''; // no having clause present
+
+        $order = count($this->order)
+            ? "\nORDER BY " . $this->buildOrderTerms()
+            : ''; // no order terms
+
+        $limit = $this->limit !== null
+            ? "\nLIMIT {$this->limit}"
+            . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
+            : ''; // no limit or offset
+
+        return "{$select}{$from}{$where}{$group_by}{$having}{$order}{$limit}";
+    }
+
+    /**
+     * @param string $type join type ("INNER", "LEFT", etc.)
+     * @param Table  $table
+     * @param string $expr join condition
+     *
+     * @return $this
+     */
+    protected function addJoin($type, Table $table, $expr)
+    {
+        $table_expr = $table->getNode();
+
+        $this->joins[] = "{$type} JOIN {$table_expr} ON {$expr}";
+
+        return $this;
     }
 
     /**
@@ -229,12 +293,28 @@ class SelectQuery extends ProjectionQuery implements MapperProvider, Countable
             unset($this->flags[$flag]);
         }
     }
-    
+
+    /**
+     * @return string root table expression and JOIN clauses (for use in the FROM clause of an SQL statement)
+     */
+    protected function buildNodes()
+    {
+        return implode("\n", array_merge([$this->root->getNode()], $this->joins));
+    }
+
     /**
      * @return string query flags (such as "SQL_CALC_FOUND_ROWS" in a MySQL SELECT query)
      */
     protected function buildFlags()
     {
         return implode(" ", array_keys($this->flags));
+    }
+
+    /**
+     * @return string combined condition expression (for use in the WHERE clause of an SQL statement)
+     */
+    protected function buildHaving()
+    {
+        return implode(" AND ", $this->having);
     }
 }

@@ -14,14 +14,9 @@ class PostgresDeleteQuery extends DeleteQuery implements MapperProvider
 {
     use Returning;
 
-    /**
-     * @param Driver       $driver
-     * @param TypeProvider $types
-     * @param Table        $table
-     */
-    public function __construct(Driver $driver, TypeProvider $types, Table $table)
+    public function __construct(Table $table, Driver $driver, TypeProvider $types)
     {
-        parent::__construct($table, $driver, $types);
+        parent::__construct($table, $types);
 
         $this->return_vars = new ReturnVars($table, $driver, $types);
     }

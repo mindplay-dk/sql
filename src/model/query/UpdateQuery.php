@@ -2,17 +2,45 @@
 
 namespace mindplay\sql\model\query;
 
+use mindplay\sql\model\components\Conditions;
+use mindplay\sql\model\Driver;
 use mindplay\sql\model\schema\Column;
+use mindplay\sql\model\schema\Table;
+use mindplay\sql\model\TypeProvider;
 
 /**
  * This class represents an UPDATE query.
  */
-class UpdateQuery extends ProjectionQuery
+class UpdateQuery extends Query
 {
+    use Conditions;
+
+    /**
+     * @var Table
+     */
+    protected $table;
+
+    /**
+     * @var Driver
+     */
+    protected $driver;
+
     /**
      * @var mixed[] map where Column name => literal SQL expression to assign
      */
     private $assignments = [];
+
+    /**
+     * @param Table        $table
+     * @param TypeProvider $types
+     */
+    public function __construct(Table $table, Driver $driver, TypeProvider $types)
+    {
+        parent::__construct($types);
+
+        $this->table = $table;
+        $this->driver = $driver;
+    }
 
     /**
      * @param Column|string $column Column to update (or Column name)
@@ -73,7 +101,7 @@ class UpdateQuery extends ProjectionQuery
      */
     public function assign(array $values)
     {
-        $columns = $this->root->listColumns();
+        $columns = $this->table->listColumns();
 
         foreach ($columns as $column) {
             $name = $column->getName();
@@ -91,7 +119,7 @@ class UpdateQuery extends ProjectionQuery
      */
     public function getSQL()
     {
-        $update = "UPDATE " . $this->buildNodes();
+        $update = "UPDATE " . $this->table->getNode();
 
         $set = "\nSET " . implode(",\n    ", $this->assignments);
 
@@ -99,16 +127,7 @@ class UpdateQuery extends ProjectionQuery
             ? "\nWHERE " . $this->buildConditions()
             : ''; // no conditions present
 
-        $order = count($this->order)
-            ? "\nORDER BY " . $this->buildOrderTerms()
-            : ''; // no order terms
-
-        $limit = $this->limit !== null
-            ? "\nLIMIT {$this->limit}"
-            . ($this->offset !== null ? " OFFSET {$this->offset}" : '')
-            : ''; // no limit or offset
-
-        return "{$update}{$set}{$where}{$order}{$limit}";
+        return "{$update}{$set}{$where}";
     }
 
     /**

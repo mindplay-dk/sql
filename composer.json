@@ -27,9 +27,9 @@
         "psr/log": "^1"
     },
     "require-dev": {
-        "mindplay/testies": "dev-master",
-        "mindplay/benchpress": "dev-master",
-        "mockery/mockery": "~0.9.4",
+        "mindplay/testies": "^0.3.2",
+        "mindplay/benchpress": "^0.1",
+        "mockery/mockery": "^0.9",
         "phpunit/php-code-coverage": ">=2, <4"
     },
     "suggest": {
