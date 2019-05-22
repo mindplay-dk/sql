@@ -16,7 +16,7 @@ It supports:
   * Schema abstraction with bi-directional conversions between PHP data-types/objects and relational data.
   * An abstraction over `PDO` adding support for `array` values with PDO-style `:name` placeholders.
   * Streaming iteration of query results enabling you to process results in arbitrary-size batches.
-  * On-fly-fly mapping of functions against individual records, or batches of records.
+  * On-the-fly mapping of functions against individual records, or batches of records.
   * **NOT** an object/relational-mapper.
 
 An important non-goal of this project is the ability to switch from one database technology to another -
@@ -989,7 +989,7 @@ To efficiently execute the same query many times, you can manually `prepare()` a
 for example, to DELETE a list of `order` records:
 
 ```php
-$delete = $db->sql("DELETE FROM order WHERE id = :id");
+$delete = $connection->prepare($db->sql("DELETE FROM order WHERE id = :id"));
 
 foreach ($ids as $id) {
     $delete->bind("id", $id);
