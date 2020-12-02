@@ -49,7 +49,7 @@ class TypeMapper implements Mapper
                 $record[$name] = $type->convertToPHP($record[$name]);
             }
 
-            yield $record;
+            yield $index => $record;
         }
     }
 }

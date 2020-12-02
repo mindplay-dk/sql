@@ -101,6 +101,8 @@ class Result implements IteratorAggregate
     {
         $fetching = true;
 
+        $record_index = 0;
+
         do {
             // fetch a batch of records:
 
@@ -110,7 +112,7 @@ class Result implements IteratorAggregate
                 $record = $this->statement->fetch();
 
                 if ($record) {
-                    $batch[] = $record;
+                    $batch[$record_index++] = $record;
                 } else {
                     if (count($batch) === 0) {
                         return; // last batch of records fetched
@@ -124,7 +126,7 @@ class Result implements IteratorAggregate
 
             $num_records = count($batch);
 
-            foreach ($this->mappers as $index => $mapper) {
+            foreach ($this->mappers as $mapper_index => $mapper) {
                 $batch = $mapper->map($batch);
 
                 if ($batch instanceof Traversable) {
@@ -134,14 +136,14 @@ class Result implements IteratorAggregate
                 if (count($batch) !== $num_records) {
                     $count = count($batch);
 
-                    throw new RuntimeException("Mapper #{$index} returned {$count} records, expected: {$num_records}");
+                    throw new RuntimeException("Mapper #{$mapper_index} returned {$count} records, expected: {$num_records}");
                 }
             }
 
             // return each record from the current batch:
 
-            foreach ($batch as $record) {
-                yield $record;
+            foreach ($batch as $index => $record) {
+                yield $index => $record;
             }
         } while ($fetching);
     }
