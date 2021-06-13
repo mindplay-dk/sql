@@ -8,11 +8,6 @@
             "name": "Rasmus Schultz",
             "email": "rasmus@mindplay.dk",
             "role": "Maintainer"
-        },
-        {
-            "name": "Thomas Nordahl",
-            "email": "thno@jfmedier.dk",
-            "role": "Co-maintainer"
         }
     ],
     "autoload": {
