@@ -21,7 +21,7 @@
         }
     },
     "require": {
-        "php": ">=5.5",
+        "php": ">=7.0",
         "ext-pdo": "*",
         "mindplay/unbox": "^2",
         "psr/log": "^1"
@@ -29,7 +29,7 @@
     "require-dev": {
         "mindplay/testies": "^0.3.2",
         "mindplay/benchpress": "^0.1",
-        "mockery/mockery": "^0.9",
+        "mockery/mockery": "^1.5.0",
         "phpunit/php-code-coverage": ">=2, <4"
     },
     "suggest": {

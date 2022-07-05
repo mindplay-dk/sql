@@ -85,7 +85,7 @@ class Result implements IteratorAggregate
      *
      * @return Iterator
      */
-    public function getIterator()
+    public function getIterator(): Iterator
     {
         return $this->createIterator($this->batch_size);
     }
