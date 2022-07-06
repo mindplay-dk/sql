@@ -40,7 +40,7 @@ test(
 
         expect(SQLException::class, 'pdo exception mode is handled', function () use ($connection, $db) {
             $connection->fetch($db->sql('invalid syntax'))->firstCol();
-        });
+        },['/42601: ERROR:  syntax error/']);
     }
 );
 
