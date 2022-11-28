@@ -5,6 +5,8 @@ use mindplay\sql\framework\Statement;
 use mindplay\sql\model\query\Query;
 use mindplay\sql\model\schema\Type;
 
+use function mindplay\testies\{ eq, ok, inspect };
+
 /**
  * @param string $sql
  *
