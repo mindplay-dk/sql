@@ -16,7 +16,7 @@ addons:
   postgresql: "9.5"
 
 sudo: required
-dist: precise
+dist: bionic
 
 before_script:
   - 'composer install --dev --prefer-source'
