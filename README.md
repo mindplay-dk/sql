@@ -40,7 +40,7 @@ the internal `protected` portion of the API; typically, a major `0.x+1` release 
 
 ### Contributions
 
-Current target is php 5.5 and later, see `.travis.yml`.
+Current target is php 7.0 and later, see `.travis.yml`.
 
 Code adheres to [PSR-2](http://www.php-fig.org/psr/psr-2/) and [PSR-4](http://www.php-fig.org/psr/psr-4/).
 
