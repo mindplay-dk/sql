@@ -1,12 +1,17 @@
+os: linux
+dist: bionic
 language: php
 
-php:
-  - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
+jobs:
+  include:
+    - php: 7.3
+    - php: 7.4
+    - php: 8.0
+      env:
+      - XDEBUG_MODE=coverage
+      after_script:
+      - wget https://scrutinizer-ci.com/ocular.phar
+      - php ocular.phar code-coverage:upload --format=php-clover test/build/clover.xml
 
 services:
   - postgresql
@@ -15,16 +20,9 @@ services:
 addons:
   postgresql: "9.5"
 
-sudo: required
-dist: precise
-
 before_script:
   - 'composer install --dev --prefer-source'
   - psql -c 'create database mindplay_sql_test;' -U postgres
   - mysql -e 'CREATE DATABASE mindplay_sql_test;'
 
 script: php test/test.php
-
-after_script:
-  - if [ $(phpenv version-name) = "7.0" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
-  - if [ $(phpenv version-name) = "7.0" ]; then php ocular.phar code-coverage:upload --format=php-clover test/build/clover.xml; fi
