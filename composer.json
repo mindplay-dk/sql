@@ -18,14 +18,14 @@
     "require": {
         "php": ">=7.3",
         "ext-pdo": "*",
-        "mindplay/unbox": "^2",
-        "psr/log": "^1"
+        "mindplay/unbox": "^3",
+        "psr/log": "*"
     },
     "require-dev": {
         "mindplay/testies": "^1.0",
         "mindplay/benchpress": "^0.1",
         "mockery/mockery": "^1.5.1",
-        "phpunit/php-code-coverage": ">=2, <4"
+        "phpunit/php-code-coverage": "^9.2.19"
     },
     "suggest": {
         "ext-pdo_pgsql": "for PostgreSQL support (duh.)",
