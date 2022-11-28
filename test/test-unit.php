@@ -27,6 +27,8 @@ use mindplay\sql\postgres\PostgresDatabase;
 use Mockery\MockInterface;
 use Psr\Log\LogLevel;
 
+use function mindplay\testies\{ test, eq, ok, expect };
+
 test(
     "can quote schema/table/column-names for Postgres",
     function () {

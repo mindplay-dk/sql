@@ -4,6 +4,8 @@ use mindplay\sql\framework\pdo\PDOProvider;
 use mindplay\sql\mysql\MySQLDatabase;
 use mindplay\sql\postgres\PostgresDatabase;
 
+use function mindplay\testies\{ test, eq };
+
 test(
     'can connect to Postgres',
     function () use ($config) {
