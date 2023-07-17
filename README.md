@@ -713,7 +713,7 @@ Next, we build the parent query, using `value()` to insert and return the value 
 ```php
 $query = $db
     ->select($customer)
-    ->table([
+    ->columns([
         $customer->id,
         $customer->first_name,
         $customer->last_name,
@@ -745,7 +745,7 @@ you might also consider simply inserting the sub-query as literal SQL - like so:
 ```php
 $query = $db
     ->select($customer)
-    ->table([
+    ->columns([
         $customer->id,
         $customer->first_name,
         $customer->last_name,
