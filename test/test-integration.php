@@ -6,14 +6,16 @@ use mindplay\sql\postgres\PostgresDatabase;
 
 use function mindplay\testies\{ test, eq };
 
+$config = file_exists(__DIR__ . '/config.json')
+    ? json_decode(file_get_contents(__DIR__ . '/config.json'), true)
+    : json_decode(file_get_contents(__DIR__ . '/config.dist.json'), true);
+
 test(
     'can connect to Postgres',
     function () use ($config) {
         $provider = new PDOProvider(
             PDOProvider::PROTOCOL_POSTGRES,
-            $config["postgres"]["database"],
-            $config["postgres"]["user"],
-            $config["postgres"]["password"]
+            ...$config["postgres"]
         );
 
         $db = new PostgresDatabase();
@@ -29,9 +31,7 @@ test(
     function () use ($config) {
         $provider = new PDOProvider(
             PDOProvider::PROTOCOL_MYSQL,
-            $config["mysql"]["database"],
-            $config["mysql"]["user"],
-            $config["mysql"]["password"]
+            ...$config["mysql"]
         );
 
         $db = new MySQLDatabase();
