@@ -7,6 +7,7 @@ Database framework and query builder.
 [![Build Status](https://travis-ci.org/mindplay-dk/sql.svg?branch=master)](https://travis-ci.org/mindplay-dk/sql)
 [![Code Coverage](https://scrutinizer-ci.com/g/mindplay-dk/sql/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/mindplay-dk/sql/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mindplay-dk/sql/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mindplay-dk/sql/?branch=master)
+[![License GPLv3](https://img.shields.io/badge/License-GPL_3+-blue.svg)](https://spdx.org/licenses/GPL-3.0-or-later.html)
 
 This library implements (yet another) database abstraction and (yet another) query builder.
 
