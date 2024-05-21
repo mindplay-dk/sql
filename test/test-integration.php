@@ -38,7 +38,7 @@ test(
 
         $connection = $db->createConnection($provider->getPDO());
 
-        eq($connection->fetch($db->sql('SELECT 123'))->firstCol(), "123");
+        eq($connection->fetch($db->sql('SELECT 123'))->firstCol(), 123);
     }
 );
 

@@ -16,7 +16,7 @@
         }
     },
     "require": {
-        "php": ">=8",
+        "php": ">=8.1",
         "ext-pdo": "*",
         "mindplay/unbox": "^3",
         "psr/log": "*"
