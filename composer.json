@@ -32,7 +32,6 @@
         "ext-pdo_mysql": "for MySQL support (hello, Captain Obvious.)"
     },
     "scripts": {
-        "test": "php test/test.php",
-        "ci": "php test/test.php --integration"
+        "test": "php test/test.php"
     }
 }
