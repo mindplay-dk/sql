@@ -32,6 +32,6 @@
         "ext-pdo_mysql": "for MySQL support (hello, Captain Obvious.)"
     },
     "scripts": {
-        "test": "php test/test.php"
+        "test": "XDEBUG_MODE=coverage php test/test.php"
     }
 }
