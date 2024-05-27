@@ -3,6 +3,10 @@
 # Ensure the script exits on any error
 set -e
 
+# Uncomment this while changing the Dockerfile
+#docker compose down
+#docker compose build
+
 # Start the Docker services if not already running
 docker compose up -d
 
