@@ -7,4 +7,5 @@ set -e
 docker compose up -d
 
 # Run the test suite within the already running php container, passing the environment variables
+docker compose exec php [ ! -f composer.lock ] && composer update
 docker compose exec php composer run test
