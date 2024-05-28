@@ -14,10 +14,10 @@ interface Statement
     /**
      * @return string SQL statement (with placeholders)
      */
-    public function getSQL();
+    public function getSQL(): string;
 
     /**
-     * @return array map where placeholder name maps to a scalar value, or arrays of scalar values
+     * @return array<string,string|int|float|bool|null|array<string|int|float|bool|null>> map where placeholder name maps to a scalar value, or arrays of scalar values
      */
-    public function getParams();
+    public function getParams(): array;
 }

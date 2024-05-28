@@ -9,8 +9,5 @@ namespace mindplay\sql\framework;
  */
 interface Countable
 {
-    /**
-     * @return Statement
-     */
-    public function createCountStatement();
+    public function createCountStatement(): Statement;
 }

@@ -28,7 +28,7 @@ class MockQuery extends Query
     /**
      * @return string SQL statement (with placeholders)
      */
-    public function getSQL()
+    public function getSQL(): string
     {
         return "SELECT 1";
     }
@@ -39,12 +39,12 @@ class MockParameterQuery extends Query
     /**
      * @return string SQL statement (with placeholders)
      */
-    public function getSQL()
+    public function getSQL(): string
     {
         return "SELECT :foo";
     }
 
-    public function getParams()
+    public function getParams(): array
     {
         return [ 'foo' => 'bar' ];
     }
@@ -65,9 +65,9 @@ class MockLogger implements Logger
         $this->log_function = $log_function;
     }
 
-    function logQuery($sql, $params, $time_msec)
+    function logQuery(string $sql, array $params, float $time_msec): void
     {
-        call_user_func_array($this->log_function, func_get_args());
+        ($this->log_function)($sql, $params, $time_msec);
     }
 }
 
@@ -112,12 +112,12 @@ class SampleSchema extends Schema
 
     private $name;
 
-    public function getName()
+    public function getName(): string|null
     {
         return $this->name;
     }
 
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
     }

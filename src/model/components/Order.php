@@ -10,14 +10,14 @@ trait Order
     /**
      * @var string[] list of ORDER BY terms
      */
-    protected $order = [];
+    protected array $order = [];
 
     /**
      * @param string $expr order-by expression (which may include a trailing "ASC" or "DESC" modifier)
      *
      * @return $this
      */
-    public function order($expr)
+    public function order(string $expr): static
     {
         $this->order[] = "{$expr}";
 
@@ -27,7 +27,7 @@ trait Order
     /**
      * @return string order terms (for use in the ORDER BY clause of an SQL statement)
      */
-    protected function buildOrderTerms()
+    protected function buildOrderTerms(): string
     {
         return implode(', ', $this->order);
     }

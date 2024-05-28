@@ -13,14 +13,11 @@ class DeleteQuery extends Query
 {
     use Conditions;
 
-    /**
-     * @var Table Table from which to DELETE
-     */
-    protected $table;
+    protected Table $table;
 
     /**
-     * @param Table        $table
-     * @param TypeProvider $types
+     * @param $table Table from which to DELETE
+     * @param $types
      */
     public function __construct(Table $table, TypeProvider $types)
     {
@@ -29,7 +26,7 @@ class DeleteQuery extends Query
         $this->table = $table;
     }
 
-    public function getSQL()
+    public function getSQL(): string
     {
         $delete = "DELETE FROM " . $this->table->getNode();
 

@@ -13,26 +13,19 @@ class SQLQuery extends Query implements MapperProvider
 {
     use Mappers;
     
-    /**
-     * @var string
-     */
-    private $sql;
+    private string $sql;
 
     /**
-     * @param TypeProvider $types
-     * @param string       $sql SQL statement (with placeholders)
+     * @param $sql SQL statement (with placeholders)
      */
-    public function __construct(TypeProvider $types, $sql)
+    public function __construct(TypeProvider $types, string $sql)
     {
         parent::__construct($types);
         
         $this->sql = $sql;
     }
     
-    /**
-     * @inheritdoc
-     */
-    public function getSQL()
+    public function getSQL(): string
     {
         return $this->sql;
     }
@@ -40,7 +33,7 @@ class SQLQuery extends Query implements MapperProvider
     /**
      * @inheritdoc
      */
-    public function getMappers()
+    public function getMappers(): array
     {
         return $this->mappers;
     }

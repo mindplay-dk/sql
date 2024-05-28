@@ -9,15 +9,8 @@ use InvalidArgumentException;
  */
 trait Range
 {
-    /**
-     * @var int|null
-     */
-    protected $limit;
-
-    /**
-     * @var int|null
-     */
-    protected $offset;
+    protected int|null $limit = null;
+    protected int|null $offset = null;
 
     /**
      * @param int      $limit  max. number of records
@@ -27,7 +20,7 @@ trait Range
      *
      * @throws InvalidArgumentException if the given limit is less than 1, or if the given offset if less than 0
      */
-    public function limit($limit, $offset = null)
+    public function limit(int|null $limit, int|null $offset = null): static
     {
         if ($limit < 1) {
             throw new InvalidArgumentException("limit out of range: {$limit}");
@@ -51,7 +44,7 @@ trait Range
      *
      * @throws InvalidArgumentException if the given page number or page size are less than 1
      */
-    public function page($page_num, $page_size)
+    public function page(int $page_num, int $page_size): static
     {
         if ($page_size < 1) {
             throw new InvalidArgumentException("page size out of range: {$page_size}");
@@ -67,7 +60,7 @@ trait Range
     /**
      * @return string the LIMIT/OFFSET clause (or an empty string, if no limit has been set)
      */
-    protected function buildLimit()
+    protected function buildLimit(): string
     {
         return $this->limit !== null
             ? "\nLIMIT {$this->limit}" . ($this->offset !== null ? " OFFSET {$this->offset}" : '')

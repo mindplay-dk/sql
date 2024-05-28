@@ -14,7 +14,7 @@ trait Mappers
     /**
      * @var Mapper[] list of Mappers
      */
-    protected $mappers = [];
+    protected array $mappers = [];
 
     /**
      * Append a Mapper instance to apply when each batch of a record-set is fetched.
@@ -26,7 +26,7 @@ trait Mappers
      *                   
      * @return $this
      */
-    public function map(Mapper $mapper)
+    public function map(Mapper $mapper): static
     {
         $this->mappers[] = $mapper;
         
@@ -42,7 +42,7 @@ trait Mappers
      *                   
      * @return $this
      */
-    public function mapRecords(callable $mapper)
+    public function mapRecords(callable $mapper): static
     {
         $this->mappers[] = new RecordMapper($mapper);
         
@@ -58,7 +58,7 @@ trait Mappers
      *                   
      * @return $this
      */
-    public function mapBatches(callable $mapper)
+    public function mapBatches(callable $mapper): static
     {
         $this->mappers[] = new BatchMapper($mapper);
         

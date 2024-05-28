@@ -494,22 +494,6 @@ test(
         $st->bind('true', true);
         $st->bind('false', false);
         $st->bind('null', null);
-
-        expect(
-            InvalidArgumentException::class,
-            "rejects non-scalar values",
-            function () use ($st) {
-                $st->bind('foo', (object) []);
-            }
-        );
-
-        expect(
-            InvalidArgumentException::class,
-            "rejects arrays",
-            function () use ($st) {
-                $st->bind('foo', [1]);
-            }
-        );
     }
 );
 

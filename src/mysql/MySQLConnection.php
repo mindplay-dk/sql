@@ -9,7 +9,7 @@ use mindplay\sql\framework\pdo\PDOConnection;
 
 class MySQLConnection extends PDOConnection
 {
-    public function getExceptionType($sql_state, $error_code, $error_message)
+    public function getExceptionType(string $sql_state, int $error_code, string $error_message): string
     {
         switch ($error_code) {
             case '1216':

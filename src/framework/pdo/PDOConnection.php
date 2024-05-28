@@ -2,6 +2,7 @@
 
 namespace mindplay\sql\framework\pdo;
 
+use mindplay\sql\framework\PreparedStatement;
 use Throwable;
 use Exception;
 use mindplay\sql\exceptions\TransactionAbortedException;
@@ -20,34 +21,28 @@ use UnexpectedValueException;
  */
 abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
 {
-    /**
-     * @var PDO
-     */
-    private $pdo;
+    private PDO $pdo;
 
-    /**
-     * @var TypeProvider
-     */
-    private $types;
+    private TypeProvider $types;
     
     /**
      * @var int number of nested calls to transact()
      *
      * @see transact()
      */
-    private $transaction_level = 0;
+    private int $transaction_level = 0;
 
     /**
      * @var bool net result of nested calls to transact()
      *
      * @see transact()
      */
-    private $transaction_result;
+    private bool $transaction_result = true;
 
     /**
      * @var Logger[]
      */
-    private $loggers = [];
+    private array $loggers = [];
 
     /**
      * To avoid duplicating dependencies, you should use DatabaseContainer::createPDOConnection()
@@ -65,7 +60,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @return PDO the internal PDO connection object
      */
-    public function getPDO()
+    public function getPDO(): PDO
     {
         return $this->pdo;
     }
@@ -73,7 +68,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function prepare(Statement $statement)
+    public function prepare(Statement $statement): PreparedStatement
     {
         $params = $statement->getParams();
 
@@ -103,7 +98,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function fetch(Statement $statement, $batch_size = 1000)
+    public function fetch(Statement $statement, int $batch_size = 1000): Result
     {
         $mappers = $statement instanceof MapperProvider
             ? $statement->getMappers()
@@ -119,7 +114,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function execute(Statement $statement)
+    public function execute(Statement $statement): PreparedStatement
     {
         $prepared_statement = $this->prepare($statement);
 
@@ -131,7 +126,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function count(Countable $statement)
+    public function count(Countable $statement): int
     {
         return $this->fetch($statement->createCountStatement())->firstCol();
     }
@@ -139,7 +134,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function transact(callable $func)
+    public function transact(callable $func): bool
     {
         if ($this->transaction_level === 0) {
             // starting a new stack of transactions - assume success:
@@ -149,14 +144,15 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
 
         $this->transaction_level += 1;
 
-        /** @var mixed $commit return type of $func isn't guaranteed, therefore mixed rather than bool */
+        /**
+         * @var mixed $commit return type of $func isn't guaranteed, therefore mixed rather than bool
+         */
+        $commit = null;
 
         try {
-            $commit = call_user_func($func);
+            $commit = $func();
         } catch (Throwable $exception) {
-            $commit = false; // PHP 7+
-        } catch (Exception $exception) {
-            $commit = false; // PHP < 7 (compatibility)
+            $commit = false;
         }
 
         $this->transaction_result = ($commit === true) && $this->transaction_result;
@@ -192,12 +188,12 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * Internally expand SQL placeholders (for array-types)
      *
-     * @param string $sql    SQL with placeholders
-     * @param array  $params placeholder name/value pairs
+     * @param string $sql SQL with placeholders
+     * @param array<string|int|float|bool|null|array<string|int|float|bool|null>> $params placeholder name/value pairs
      *
      * @return string SQL with expanded placeholders
      */
-    private function expandPlaceholders($sql, array $params)
+    private function expandPlaceholders(string $sql, array $params): string
     {
         $replace_pairs = [];
 
@@ -219,23 +215,27 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     }
 
     /**
-     * @param string|null $sequence_name auto-sequence name (or NULL for e.g. MySQL which supports only one auto-key)
-     *
-     * @return int|string
+     * @param $sequence_name auto-sequence name (or NULL for e.g. MySQL which supports only one auto-key)
      */
-    public function lastInsertId($sequence_name = null)
+    public function lastInsertId(?string $sequence_name = null): string|int|null
     {
         $id = $this->pdo->lastInsertId($sequence_name);
         
-        return is_numeric($id)
-            ? (int) $id
-            : $id;
+        if (is_numeric($id)) {
+            return (int) $id;
+        }
+
+        if (is_string($id)) {
+            return $id;
+        }
+        
+        return null;
     }
     
     /**
      * @inheritdoc
      */
-    public function addLogger(Logger $logger)
+    public function addLogger(Logger $logger): void
     {
         $this->loggers[] = $logger;
     }
@@ -243,7 +243,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @inheritdoc
      */
-    public function logQuery($sql, $params, $time_msec)
+    public function logQuery(string $sql, array $params, float $time_msec): void
     {
         foreach ($this->loggers as $logger) {
             $logger->logQuery($sql, $params, $time_msec);

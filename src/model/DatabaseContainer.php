@@ -4,6 +4,7 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\model\schema\Schema;
 use mindplay\sql\model\schema\Type;
+use mindplay\sql\model\schema\Table;
 use mindplay\unbox\Container;
 use UnexpectedValueException;
 
@@ -15,7 +16,7 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     /**
      * @inheritdoc
      */
-    public function getType($type_name)
+    public function getType(string $type_name): Type
     {
         if (! $this->has($type_name)) {
             $this->inject($type_name, $this->create($type_name)); // auto-wiring
@@ -33,11 +34,11 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     }
 
     /**
-     * @param string Schema class-name
+     * @param $schema_type Schema class-name
      *
      * @return Schema
      */
-    public function getSchema($schema_type)
+    public function getSchema(string $schema_type): Schema
     {
         if (! $this->has($schema_type)) {
             $this->inject($schema_type, $this->create($schema_type)); // auto-wiring
@@ -57,7 +58,7 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     /**
      * @inheritdoc
      */
-    public function hasType($type_name)
+    public function hasType(string $type_name): bool
     {
         return $this->has($type_name);
     }
@@ -65,7 +66,7 @@ class DatabaseContainer extends Container implements TypeProvider, TableFactory
     /**
      * @inheritdoc
      */
-    public function createTable(Schema $schema, $class_name, $table_name, $alias)
+    public function createTable(Schema $schema, string $class_name, string $table_name, string|null $alias): Table
     {
         return $this->create($class_name, [
             Schema::class => $schema,

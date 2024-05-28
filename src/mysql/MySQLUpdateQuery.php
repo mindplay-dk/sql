@@ -11,7 +11,7 @@ class MySQLUpdateQuery extends UpdateQuery
     use Order;
     use Limit;
 
-    public function getSQL()
+    public function getSQL(): string
     {
         $update = parent::getSQL();
 

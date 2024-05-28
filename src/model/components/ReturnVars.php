@@ -18,33 +18,19 @@ class ReturnVars
     /**
      * @var string[] list of return variable expressions (for use in a SELECT or RETURNING clause)
      */
-    private $vars = [];
+    private array $vars = [];
 
     /**
      * @var Type[] map where return variable name maps to Type
      */
-    private $type_map = [];
+    private array $type_map = [];
 
-    /**
-     * @var Table
-     */
-    private $root;
+    private Table $root;
 
-    /**
-     * @var Driver
-     */
-    private $driver;
+    private Driver $driver;
 
-    /**
-     * @var TypeProvider
-     */
-    private $types;
+    private TypeProvider $types;
     
-    /**
-     * @param Table        $root
-     * @param Driver       $driver
-     * @param TypeProvider $types
-     */
     public function __construct(Table $root, Driver $driver, TypeProvider $types)
     {
         $this->root = $root;
@@ -57,7 +43,7 @@ class ReturnVars
      *
      * @param Table $table Table to select and return
      */
-    public function addTable(Table $table)
+    public function addTable(Table $table): void
     {
         $this->vars[] = "{$table}.*";
 
@@ -67,9 +53,9 @@ class ReturnVars
     /**
      * Add one or more Columns to select and return
      *
-     * @param Column|Column[] one or more Columns to select and return
+     * @param Column|Column[] $cols one or more Columns to select and return
      */
-    public function addColumns($cols)
+    public function addColumns(Column|array $cols): void
     {
         /**
          * @var Column[] $cols
@@ -101,11 +87,11 @@ class ReturnVars
     /**
      * Add an SQL expression to select and return
      *
-     * @param string           $expr return expression
-     * @param string|null      $name return variable name (optional, but usually required)
-     * @param Type|string|null $type optional Type (or Type class-name)
+     * @param $expr return expression
+     * @param $name return variable name (optional, but usually required)
+     * @param $type optional Type (or Type class-name)
      */
-    public function addValue($expr, $name = null, $type = null)
+    public function addValue(string $expr, string|null $name = null, Type|String|null $type = null): void
     {
         if (isset($this->vars[$name])) {
             throw new OutOfBoundsException("duplicate return variable name: {$name}");
@@ -130,10 +116,7 @@ class ReturnVars
         }
     }
 
-    /**
-     * @return TypeMapper
-     */
-    public function createTypeMapper()
+    public function createTypeMapper(): TypeMapper
     {
         $type_map = $this->type_map;
 
@@ -150,7 +133,7 @@ class ReturnVars
     /**
      * @return bool true, if any return vars have been added
      */
-    public function hasReturnVars()
+    public function hasReturnVars(): bool
     {
         return count($this->vars) > 0;
     }
@@ -158,7 +141,7 @@ class ReturnVars
     /**
      * @return string comma-separated return expressions (for use in the SELECT or RETURNING clause of an SQL query)
      */
-    public function buildReturnVars()
+    public function buildReturnVars(): string
     {
         $vars = $this->vars;
 
@@ -177,9 +160,9 @@ class ReturnVars
      *
      * @param Table $table
      *
-     * @return Type[] map where Column Alias maps to Type
+     * @return array<string,Type> map where Column Alias maps to Type
      */
-    private function createTypeMap(Table $table)
+    private function createTypeMap(Table $table): array
     {
         $type_map = [];
 

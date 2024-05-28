@@ -98,11 +98,11 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * Add one or more Columns to select and return
      *
-     * @param Column|Column[] one or more Columns to select and return
+     * @param Column|Column[] $cols one or more Columns to select and return
      *
      * @return $this
      */
-    public function columns($cols)
+    public function columns(Column|array $cols)
     {
         $this->return_vars->addColumns($cols);
 
@@ -156,7 +156,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * @inheritdoc
      */
-    public function getMappers()
+    public function getMappers(): array
     {
         return array_merge([$this->return_vars->createTypeMapper()], $this->mappers);
     }
@@ -170,7 +170,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      *
      * @return SelectQuery
      */
-    public function createCountStatement()
+    public function createCountStatement(): SelectQuery
     {
         $query = clone $this;
 
@@ -191,7 +191,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * @ignore string magic (enables creation of nested SELECT queries)
      */
-    public function __toString()
+    public function __toString(): string
     {
         return "(" . $this->getSQL() . ")";
     }
@@ -202,7 +202,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      *
      * @return $this
      */
-    public function innerJoin(Table $table, $expr)
+    public function innerJoin(Table $table, $expr): static
     {
         return $this->addJoin("INNER", $table, $expr);
     }
@@ -213,7 +213,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      *
      * @return $this
      */
-    public function leftJoin(Table $table, $expr)
+    public function leftJoin(Table $table, $expr): static
     {
         return $this->addJoin("LEFT", $table, $expr);
     }
@@ -224,7 +224,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      *
      * @return $this
      */
-    public function rightJoin(Table $table, $expr)
+    public function rightJoin(Table $table, $expr): static
     {
         return $this->addJoin("RIGHT", $table, $expr);
     }
@@ -232,7 +232,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * @inheritdoc
      */
-    public function getSQL()
+    public function getSQL(): string
     {
         $flags = $this->buildFlags();
 
@@ -272,7 +272,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      *
      * @return $this
      */
-    protected function addJoin($type, Table $table, $expr)
+    protected function addJoin($type, Table $table, $expr): static
     {
         $table_expr = $table->getNode();
 
@@ -285,7 +285,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      * @param string $flag
      * @param bool   $state
      */
-    protected function setFlag($flag, $state = true)
+    protected function setFlag($flag, $state = true): void
     {
         if ($state) {
             $this->flags[$flag] = true;
@@ -297,7 +297,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * @return string root table expression and JOIN clauses (for use in the FROM clause of an SQL statement)
      */
-    protected function buildNodes()
+    protected function buildNodes(): string
     {
         return implode("\n", array_merge([$this->root->getNode()], $this->joins));
     }
@@ -305,7 +305,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * @return string query flags (such as "SQL_CALC_FOUND_ROWS" in a MySQL SELECT query)
      */
-    protected function buildFlags()
+    protected function buildFlags(): string
     {
         return implode(" ", array_keys($this->flags));
     }
@@ -313,7 +313,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
     /**
      * @return string combined condition expression (for use in the WHERE clause of an SQL statement)
      */
-    protected function buildHaving()
+    protected function buildHaving(): string
     {
         return implode(" AND ", $this->having);
     }

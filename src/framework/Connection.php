@@ -25,7 +25,7 @@ interface Connection
      *
      * @return Result
      */
-    public function fetch(Statement $statement, $batch_size = 1000);
+    public function fetch(Statement $statement, int $batch_size = 1000);
 
     /**
      * Execute an SQL statement, which does not produce a result, e.g. an "INSERT", "UPDATE" or "DELETE" statement.
@@ -34,8 +34,8 @@ interface Connection
      *
      * @return PreparedStatement
      */
-    public function execute(Statement $statement);
-
+    
+    public function execute(Statement $statement): PreparedStatement;
     /**
      * Prepare an SQL statement.
      *
@@ -43,7 +43,7 @@ interface Connection
      *
      * @return PreparedStatement
      */
-    public function prepare(Statement $statement);
+    public function prepare(Statement $statement): PreparedStatement;
 
     /**
      * Execute a `SELECT COUNT(*)` SQL statement and return the result.
@@ -52,10 +52,10 @@ interface Connection
      *
      * @return int
      */
-    public function count(Countable $statement);
+    public function count(Countable $statement): int;
 
     /**
-     * @param callable $func function () : bool - must return TRUE to commit or FALSE to roll back
+     * @param callable():bool $func function (): bool - must return TRUE to commit or FALSE to roll back
      *
      * @return bool TRUE on success (committed) or FALSE on failure (rolled back)
      *
@@ -65,14 +65,14 @@ interface Connection
      * @throws LogicException if an unhandled Exception occurs while calling the provided function
      * @throws UnexpectedValueException if the provided function does not return TRUE or FALSE
      */
-    public function transact(callable $func);
+    public function transact(callable $func): bool;
 
     /**
      * @param string|null $sequence_name auto-sequence name (or NULL for e.g. MySQL which supports only one auto-key)
      *
-     * @return mixed
+     * @return string|int|null the last auto-generated ID (usually an integer, could be a string for UUIDs, etc.)
      */
-    public function lastInsertId($sequence_name = null);
+    public function lastInsertId(?string $sequence_name = null): string|int|null;
 
     /**
      * Add a `Logger` instance, which will be notified when a query is executed.
@@ -81,5 +81,5 @@ interface Connection
      *
      * @return void
      */
-    public function addLogger(Logger $logger);
+    public function addLogger(Logger $logger): void;
 }

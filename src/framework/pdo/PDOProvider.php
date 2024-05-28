@@ -21,56 +21,35 @@ class PDOProvider
     const PROTOCOL_POSTGRES = "pgsql";
     const PROTOCOL_MYSQL    = "mysql";
 
-    /**
-     * @var string
-     */
-    private $protocol;
-
-    /**
-     * @var string
-     */
-    private $dsn;
-
-    /**
-     * @var string
-     */
-    private $username;
-
-    /**
-     * @var string
-     */
-    private $password;
-
-    /**
-     * @var array
-     */
-    private $options;
-
-    /**
-     * @var string
-     */
-    private $host;
-
-    /**
-     * @var string
-     */
-    private $port;
-
-    /**
-     * @var PDO|null
-     */
-    private $pdo;
+    private string $protocol;
+    
+    private string $dsn;
+    
+    private string $username;
+    
+    private string $password;
     
     /**
-     * @param string      $protocol database protocol name (one of the PROTOCOL_* class constants)
-     * @param string      $dbname   name of the database to connect to
-     * @param string      $username
-     * @param string      $password
-     * @param array|null  $options  PDO constructor options
-     * @param string|null $host     optional hostname; defaults to "localhost"
-     * @param int|null    $port     optional port-number; defaults to the standard port-number for the given $db type
+     * @var array<int,mixed>
      */
-    public function __construct($protocol, $dbname, $username, $password, $options = null, $host = null, $port = null)
+    private array $options;
+    
+    private string $host;
+    
+    private int $port;
+    
+    private PDO|null $pdo = null;
+    
+    /**
+     * @param string                 $protocol database protocol name (one of the PROTOCOL_* class constants)
+     * @param string                 $dbname   name of the database to connect to
+     * @param string                 $username
+     * @param string                 $password
+     * @param array<int,mixed>|null  $options  PDO constructor options (attributes)
+     * @param string|null            $host     optional hostname; defaults to "localhost"
+     * @param int|null               $port     optional port-number; defaults to the standard port-number for the given $db type
+     */
+    public function __construct(string $protocol, string $dbname, string $username, string $password, array $options = null, string $host = null, int|null $port = null)
     {
         static $default_port = [
             self::PROTOCOL_MYSQL    => 3306,
@@ -101,7 +80,7 @@ class PDOProvider
     /**
      * @return PDO
      */
-    public function getPDO()
+    public function getPDO(): PDO
     {
         if (! isset($this->pdo)) {
             $this->pdo = new PDO($this->dsn, $this->username, $this->password, $this->options);
@@ -113,55 +92,40 @@ class PDOProvider
     /**
      * @return string database procol name (one of the PROTOCOL_* class constants)
      */
-    public function getProtocol()
+    public function getProtocol(): string
     {
         return $this->protocol;
     }
 
-    /**
-     * @return string
-     */
-    public function getDSN()
+    public function getDSN(): string
     {
         return $this->dsn;
     }
 
-    /**
-     * @return string
-     */
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->username;
     }
 
-    /**
-     * @return string
-     */
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
 
     /**
-     * @return array
+     * @return array<int,mixed>
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->options;
     }
 
-    /**
-     * @return string
-     */
-    public function getHost()
+    public function getHost(): string
     {
         return $this->host;
     }
 
-    /**
-     * @return string
-     */
-    public function getPort()
+    public function getPort(): int
     {
         return $this->port;
     }

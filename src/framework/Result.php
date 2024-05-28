@@ -13,30 +13,25 @@ use Traversable;
  *
  * It implements `IteratorAggregate`, allowing you to execute the query and iterate
  * over the result set with a `foreach` statement.
+ * 
+ * @implements IteratorAggregate<array<string,mixed>>
  */
 class Result implements IteratorAggregate
 {
-    /**
-     * @var PreparedStatement
-     */
-    private $statement;
-
-    /**
-     * @var int
-     */
-    private $batch_size;
+    private PreparedStatement $statement;
+    private int $batch_size;
 
     /**
      * @var Mapper[] list of Mappers to apply when fetching results
      */
-    private $mappers;
+    private array $mappers;
 
     /**
      * @param PreparedStatement $statement  prepared statement
      * @param int               $batch_size batch-size (when fetching large result sets)
      * @param Mapper[]          $mappers    list of Mappers to apply while fetching results
      */
-    public function __construct(PreparedStatement $statement, $batch_size, array $mappers)
+    public function __construct(PreparedStatement $statement, int $batch_size, array $mappers)
     {
         $this->statement = $statement;
         $this->batch_size = $batch_size;
@@ -44,9 +39,9 @@ class Result implements IteratorAggregate
     }
 
     /**
-     * @return mixed|null first record of the record-set (or NULL, if the record-set is empty)
+     * @return array<string,mixed>|null first record of the record-set (or NULL, if the record-set is empty)
      */
-    public function firstRow()
+    public function firstRow(): array|null
     {
         foreach ($this->createIterator(1) as $record) {
             return $record; // break from loop immediately after fetching the first record
@@ -58,7 +53,7 @@ class Result implements IteratorAggregate
     /**
      * @return mixed|null first column value of the first record of the record-set (or NULL, if the record-set is empty)
      */
-    public function firstCol()
+    public function firstCol(): mixed
     {
         foreach ($this->createIterator(1) as $record) {
             $keys = array_keys($record);
@@ -70,9 +65,9 @@ class Result implements IteratorAggregate
     }
 
     /**
-     * @return array all the records of the record-set
+     * @return array<array<string,mixed>> all the records of the record-set
      */
-    public function all()
+    public function all(): array
     {
         return iterator_to_array($this->getIterator());
     }
@@ -95,7 +90,7 @@ class Result implements IteratorAggregate
      *
      * @return Iterator
      */
-    private function createIterator($batch_size)
+    private function createIterator($batch_size): Iterator
     {
         $fetching = true;
 

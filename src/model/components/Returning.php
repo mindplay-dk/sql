@@ -13,10 +13,7 @@ trait Returning
 {
     use Mappers;
 
-    /**
-     * @var ReturnVars
-     */
-    protected $return_vars;
+    protected ReturnVars $return_vars;
     
     /**
      * Add all the Columns of a full Table to be selected and returned
@@ -25,7 +22,7 @@ trait Returning
      *
      * @return $this
      */
-    public function returningTable(Table $table)
+    public function returningTable(Table $table): static
     {
         $this->return_vars->addTable($table);
 
@@ -39,7 +36,7 @@ trait Returning
      *
      * @return $this
      */
-    public function returningColumns($cols)
+    public function returningColumns($cols): static
     {
         $this->return_vars->addColumns($cols);
 
@@ -55,7 +52,7 @@ trait Returning
      *
      * @return $this
      */
-    public function returningValue($expr, $name = null, $type = null)
+    public function returningValue($expr, $name = null, $type = null): static
     {
         $this->return_vars->addValue($expr, $name, $type);
 
@@ -63,9 +60,9 @@ trait Returning
     }
 
     /**
-     * @inheritdoc
+     * @see MapperProvider::getMappers()
      */
-    public function getMappers()
+    public function getMappers(): array
     {
         return array_merge([$this->return_vars->createTypeMapper()], $this->mappers);
     }

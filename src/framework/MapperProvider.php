@@ -13,5 +13,5 @@ interface MapperProvider
     /**
      * @return Mapper[] list of Mappers to apply while fetching returned records
      */
-    public function getMappers();
+    public function getMappers(): array;
 }

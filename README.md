@@ -57,7 +57,7 @@ Once the Docker environment is running, you can run the tests more quickly on th
 
 Once running, if you prefer, you can also just shell into the PHP container and run the tests from there, for example:
 
-    docker compose exec php sh
+    docker compose exec php bash
     composer update
     composer test
     exit

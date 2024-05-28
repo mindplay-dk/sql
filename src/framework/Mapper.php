@@ -10,9 +10,9 @@ use Traversable;
 interface Mapper
 {
     /**
-     * @param array $record_set
-     *
-     * @return array|Traversable
+     * @param array<string,mixed>[] $record_set
+     * 
+     * @return iterable<array<string,mixed>>
      */
-    public function map(array $record_set);
+    public function map(array $record_set): array|Traversable;
 }

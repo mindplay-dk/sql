@@ -15,18 +15,11 @@ class UpdateQuery extends Query
 {
     use Conditions;
 
-    /**
-     * @var Table
-     */
-    protected $table;
+    protected Table $table;
+    protected Driver $driver;
 
     /**
-     * @var Driver
-     */
-    protected $driver;
-
-    /**
-     * @var mixed[] map where Column name => literal SQL expression to assign
+     * @var array<string,string> map where Column name => literal SQL expression to assign
      */
     private $assignments = [];
 
@@ -48,23 +41,25 @@ class UpdateQuery extends Query
      *
      * @return $this
      */
-    public function setValue($column, $value)
+    public function setValue(Column|string $column, mixed $value): static
     {
         // TODO qualify table-references to support UPDATE queries with JOINs
 
         if ($column instanceof Column) {
             $name = $this->getPlaceholder($column);
+            $type = $column->getType();
 
             $quoted_name = $this->driver->quoteName($column->getName());
         } else {
             $name = $column;
+            $type = null;
 
             $quoted_name = $this->driver->quoteName($name);
         }
 
         $this->assignments[$name] = "{$quoted_name} = :{$name}";
 
-        $this->bind($name, $value, $column->getType());
+        $this->bind($name, $value, $type);
 
         return $this;
     }
@@ -75,7 +70,7 @@ class UpdateQuery extends Query
      *
      * @return $this
      */
-    public function setExpr($column, $expr)
+    public function setExpr(Column|string $column, string $expr): static
     {
         // TODO qualify table-references to support UPDATE queries with JOINs
 
@@ -95,7 +90,7 @@ class UpdateQuery extends Query
     }
 
     /**
-     * @param array $values map where Column name => scalar values to assign
+     * @param array<string,int|string|bool|null> $values map where Column name => scalar values to assign
      *
      * @return $this
      */
@@ -117,7 +112,7 @@ class UpdateQuery extends Query
     /**
      * @inheritdoc
      */
-    public function getSQL()
+    public function getSQL(): string
     {
         $update = "UPDATE " . $this->table->getNode();
 
@@ -135,7 +130,7 @@ class UpdateQuery extends Query
      *
      * @return string
      */
-    private function getPlaceholder(Column $column)
+    private function getPlaceholder(Column $column): string
     {
         $table = $column->getTable();
 

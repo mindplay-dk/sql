@@ -2,56 +2,34 @@
 
 namespace mindplay\sql\framework\pdo;
 
-use InvalidArgumentException;
 use mindplay\sql\framework\Logger;
 use mindplay\sql\framework\PreparedStatement;
-use mindplay\sql\model\Driver;
 use mindplay\sql\model\TypeProvider;
 use PDO;
 use PDOException;
 use PDOStatement;
+use RuntimeException;
 
 /**
  * This class implements a Prepared Statement adapter for PDO Statements.
  */
 class PreparedPDOStatement implements PreparedStatement
 {
+    private PDOStatement $handle;
+    
+    private PDOExceptionMapper $exception_mapper;
+    
+    private TypeProvider $types;
+    
     /**
-     * @var PDOStatement
+     * @var array<string,int|float|string|bool|null>
      */
-    private $handle;
+    private array $params = [];
+    
+    private bool $executed = false;
+    
+    private Logger $logger;
 
-    /**
-     * @var PDOExceptionMapper
-     */
-    private $exception_mapper;
-
-    /**
-     * @var TypeProvider
-     */
-    private $types;
-
-    /**
-     * @var array
-     */
-    private $params = [];
-
-    /**
-     * @var bool
-     */
-    private $executed = false;
-
-    /**
-     * @var Logger
-     */
-    private $logger;
-
-    /**
-     * @param PDOStatement       $handle
-     * @param PDOExceptionMapper $exception_mapper
-     * @param TypeProvider       $types
-     * @param Logger             $logger
-     */
     public function __construct(
         PDOStatement $handle,
         PDOExceptionMapper $exception_mapper,
@@ -67,7 +45,7 @@ class PreparedPDOStatement implements PreparedStatement
     /**
      * @inheritdoc
      */
-    public function bind($name, $value)
+    public function bind(string $name, int|float|string|bool|null $value): void
     {
         static $PDO_TYPE = [
             'integer' => PDO::PARAM_INT,
@@ -94,14 +72,14 @@ class PreparedPDOStatement implements PreparedStatement
 
             $this->params[$name] = $value;
         } else {
-            throw new InvalidArgumentException("unexpected value type: {$value_type}");
+            throw new RuntimeException("internal error: unexpected value type {$value_type}");
         }
     }
 
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         $microtime_begin = microtime(true);
 
@@ -134,8 +112,10 @@ class PreparedPDOStatement implements PreparedStatement
 
     /**
      * @inheritdoc
+     * 
+     * @return array<string,mixed>|null
      */
-    public function fetch()
+    public function fetch(): array|null
     {
         if (! $this->executed) {
             $this->execute();
@@ -153,7 +133,7 @@ class PreparedPDOStatement implements PreparedStatement
     /**
      * @inheritdoc
      */
-    public function getRowsAffected()
+    public function getRowsAffected(): int
     {
         return $this->handle->rowCount();
     }

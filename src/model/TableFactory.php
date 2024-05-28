@@ -12,12 +12,8 @@ use mindplay\sql\model\schema\Table;
 interface TableFactory
 {
     /**
-     * @param Schema      $schema     owner Schema reference
-     * @param string      $class_name Table class-name
-     * @param string      $table_name
-     * @param string|null $alias
-     *
-     * @return Table
+     * @param $schema     owner Schema reference
+     * @param $class_name Table class-name
      */
-    public function createTable(Schema $schema, $class_name, $table_name, $alias);
+    public function createTable(Schema $schema, string $class_name, string $table_name, string|null $alias): Table;
 }

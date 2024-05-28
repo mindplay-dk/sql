@@ -19,10 +19,10 @@ class TypeMapper implements Mapper
     /**
      * @var Type[] map where return variable name maps to Type
      */
-    private $types;
+    private array $types;
 
     /**
-     * @param $types Type[] map where return variable name maps to Type
+     * @param Type[] $types map where return variable name maps to Type
      */
     public function __construct(array $types)
     {
@@ -30,11 +30,9 @@ class TypeMapper implements Mapper
     }
 
     /**
-     * @param array $record_set
-     *
-     * @return array|Traversable
+     * @inheritDoc
      */
-    public function map(array $record_set)
+    public function map(array $record_set): array|Traversable
     {
         foreach ($record_set as $index => $record) {
             if (! is_array($record)) {

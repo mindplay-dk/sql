@@ -18,20 +18,20 @@ use Psr\Log\LogLevel;
 class BufferedPSRLogger implements Logger
 {
     /**
-     * @var array
+     * @var array<string,mixed>[] buffered query log-entries
      */
-    private $entries = [];
+    private array $entries = [];
 
     /**
      * Flush all recorded query log-entries to a single PSR-3 log-entry
      *
      * @param LoggerInterface $logger the PSR Logger to which the query-log will be flushed
-     * @param string|mixed    $log_level PSR-3 log level (defaults to INFO)
+     * @param string|mixed    $log_level PSR-3 log level (usually a string, defaults to "info")
      * @param string          $message   combined log entry title
      *
      * @see LogLevel
      */
-    public function flushTo(LoggerInterface $logger, $log_level = LogLevel::INFO, $message = "INFO")
+    public function flushTo(LoggerInterface $logger, mixed $log_level = LogLevel::INFO, string $message = "INFO"): void
     {
         $logger->log(
             $log_level,
@@ -42,7 +42,10 @@ class BufferedPSRLogger implements Logger
         $this->entries = [];
     }
 
-    public function logQuery($sql, $params, $time_msec)
+    /**
+     * @param array<string,mixed> $params
+     */
+    public function logQuery(string $sql, array $params, float $time_msec): void
     {
         $this->entries[] = [
             "time" => sprintf('%0.3f', $time_msec / 1000) . " s",

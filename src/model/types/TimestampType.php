@@ -34,13 +34,20 @@ class TimestampType implements Type
             return null;
         }
 
+        if (!is_numeric($value)) {
+            throw new UnexpectedValueException("expected integer value, got: " . gettype($value));
+        }
+
         $timestamp = (int) $value;
 
         if ($timestamp === 0) {
             throw new UnexpectedValueException("unable to convert value to int: " . $value);
         }
 
-        $datetime = DateTime::createFromFormat('U', $timestamp);
+        /**
+         * @var DateTime $datetime
+         */
+        $datetime = DateTime::createFromFormat('U', (string) $timestamp);
 
         $datetime->setTimezone(self::$utc_timezone);
 
@@ -55,6 +62,10 @@ class TimestampType implements Type
 
         if ($value === null) {
             return $value; // return NULL value as-is
+        }
+
+        if (!is_string($value)) {
+            throw new UnexpectedValueException("expected string value, got: " . gettype($value));
         }
 
         $datetime = DateTime::createFromFormat('!' . static::FORMAT, $value, self::$utc_timezone);

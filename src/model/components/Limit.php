@@ -10,10 +10,7 @@ use InvalidArgumentException;
  */
 trait Limit
 {
-    /**
-     * @var int|null
-     */
-    protected $limit;
+    protected int|null $limit = null;
 
     /**
      * @param int $limit max. number of records
@@ -22,7 +19,7 @@ trait Limit
      *
      * @throws InvalidArgumentException if the given limit is less than 1
      */
-    public function limit($limit)
+    public function limit($limit): static
     {
         if ($limit < 1) {
             throw new InvalidArgumentException("limit out of range: {$limit}");

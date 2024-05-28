@@ -25,7 +25,8 @@
         "mindplay/testies": "^1.0",
         "mindplay/benchpress": "^0.1",
         "mockery/mockery": "^1.5.1",
-        "phpunit/php-code-coverage": "^9.2.19"
+        "phpunit/php-code-coverage": "^9.2.19",
+        "phpstan/phpstan": "^1.11"
     },
     "suggest": {
         "ext-pdo_pgsql": "for PostgreSQL support (duh.)",

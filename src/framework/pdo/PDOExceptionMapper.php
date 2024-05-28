@@ -2,6 +2,8 @@
 
 namespace mindplay\sql\framework\pdo;
 
+use mindplay\sql\exceptions\SQLException;
+
 interface PDOExceptionMapper
 {
     /**
@@ -11,7 +13,7 @@ interface PDOExceptionMapper
      * @param int    $error_code    driver-specific error-code
      * @param string $error_message driver-specific error-message
      *
-     * @return string SQLException-type name
+     * @return class-string<SQLException> SQLException-type name
      */
-    public function getExceptionType($sql_state, $error_code, $error_message);
+    public function getExceptionType(string $sql_state, int $error_code, string $error_message): string;
 }

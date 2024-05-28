@@ -8,17 +8,14 @@ namespace mindplay\sql\model;
 interface Driver
 {
     /**
-     * @param string $name table or column name
+     * @param $name table or column name
      *
      * @return string quoted name
      */
-    public function quoteName($name);
+    public function quoteName(string $name): string;
 
     /**
-     * @param string|null $schema
-     * @param string      $table
-     *
      * @return string quoted, schema-qualified table-name
      */
-    public function quoteTableName($schema, $table);
+    public function quoteTableName(string|null $schema, string $table): string;
 }

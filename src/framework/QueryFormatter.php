@@ -10,12 +10,12 @@ namespace mindplay\sql\framework;
 abstract class QueryFormatter
 {
     /**
-     * @param string $sql
-     * @param array  $params
+     * @param string              $sql
+     * @param array<string,mixed> $params
      *
      * @return string SQL with emulated prepare (for diagnostic purposes only)
      */
-    public static function formatQuery($sql, $params)
+    public static function formatQuery(string $sql, array $params): string
     {
         $quoted_params = [];
 

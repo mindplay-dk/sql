@@ -23,3 +23,4 @@ fi
 
 # Run the test suite within the already running php container, passing the environment variables
 docker compose exec php composer run test
+docker compose exec php composer exec phpstan

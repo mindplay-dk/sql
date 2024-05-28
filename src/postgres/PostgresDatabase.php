@@ -13,7 +13,7 @@ use PDO;
 
 class PostgresDatabase extends Database implements Driver
 {
-    protected function bootstrap(DatabaseContainerFactory $factory)
+    protected function bootstrap(DatabaseContainerFactory $factory): void
     {
         $factory->set(Driver::class, $this);
         
@@ -26,12 +26,7 @@ class PostgresDatabase extends Database implements Driver
         $factory->register("scalar.double", FloatType::class);
     }
 
-    /**
-     * @param PDO $pdo
-     *
-     * @return PostgresConnection
-     */
-    public function createConnection(PDO $pdo)
+    public function createConnection(PDO $pdo): PostgresConnection
     {
         return $this->container->create(PostgresConnection::class, ['pdo' => $pdo]);
     }
@@ -39,7 +34,7 @@ class PostgresDatabase extends Database implements Driver
     /**
      * @inheritdoc
      */
-    public function quoteName($name)
+    public function quoteName(string $name): string
     {
         return '"' . $name . '"';
     }
@@ -47,7 +42,7 @@ class PostgresDatabase extends Database implements Driver
     /**
      * @inheritdoc
      */
-    public function quoteTableName($schema, $table)
+    public function quoteTableName(string|null $schema, string $table): string
     {
         return $schema
             ? '"' . $schema . '"."' . $table . '"'

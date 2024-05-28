@@ -31,8 +31,14 @@ class JSONType implements Type
 
     public function convertToPHP($value)
     {
-        return ($value === null || $value === '')
-            ? null
-            : json_decode($value, true);
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_string($value)) {
+            return json_decode($value, true);
+        }
+
+        throw new RuntimeException("expected JSON string, got: " . gettype($value));
     }
 }

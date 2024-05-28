@@ -11,7 +11,7 @@ class MySQLDeleteQuery extends DeleteQuery
     use Order;
     use Limit;
 
-    public function getSQL()
+    public function getSQL(): string
     {
         $delete = parent::getSQL();
 

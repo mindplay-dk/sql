@@ -9,14 +9,8 @@ use mindplay\sql\model\TableFactory;
  */
 abstract class Schema
 {
-    /**
-     * @var TableFactory
-     */
-    private $factory;
+    private TableFactory $factory;
 
-    /**
-     * @param TableFactory $factory
-     */
     public function __construct(TableFactory $factory)
     {
         $this->factory = $factory;
@@ -30,19 +24,17 @@ abstract class Schema
      *
      * @return string|null optional Schema-name, or NULL
      */
-    public function getName()
+    public function getName(): string|null
     {
         return null;
     }
 
     /**
-     * @param string      $class_name Table class-name
-     * @param string      $table_name relational table-name
-     * @param string|null $alias      optional Table alias
-     *
-     * @return Table
+     * @param $class_name Table class-name
+     * @param $table_name relational table-name
+     * @param $alias      optional Table alias
      */
-    protected function createTable($class_name, $table_name, $alias = null)
+    protected function createTable(string $class_name, string $table_name, string|null $alias = null): Table
     {
         return $this->factory->createTable($this, $class_name, $table_name, $alias);
     }

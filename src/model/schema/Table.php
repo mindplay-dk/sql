@@ -12,39 +12,13 @@ use ReflectionMethod;
  */
 abstract class Table
 {
-    /**
-     * @var Schema
-     */
-    private $schema;
+    private Schema $schema;
+    private Driver $driver;
+    private TypeProvider $types;
+    private string $name;
+    private string|null $alias;
 
-    /**
-     * @var Driver
-     */
-    private $driver;
-
-    /**
-     * @var TypeProvider
-     */
-    private $types;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var string|null
-     */
-    private $alias;
-
-    /**
-     * @param Schema       $schema
-     * @param Driver       $driver
-     * @param TypeProvider $types
-     * @param string       $name
-     * @param string|null  $alias
-     */
-    public function __construct(Schema $schema, Driver $driver, TypeProvider $types, $name, $alias)
+    public function __construct(Schema $schema, Driver $driver, TypeProvider $types, string $name, string|null $alias)
     {
         $this->schema = $schema;
         $this->driver = $driver;
@@ -56,23 +30,17 @@ abstract class Table
     /**
      * @return Schema owner Schema instance
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
         return $this->schema;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getAlias()
+    public function getAlias(): string|null
     {
         return $this->alias;
     }
@@ -80,7 +48,7 @@ abstract class Table
     /**
      * @return string table expression (e.g. "{table} AS {alias}" for use in the FROM clause of an SQL statement)
      */
-    public function getNode()
+    public function getNode(): string
     {
         $alias = $this->getAlias();
 
@@ -98,7 +66,7 @@ abstract class Table
      *
      * @return Column[] list of all available Columns
      */
-    public function listColumns($prefix = null)
+    public function listColumns(string|null $prefix = null): array
     {
         // create a whitelist of parent types, excluding the Table class itself:
 
@@ -138,14 +106,8 @@ abstract class Table
      *
      * A value *must* be specified when building an `INSERT` query - if you don't specify a value
      * for this Column, the INSERT query-builder will throw an exception.
-     *
-     * @param string      $name  Column name
-     * @param string      $type  Type class-name
-     * @param string|null $alias Optional alias
-     *
-     * @return Column
      */
-    protected function requiredColumn($name, $type, $alias = null)
+    protected function requiredColumn(string $name, string $type, string|null $alias = null): Column
     {
         return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, true, null, false);
     }
@@ -156,14 +118,14 @@ abstract class Table
      * A value is optional (and may have a `$default`) when building an `INSERT` query - if you don't
      * specify a value for this Column, the INSERT query-builder will automatically assign the `$default`.
      *
-     * @param string      $name    Column name
-     * @param string      $type    Type class-name
-     * @param string|null $alias   Optional alias
-     * @param mixed       $default Optional default PHP value (Type-conversion will be applied.)
+     * @param $name    Column name
+     * @param $type    Type class-name
+     * @param $alias   Optional alias
+     * @param $default Optional default PHP value (Type-conversion will be applied.)
      *
      * @return Column
      */
-    protected function optionalColumn($name, $type, $alias = null, $default = null)
+    protected function optionalColumn(string $name, string $type, string|null $alias = null, mixed $default = null): Column
     {
         return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, false, $default, false);
     }
@@ -176,13 +138,11 @@ abstract class Table
      * Use this for Columns that the database itself will populate, e.g. auto-incrementing keys or
      * columns that are otherwise initialized by the database itself.
      *
-     * @param string      $name  Column name
-     * @param string      $type  Type class-name
-     * @param string|null $alias Optional alias
-     *
-     * @return Column
+     * @param $name  Column name
+     * @param $type  Type class-name
+     * @param $alias Optional alias
      */
-    protected function autoColumn($name, $type, $alias = null)
+    protected function autoColumn(string $name, string $type, string|null $alias = null): Column
     {
         return new Column($this->driver, $this, $name, $this->types->getType($type), $alias, false, null, true);
     }
@@ -192,7 +152,7 @@ abstract class Table
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->alias
             ? $this->driver->quoteName($this->alias)

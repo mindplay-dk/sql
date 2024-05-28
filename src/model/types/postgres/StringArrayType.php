@@ -3,6 +3,7 @@
 namespace mindplay\sql\model\types\postgres;
 
 use mindplay\sql\model\schema\Type;
+use RuntimeException;
 
 /**
  * Support for one-dimensional (Postgres) string arrays
@@ -18,7 +19,7 @@ class StringArrayType implements Type
      */
     const POSTGRES_SYNTAX_PATTERN = '/(?<=^\{|,)(([^,"{]*)|\s*"((?:[^"\\\\]|\\\\(?:.|[0-9]+|x[0-9a-f]+))*)"\s*)(,|(?<!^\{)(?=\}$))/iu';
 
-    public function convertToSQL($value)
+    public function convertToSQL($value): string
     {
         if (empty($value)) {
             return '{}';
@@ -43,6 +44,10 @@ class StringArrayType implements Type
     {
         if (empty($value) || '{}' === $value) {
             return [];
+        }
+
+        if (gettype($value) !== 'string') {
+            throw new RuntimeException('Expected string, got: ' . gettype($value));
         }
 
         $array = [];

@@ -10,14 +10,14 @@ trait Conditions
     /**
      * @var string[] list of condition expressions to apply to the WHERE clause
      */
-    protected $conditions = [];
+    protected array $conditions = [];
 
     /**
      * @param string|string[] $exprs one or more condition expressions to apply to the WHERE clause
      *
      * @return $this
      */
-    public function where($exprs)
+    public function where(string|array $exprs): static
     {
         foreach ((array) $exprs as $expr) {
             $this->conditions[] = $expr;
@@ -29,7 +29,7 @@ trait Conditions
     /**
      * @return string combined condition expression (for use in the WHERE clause of an SQL statement)
      */
-    protected function buildConditions()
+    protected function buildConditions(): string
     {
         return implode(" AND ", $this->conditions);
     }

@@ -12,20 +12,17 @@ use UnexpectedValueException;
  */
 abstract class Query implements Statement
 {
-    /**
-     * @var TypeProvider
-     */
-    protected $types;
+    protected TypeProvider $types;
 
     /**
-     * @var array map where placeholder name => mixed value types
+     * @var array<string,mixed> map where placeholder name => mixed value types
      */
-    protected $params = [];
+    protected array $params = [];
 
     /**
-     * @var Type[] map where placeholder name => Type instance
+     * @var array<string,Type|null> map where placeholder name => Type instance (or NULL)
      */
-    protected $param_types = [];
+    protected array $param_types = [];
 
     /**
      * @param TypeProvider $types
@@ -46,7 +43,7 @@ abstract class Query implements Statement
      *
      * @return $this
      */
-    public function bind($name, $value, $type = null)
+    public function bind(string $name, mixed $value, Type|string|null $type = null): static
     {
         static $SCALAR_TYPES = [
             'integer' => true,
@@ -91,11 +88,11 @@ abstract class Query implements Statement
      * 
      * @see bind()
      *
-     * @param array $params placeholder name/value pairs
+     * @param array<string|int|float|bool|null|array<string|int|float|bool|null>> $params placeholder name/value pairs
      *
      * @return $this
      */
-    public function apply(array $params)
+    public function apply(array $params): static
     {
         foreach ($params as $name => $value) {
             $this->bind($name, $value);
@@ -107,7 +104,7 @@ abstract class Query implements Statement
     /**
      * @inheritdoc
      */
-    public function getParams()
+    public function getParams(): array
     {
         $params = [];
 

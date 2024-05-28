@@ -15,7 +15,7 @@ class MySQLSelectQuery extends SelectQuery
      *
      * @return $this
      */
-    public function calcFoundRows()
+    public function calcFoundRows(): static
     {
         $this->setFlag(self::CALC_FOUND_ROWS);
         

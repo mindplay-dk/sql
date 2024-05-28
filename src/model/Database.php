@@ -4,17 +4,13 @@ namespace mindplay\sql\model;
 
 use mindplay\sql\model\query\SQLQuery;
 use mindplay\sql\model\schema\Schema;
-use UnexpectedValueException;
 
 /**
  * This class implements the primary public API of the database model.
  */
 abstract class Database
 {
-    /**
-     * @var DatabaseContainer
-     */
-    protected $container;
+    protected DatabaseContainer $container;
 
     /**
      * The typical use-case is to omit the `$factory` argument - it exists primarily for
@@ -33,27 +29,17 @@ abstract class Database
         $this->container = $factory->createContainer();
     }
 
-    /**
-     * @return DatabaseContainer
-     */
-    abstract protected function bootstrap(DatabaseContainerFactory $factory);
+    abstract protected function bootstrap(DatabaseContainerFactory $factory): void;
 
     /**
-     * @param string Schema class-name
-     *
-     * @return Schema
+     * @param class-string $schema Schema class type-name
      */
-    public function getSchema($schema)
+    public function getSchema(string $schema): Schema
     {
         return $this->container->getSchema($schema);
     }
     
-    /**
-     * @param string $sql
-     * 
-     * @return SQLQuery
-     */
-    public function sql($sql)
+    public function sql(string $sql): SQLQuery
     {
         return $this->container->create(SQLQuery::class, ['sql' => $sql]);
     }

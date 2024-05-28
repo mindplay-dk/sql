@@ -9,57 +9,19 @@ use mindplay\sql\model\Driver;
  */
 class Column
 {
-    /**
-     * @var Table
-     */
-    private $table;
+    private Table $table;
+    private Driver $driver;
+    private Type $type;
+    private string $name;
+    private string|null $alias;
+    private bool $required;
+    private mixed $default;
+    private bool $auto;
 
     /**
-     * @var Driver
+     * @param $table parent Table instance
      */
-    private $driver;
-
-    /**
-     * @var Type
-     */
-    private $type;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var string
-     */
-    private $alias;
-
-    /**
-     * @var bool
-     */
-    private $required;
-
-    /**
-     * @var mixed
-     */
-    private $default;
-
-    /**
-     * @var bool
-     */
-    private $auto;
-
-    /**
-     * @param Driver      $driver
-     * @param Table       $table parent Table instance
-     * @param string      $name
-     * @param Type        $type
-     * @param string|null $alias
-     * @param bool        $required
-     * @param mixed       $default
-     * @param bool        $auto
-     */
-    public function __construct(Driver $driver, Table $table, $name, Type $type, $alias, $required, $default, $auto)
+    public function __construct(Driver $driver, Table $table, string $name, Type $type, string|null $alias, bool $required, mixed $default, bool $auto)
     {
         $this->table = $table;
         $this->driver = $driver;
@@ -71,68 +33,42 @@ class Column
         $this->auto = $auto;
     }
 
-    /**
-     * @return Table
-     */
-    public function getTable()
+    public function getTable(): Table
     {
         return $this->table;
     }
 
-    /**
-     * @return Type
-     */
-    public function getType()
+    public function getType(): Type
     {
         return $this->type;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getAlias()
+    public function getAlias(): string|null
     {
         return $this->alias;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRequired()
+    public function isRequired(): bool
     {
         return $this->required;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDefault()
+    public function getDefault(): mixed
     {
         return $this->default;
     }
 
-    /**
-     * @return bool
-     */
-    public function isAuto()
+    public function isAuto(): bool
     {
         return $this->auto;
     }
 
-    /**
-     * @ignore
-     *
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->table->__toString() . '.' . $this->driver->quoteName($this->name);
     }

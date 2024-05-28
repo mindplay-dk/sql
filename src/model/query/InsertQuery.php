@@ -13,20 +13,13 @@ use RuntimeException;
  */
 class InsertQuery extends Query
 {
-    /**
-     * @var Driver
-     */
-    private $driver;
-
-    /**
-     * @var Table
-     */
-    private $table;
+    private Driver $driver;
+    private Table $table;
 
     /**
      * @var Column[]
      */
-    private $columns;
+    private array $columns;
 
     /**
      * @var string[] list of tuple expressions
@@ -62,11 +55,11 @@ class InsertQuery extends Query
     /**
      * Add a record to this INSERT query.
      *
-     * @param array $record record map (where Column name => value)
+     * @param array<string,mixed> $record record map (where Column name => value)
      *
      * @return $this
      */
-    public function add(array $record)
+    public function add(array $record): static
     {
         $placeholders = [];
 
@@ -98,7 +91,7 @@ class InsertQuery extends Query
     /**
      * @inheritdoc
      */
-    public function getSQL()
+    public function getSQL(): string
     {
         if (count($this->tuples) === 0) {
             throw new RuntimeException("no records added to this query");

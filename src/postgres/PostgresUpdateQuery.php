@@ -29,7 +29,7 @@ class PostgresUpdateQuery extends UpdateQuery implements MapperProvider
     /**
      * @inheritdoc
      */
-    public function getSQL()
+    public function getSQL(): string
     {
         $returning = $this->return_vars->hasReturnVars()
             ? "\nRETURNING " . $this->return_vars->buildReturnVars()

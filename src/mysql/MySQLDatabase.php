@@ -3,7 +3,6 @@
 namespace mindplay\sql\mysql;
 
 use mindplay\sql\model\Database;
-use mindplay\sql\model\DatabaseContainer;
 use mindplay\sql\model\DatabaseContainerFactory;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\query\DeleteQuery;
@@ -16,7 +15,7 @@ use PDO;
 
 class MySQLDatabase extends Database implements Driver
 {
-    protected function bootstrap(DatabaseContainerFactory $factory)
+    protected function bootstrap(DatabaseContainerFactory $factory): void
     {
         $factory->set(Driver::class, $this);
 
@@ -29,12 +28,7 @@ class MySQLDatabase extends Database implements Driver
         $factory->register("scalar.double", FloatType::class);
     }
     
-    /**
-     * @param PDO $pdo
-     * 
-     * @return MySQLConnection
-     */
-    public function createConnection(PDO $pdo)
+    public function createConnection(PDO $pdo): MySQLConnection
     {
         return $this->container->create(MySQLConnection::class, ['pdo' => $pdo]);
     }
@@ -42,7 +36,7 @@ class MySQLDatabase extends Database implements Driver
     /**
      * @inheritdoc
      */
-    public function quoteName($name)
+    public function quoteName(string $name): string
     {
         return '`' . $name . '`';
     }
@@ -50,49 +44,29 @@ class MySQLDatabase extends Database implements Driver
     /**
      * @inheritdoc
      */
-    public function quoteTableName($schema, $table)
+    public function quoteTableName(string|null $schema, string $table): string
     {
         return $schema
             ? "`{$schema}_{$table}`"
             : "`{$table}`";
     }
 
-    /**
-     * @param Table $from
-     *
-     * @return MySQLSelectQuery
-     */
-    public function select(Table $from)
+    public function select(Table $from): MySQLSelectQuery
     {
         return $this->container->create(MySQLSelectQuery::class, [Table::class => $from]);
     }
 
-    /**
-     * @param Table $into
-     *
-     * @return InsertQuery
-     */
-    public function insert(Table $into)
+    public function insert(Table $into): InsertQuery
     {
         return $this->container->create(InsertQuery::class, [Table::class => $into]);
     }
 
-    /**
-     * @param Table $table
-     *
-     * @return UpdateQuery
-     */
-    public function update(Table $table)
+    public function update(Table $table): UpdateQuery
     {
         return $this->container->create(MySQLUpdateQuery::class, [Table::class => $table]);
     }
 
-    /**
-     * @param Table $table
-     *
-     * @return DeleteQuery
-     */
-    public function delete(Table $table)
+    public function delete(Table $table): DeleteQuery
     {
         return $this->container->create(MySQLDeleteQuery::class, [Table::class => $table]);
     }
