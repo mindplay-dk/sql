@@ -7,14 +7,26 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php_version: [8.1, 8.2, 8.3]
+        include:
+          - php_version: 8.1
+          - php_version: 8.2
+          - php_version: 8.3
+            code_coverage: upload
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Required by Scrutinizer (Ocular)
 
       - name: Set up Docker Compose
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Run tests
         run: ./test.sh ${{ matrix.php_version }}
+
+      - name: Upload Scrutinizer coverage
+        uses: sudo-bot/action-scrutinizer@latest
+        if: github.repository == 'mindplay-dk/sql' && matrix.code_coverage == 'upload'
+        with:
+          cli-args: "--format=php-clover test/build/clover.xml"
