@@ -3,9 +3,11 @@
 # Ensure the script exits on any error
 set -e
 
-# Uncomment this while changing the Dockerfile
-#docker compose down
-#docker compose build
+# If a PHP version is passed as an argument, rebuild with the new PHP version
+if [ -n "$1" ]; then
+  docker compose down
+  docker compose build --build-arg php_version=$1
+fi
 
 # Start the Docker services if not already running
 docker compose up -d
