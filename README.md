@@ -3,7 +3,7 @@ mindplay/sql
 
 Database framework and query builder.
 
-[![PHP Version](https://img.shields.io/badge/php-7.3%2B-blue.svg)](https://packagist.org/packages/mindplay/sql)
+[![PHP Version](https://img.shields.io/badge/php-8.1%2B-blue.svg)](https://packagist.org/packages/mindplay/sql)
 [![Build Status](https://travis-ci.org/mindplay-dk/sql.svg?branch=master)](https://travis-ci.org/mindplay-dk/sql)
 [![Code Coverage](https://scrutinizer-ci.com/g/mindplay-dk/sql/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/mindplay-dk/sql/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mindplay-dk/sql/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mindplay-dk/sql/?branch=master)
@@ -41,18 +41,26 @@ the internal `protected` portion of the API; typically, a major `0.x+1` release 
 
 ### Contributions
 
-Current target is php 5.5 and later, see `.travis.yml`.
+Current target is php 8.1 or later.
 
 Code adheres to [PSR-2](http://www.php-fig.org/psr/psr-2/) and [PSR-4](http://www.php-fig.org/psr/psr-4/).
 
-To run the test-suite:
+You need a working [Docker](https://docs.docker.com/get-docker/) installation to run the tests.
 
-    php test/test.php
+To launch Docker and run the test-suite, e.g. in PHP `8.3`:
 
-To run only the unit or integration suites:
+    ./test.sh 8.3
 
-    php test/test.php --unit
-    php test/test.php --integration
+Once the Docker environment is running, you can run the tests more quickly on the existing Docker environment:
+
+    ./test.sh
+
+Once running, if you prefer, you can also just shell into the PHP container and run the tests from there, for example:
+
+    docker compose exec php sh
+    composer update
+    composer test
+    exit
 
 ## Overview
 

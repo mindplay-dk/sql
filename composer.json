@@ -16,7 +16,7 @@
         }
     },
     "require": {
-        "php": ">=7.3",
+        "php": ">=8.1",
         "ext-pdo": "*",
         "mindplay/unbox": "^3",
         "psr/log": "*"
@@ -30,5 +30,8 @@
     "suggest": {
         "ext-pdo_pgsql": "for PostgreSQL support (duh.)",
         "ext-pdo_mysql": "for MySQL support (hello, Captain Obvious.)"
+    },
+    "scripts": {
+        "test": "XDEBUG_MODE=coverage php test/test.php"
     }
 }

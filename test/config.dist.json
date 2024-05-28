@@ -1,14 +1,16 @@
 {
     "postgres": {
-        "host": "localhost",
-        "user": "postgres",
-        "password": "",
-        "database": "mindplay_sql_test"
+        "host": "postgres",
+        "port": 5432,
+        "dbname": "mindplay_sql_test",
+        "username": "root",
+        "password": "root"
     },
     "mysql": {
-        "host": "localhost",
-        "user": "travis",
-        "password": "",
-        "database": "mindplay_sql_test"
+        "host": "mariadb",
+        "port": 3306,
+        "dbname": "mindplay_sql_test",
+        "username": "root",
+        "password": "root"
     }
 }

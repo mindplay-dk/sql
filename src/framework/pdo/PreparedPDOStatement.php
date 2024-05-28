@@ -8,6 +8,7 @@ use mindplay\sql\framework\PreparedStatement;
 use mindplay\sql\model\Driver;
 use mindplay\sql\model\TypeProvider;
 use PDO;
+use PDOException;
 use PDOStatement;
 
 /**
@@ -104,7 +105,15 @@ class PreparedPDOStatement implements PreparedStatement
     {
         $microtime_begin = microtime(true);
 
-        if (@$this->handle->execute()) {
+        $success = false;
+
+        try {
+            $success = @$this->handle->execute();
+        } catch (PDOException $e) {
+            // error will be handled below
+        }
+
+        if ($success) {
             $this->executed = true;
             $microtime_end = microtime(true);
             $time_msec = ($microtime_end - $microtime_begin) * 1000;

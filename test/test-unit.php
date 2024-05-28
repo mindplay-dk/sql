@@ -396,7 +396,7 @@ test(
         foreach ($params as $name => $value) {
             $statement->bind($name, $value);
 
-            $handle->shouldReceive('bindValue')->once()->with($name, $value, $pdo_types[$name])->andReturn($handle);
+            $handle->shouldReceive('bindValue')->once()->with($name, $value, $pdo_types[$name])->andReturn(true);
         }
 
         $connection->prepare($statement);
@@ -446,7 +446,7 @@ test(
             $index = 1;
 
             foreach ($values as $value) {
-                $handle->shouldReceive('bindValue')->once()->with("{$name}_{$index}", $value, $pdo_types[$name])->andReturn($handle);
+                $handle->shouldReceive('bindValue')->once()->with("{$name}_{$index}", $value, $pdo_types[$name])->andReturn(true);
 
                 $index += 1;
             }
@@ -526,6 +526,12 @@ test(
     }
 );
 
+class MockPDOStatement extends PDOStatement
+{
+    public function __construct(public string $queryString)
+    {}
+}
+
 test(
     'connection logs executed queries',
     function () {
@@ -533,12 +539,12 @@ test(
 
         $container = $factory->createContainer();
 
-        /** @var MockInterface|PDOStatement $mock_handle */
-        $mock_handle = Mockery::mock(PDOStatement::class);
+        /** @var MockInterface|MockPDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(MockPDOStatement::class, ["SELECT :foo"]);
         $mock_handle->shouldReceive('execute')->andReturn(true)->once();
-        $mock_handle->shouldReceive('bindValue')->andReturnNull();
+        $mock_handle->shouldReceive('bindValue')->andReturn(true);
 
-        $params = $time_msec = null;
+        $sql = $params = $time_msec = null;
 
         /** @var MockInterface|PDO $pdo_mock */
         $pdo_mock = Mockery::mock(PDO::class);
@@ -546,7 +552,8 @@ test(
 
         $connection = new PostgresConnection($pdo_mock, $container);
 
-        $logger = new MockLogger(function ($arg_sql, $arg_params, $arg_time_msec) use (&$params, &$time_msec) {
+        $logger = new MockLogger(function ($arg_sql, $arg_params, $arg_time_msec) use (&$sql, &$params, &$time_msec) {
+            $sql = $arg_sql;
             $params = $arg_params;
             $time_msec = $arg_time_msec;
         });
@@ -554,17 +561,17 @@ test(
 
         $connection->execute(new MockParameterQuery($container));
 
+        eq($sql, "SELECT :foo", 'SQL is logged');
         eq($params, [ 'foo' => 'bar' ], 'params are logged');
         ok($time_msec > 0 && $time_msec < 1000, 'duration is logged and reasonable');
-        // I cannot test that the correct SQL is logged because PDO sucks
     }
 );
 
 test(
     'can fetch; and auto-executes prepared statement on first fetch',
     function () {
-        /** @var MockInterface|PDOStatement $mock_handle */
-        $mock_handle = Mockery::mock(PDOStatement::class);
+        /** @var MockInterface|MockPDOStatement $mock_handle */
+        $mock_handle = Mockery::mock(MockPDOStatement::class, [""]);
 
         $mock_handle->shouldReceive('execute')->andReturn(true)->once();
         $mock_handle->shouldReceive('fetch')->andReturn(['a' => 1])->once();
@@ -598,7 +605,7 @@ test(
         $db = create_db();
 
         /** @var MockInterface|PDOStatement $mock_statement */
-        $mock_statement = Mockery::mock(PDOStatement::class);
+        $mock_statement = Mockery::mock(MockPDOStatement::class, [""]);
 
         $mock_pdo
             ->shouldReceive('prepare')
@@ -1071,7 +1078,7 @@ test(
         $mock_pdo = Mockery::mock(PDO::class);
 
         /** @var MockInterface|PDOStatement $mock_statement */
-        $mock_statement = Mockery::mock(PDOStatement::class);
+        $mock_statement = Mockery::mock(MockPDOStatement::class, [""]);
 
         $mock_pdo->shouldReceive('prepare')->andReturn($mock_statement);
 

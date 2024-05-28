@@ -82,10 +82,8 @@ class Result implements IteratorAggregate
      *
      * This method implements `IteratorAggregate`, permitting you to iterate directly over
      * the resulting records (or objects) without explicitly having to call this method.
-     *
-     * @return Iterator
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return $this->createIterator($this->batch_size);
     }
