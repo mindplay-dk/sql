@@ -9,6 +9,8 @@ services:
       mariadb:
         condition: service_healthy
     tty: true
+    volumes:
+      - .:/app
 
   postgres:
     image: postgres:latest

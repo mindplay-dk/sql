@@ -18,14 +18,8 @@ RUN yes | pecl install xdebug \
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy the current directory contents into the container
-COPY . /app
-
 # Set the working directory
 WORKDIR /app
-
-# Install PHP dependencies
-RUN composer update --no-interaction --prefer-dist
 
 # Keep the container running by default
 CMD ["/bin/sh"]
