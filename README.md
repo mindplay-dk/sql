@@ -47,6 +47,13 @@ Code adheres to [PSR-2](http://www.php-fig.org/psr/psr-2/) and [PSR-4](http://ww
 
 You need a working [Docker](https://docs.docker.com/get-docker/) installation to run the tests.
 
+#### Using VS Code
+
+The project includes a [DevContainer](https://containers.dev/) and a `launch.json` for testing and debugging
+with VS Code - just open the project in VS Code, hit `F5` to run the tests, and you should be good to go. ✨
+
+#### Using Docker
+
 To launch Docker and run the test-suite, e.g. in PHP `8.3`:
 
     ./test.sh 8.3

@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug test/test.php",
+      "type": "php",
+      "request": "launch",
+      "cwd": "/app",
+      "program": "/app/test/test.php",
+      "externalConsole": false,
+      "port": 9003
+    }
+  ]
+}
