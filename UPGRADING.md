@@ -1,3 +1,10 @@
+### Version 0.8.0
+
+This release upgrades everything to PHP 8.1.
+
+The addition of static type-hints everywhere may be a breaking change - to upgrade, simply copy the added
+type-hints from the library into your own methods.
+
 ### Version 0.7.6
 
 This bugfix release includes some minor breaking changes.
