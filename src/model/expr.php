@@ -21,7 +21,7 @@ abstract class expr
         }
 
         return count($exprs) > 1
-            ? implode(" OR ", array_map(self::group(...), $exprs))
+            ? "(" . implode(") OR (", $exprs) . ")"
             : $exprs[0];
     }
     
@@ -37,19 +37,7 @@ abstract class expr
         }
         
         return count($exprs) > 1
-            ? implode(" AND ", array_map(self::group(...), $exprs))
+            ? "(" . implode(") AND (", $exprs) . ")"
             : $exprs[0];
-    }
-
-    private const FULLY_GROUPED = '/^\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)$/';
-
-    /**
-     * Group an expression in parentheses, if not already fully grouped
-     */
-    public static function group(string $expr): string
-    {
-        return preg_match(self::FULLY_GROUPED, $expr) === 1
-            ? $expr
-            : "($expr)";
     }
 }

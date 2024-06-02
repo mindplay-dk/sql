@@ -889,19 +889,6 @@ test(
 );
 
 test(
-    'can conditionally group SQL expressions',
-    function () {
-        eq(expr::group('a OR b'), '(a OR b)', 'should group');
-        eq(expr::group('(a) OR b'), '((a) OR b)', 'should group');
-        eq(expr::group('(a) OR (b)'), '((a) OR (b))', 'should group');
-
-        eq(expr::group('(a OR b)'), '(a OR b)', 'should not regroup');
-        eq(expr::group('((a) OR b)'), '((a) OR b)', 'should not regroup');
-        eq(expr::group('((a) OR (b))'), '((a) OR (b))', 'should not regroup');
-    }
-);
-
-test(
     'can build and/or expressions',
     function () {
         eq(expr::any(['a']), 'a');
@@ -930,8 +917,8 @@ test(
                 '(a OR b)',
                 '(c OR d)'
             ]),
-            '(a OR b) AND (c OR d)',
-            'should not regroup nested expressions'
+            '((a OR b)) AND ((c OR d))',
+            'grouped expressions will be regrouped'
         );
 
         eq(
