@@ -2,6 +2,8 @@
 
 namespace mindplay\sql\model\components;
 
+use mindplay\sql\model\expr;
+
 /**
  * This trait implements query conditions for the `WHERE` clause.
  */
@@ -31,6 +33,6 @@ trait Conditions
      */
     protected function buildConditions(): string
     {
-        return implode(" AND ", $this->conditions);
+        return expr::all($this->conditions);
     }
 }
