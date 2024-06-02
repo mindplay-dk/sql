@@ -889,19 +889,59 @@ test(
 );
 
 test(
+    'can conditionally group SQL expressions',
+    function () {
+        eq(expr::group('a OR b'), '(a OR b)', 'should group');
+        eq(expr::group('(a) OR b'), '((a) OR b)', 'should group');
+        eq(expr::group('(a) OR (b)'), '((a) OR (b))', 'should group');
+
+        eq(expr::group('(a OR b)'), '(a OR b)', 'should not regroup');
+        eq(expr::group('((a) OR b)'), '((a) OR b)', 'should not regroup');
+        eq(expr::group('((a) OR (b))'), '((a) OR (b))', 'should not regroup');
+    }
+);
+
+test(
     'can build and/or expressions',
     function () {
         eq(expr::any(['a']), 'a');
-        eq(expr::any(['a', 'b']), '(a OR b)');
-        eq(expr::any(['a', 'b', 'c']), '(a OR b OR c)');
+        eq(expr::any(['a', 'b']), '(a) OR (b)');
+        eq(expr::any(['a', 'b', 'c']), '(a) OR (b) OR (c)');
 
-        expect(RuntimeException::class, 'shoud throw for empty array', function () { expr::any([]); });
+        expect(RuntimeException::class, 'should throw for empty array', function () { expr::any([]); });
 
         eq(expr::all(['a']), 'a');
-        eq(expr::all(['a', 'b']), '(a AND b)');
-        eq(expr::all(['a', 'b', 'c']), '(a AND b AND c)');
+        eq(expr::all(['a', 'b']), '(a) AND (b)');
+        eq(expr::all(['a', 'b', 'c']), '(a) AND (b) AND (c)');
 
-        expect(RuntimeException::class, 'shoud throw for empty array', function () { expr::all([]); });
+        expect(RuntimeException::class, 'should throw for empty array', function () { expr::all([]); });
+
+        eq(
+            expr::all([
+                'a OR b',
+                'c OR d'
+            ]),
+            '(a OR b) AND (c OR d)',
+            'should group nested expressions'
+        );
+
+        eq(
+            expr::all([
+                '(a OR b)',
+                '(c OR d)'
+            ]),
+            '(a OR b) AND (c OR d)',
+            'should not regroup nested expressions'
+        );
+
+        eq(
+            expr::all([
+                expr::any(['a', 'b']),
+                expr::any(['c', 'd']),
+            ]),
+            '((a) OR (b)) AND ((c) OR (d))',
+            'should fully group nested expressions'
+        );
     }
 );
 
@@ -985,8 +1025,16 @@ test(
                 ->order("{$user->first_name} ASC")
                 ->order("{$user->last_name} ASC")
                 ->page(1, 20),
-            'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE `user`.`first_name` LIKE :first AND `user`.`last_name` LIKE :last ORDER BY `user`.`first_name` ASC, `user`.`last_name` ASC LIMIT 20 OFFSET 0',
+            'SELECT `user`.`first_name`, `user`.`last_name` FROM `user` WHERE (`user`.`first_name` LIKE :first) AND (`user`.`last_name` LIKE :last) ORDER BY `user`.`first_name` ASC, `user`.`last_name` ASC LIMIT 20 OFFSET 0',
             'select with multiple WHERE conditions, multiple ORDER BY terms, and LIMIT and OFFSET'
+        );
+
+        sql_eq(
+            $db->select($schema->user)
+                ->where("true OR true")
+                ->where("false OR false"),
+            'SELECT `user`.* FROM `user` WHERE (true OR true) AND (false OR false)',
+            'add parens when combining multiple conditions'
         );
 
         $schema->setName("test");
@@ -1001,7 +1049,7 @@ test(
                 ->order("{$user->first_name} ASC")
                 ->order("{$user->last_name} ASC")
                 ->page(1, 20),
-            'SELECT `test_user`.`first_name`, `test_user`.`last_name` FROM `test_user` WHERE `test_user`.`first_name` LIKE :first AND `test_user`.`last_name` LIKE :last ORDER BY `test_user`.`first_name` ASC, `test_user`.`last_name` ASC LIMIT 20 OFFSET 0',
+            'SELECT `test_user`.`first_name`, `test_user`.`last_name` FROM `test_user` WHERE (`test_user`.`first_name` LIKE :first) AND (`test_user`.`last_name` LIKE :last) ORDER BY `test_user`.`first_name` ASC, `test_user`.`last_name` ASC LIMIT 20 OFFSET 0',
             'qualify table-names in WHERE conditions, ORDER BY terms, LIMIT and OFFSET'
         );
     }
@@ -1176,15 +1224,15 @@ SELECT
     `home_address`.`street_name` AS `home_address_street_name`,
     `work_address`.`street_name` AS `work_address_street_name`,
     NOW() AS `now`,
-    (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) AS `num_orders`
+    (SELECT COUNT(`order_id`) FROM `order` WHERE (`order`.`user_id` = `user`.`id`) AND (`order`.`completed` >= :order_date)) AS `num_orders`
 FROM `user`
     INNER JOIN `address` AS `home_address` ON `home_address`.`id` = `user`.`home_address_id`
     INNER JOIN `address` AS `work_address` ON `work_address`.`id` = `user`.`home_address_id`
 WHERE
-    `user`.`first_name` LIKE :first_name
-    AND `user`.`dob` = :dob
-    AND (`home_address`.`street_name` LIKE :street_name OR `work_address`.`street_name` LIKE :street_name)
-    AND (SELECT COUNT(`order_id`) FROM `order` WHERE `order`.`user_id` = `user`.`id` AND `order`.`completed` >= :order_date) > 3
+    (`user`.`first_name` LIKE :first_name)
+    AND (`user`.`dob` = :dob)
+    AND ((`home_address`.`street_name` LIKE :street_name) OR (`work_address`.`street_name` LIKE :street_name))
+    AND ((SELECT COUNT(`order_id`) FROM `order` WHERE (`order`.`user_id` = `user`.`id`) AND (`order`.`completed` >= :order_date)) > 3)
 SQL;
 
         sql_eq($query, $expected_sql);
@@ -1212,15 +1260,15 @@ SELECT
     `home_address`.`street_name` AS `home_address_street_name`,
     `work_address`.`street_name` AS `work_address_street_name`,
     NOW() AS `now`,
-    (SELECT COUNT(`order_id`) FROM `x_order` WHERE `x_order`.`user_id` = `x_user`.`id` AND `x_order`.`completed` >= :order_date) AS `num_orders`
+    (SELECT COUNT(`order_id`) FROM `x_order` WHERE (`x_order`.`user_id` = `x_user`.`id`) AND (`x_order`.`completed` >= :order_date)) AS `num_orders`
 FROM `x_user`
     INNER JOIN `x_address` AS `home_address` ON `home_address`.`id` = `x_user`.`home_address_id`
     INNER JOIN `x_address` AS `work_address` ON `work_address`.`id` = `x_user`.`home_address_id`
 WHERE
-    `x_user`.`first_name` LIKE :first_name
-    AND `x_user`.`dob` = :dob
-    AND (`home_address`.`street_name` LIKE :street_name OR `work_address`.`street_name` LIKE :street_name)
-    AND (SELECT COUNT(`order_id`) FROM `x_order` WHERE `x_order`.`user_id` = `x_user`.`id` AND `x_order`.`completed` >= :order_date) > 3
+    (`x_user`.`first_name` LIKE :first_name)
+    AND (`x_user`.`dob` = :dob)
+    AND ((`home_address`.`street_name` LIKE :street_name) OR (`work_address`.`street_name` LIKE :street_name))
+    AND ((SELECT COUNT(`order_id`) FROM `x_order` WHERE (`x_order`.`user_id` = `x_user`.`id`) AND (`x_order`.`completed` >= :order_date)) > 3)
 SQL;
 
         sql_eq($query, $expected_sql);

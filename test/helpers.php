@@ -24,7 +24,10 @@ function normalize_sql($sql)
  */
 function sql_eq(Statement $query, $expected_sql, $why = null)
 {
-    eq(normalize_sql($query->getSQL()), normalize_sql($expected_sql), $why);
+    $actual = normalize_sql($query->getSQL());
+    $expected = normalize_sql($expected_sql);
+
+    eq($actual, $expected, $why);
 }
 
 /**

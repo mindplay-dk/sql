@@ -10,6 +10,7 @@ use mindplay\sql\model\components\Order;
 use mindplay\sql\model\components\Range;
 use mindplay\sql\model\components\ReturnVars;
 use mindplay\sql\model\Driver;
+use mindplay\sql\model\expr;
 use mindplay\sql\model\schema\Column;
 use mindplay\sql\model\schema\Table;
 use mindplay\sql\model\schema\Type;
@@ -311,10 +312,10 @@ class SelectQuery extends Query implements MapperProvider, Countable
     }
 
     /**
-     * @return string combined condition expression (for use in the WHERE clause of an SQL statement)
+     * @return string combined condition expression (for use in the HAVING clause of an SQL statement)
      */
     protected function buildHaving(): string
     {
-        return implode(" AND ", $this->having);
+        return expr::all($this->having);
     }
 }
