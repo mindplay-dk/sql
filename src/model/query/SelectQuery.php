@@ -119,7 +119,7 @@ class SelectQuery extends Query implements MapperProvider, Countable
      *
      * @return $this
      */
-    public function value($expr, $name = null, $type = null)
+    public function value(string $expr, string|null $name = null, Type|string|null $type = null)
     {
         $this->return_vars->addValue($expr, $name, $type);
 

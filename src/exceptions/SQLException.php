@@ -23,7 +23,7 @@ class SQLException extends RuntimeException
         array $params = [],
         string $message = 'SQL Error',
         int $code = 0,
-        Exception $previous = null
+        Exception|null $previous = null
     ) {
         parent::__construct(
             "{$message}\n" . QueryFormatter::formatQuery($sql, $params),
