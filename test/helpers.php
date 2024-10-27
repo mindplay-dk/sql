@@ -22,7 +22,7 @@ function normalize_sql($sql)
  * @param string      $expected_sql
  * @param string|null $why
  */
-function sql_eq(Statement $query, $expected_sql, $why = null)
+function sql_eq(Statement $query, $expected_sql, string|null $why = null)
 {
     $actual = normalize_sql($query->getSQL());
     $expected = normalize_sql($expected_sql);

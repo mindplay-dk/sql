@@ -18,7 +18,7 @@ abstract class Database
      *
      * @param DatabaseContainerFactory|null $factory custom factory instance (typically omitted)
      */
-    public function __construct(DatabaseContainerFactory $factory = null)
+    public function __construct(DatabaseContainerFactory|null $factory = null)
     {
         if ($factory === null) {
             $factory = new DatabaseContainerFactory();
