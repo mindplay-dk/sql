@@ -39,9 +39,9 @@ class Result implements IteratorAggregate
     }
 
     /**
-     * @return array<string,mixed>|null first record of the record-set (or NULL, if the record-set is empty)
+     * @return mixed|null first record of the record-set (or NULL, if the record-set is empty)
      */
-    public function firstRow(): array|null
+    public function firstRow(): mixed
     {
         foreach ($this->createIterator(1) as $record) {
             return $record; // break from loop immediately after fetching the first record

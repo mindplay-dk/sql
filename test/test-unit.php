@@ -696,14 +696,14 @@ test(
         $mappers = [new RecordMapper(function (array $record) use (&$calls) {
             $calls[] = $record;
 
-            return $record;
+            return (object) $record;
         })];
 
         $result = new Result($mock_statement, 20, $mappers);
 
         $record = $result->firstRow();
 
-        eq($record, ['id' => 1], 'should return first row');
+        eq($record->id, 1, 'should return first result');
 
         eq($calls, [['id' => 1]], 'should process precisely one record (disregarding batch size)');
     }
