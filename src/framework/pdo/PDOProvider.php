@@ -49,7 +49,7 @@ class PDOProvider
      * @param string|null            $host     optional hostname; defaults to "localhost"
      * @param int|null               $port     optional port-number; defaults to the standard port-number for the given $db type
      */
-    public function __construct(string $protocol, string $dbname, string $username, string $password, array $options = null, string $host = null, int|null $port = null)
+    public function __construct(string $protocol, string $dbname, string $username, string $password, array|null $options = null, string|null $host = null, int|null $port = null)
     {
         static $default_port = [
             self::PROTOCOL_MYSQL    => 3306,

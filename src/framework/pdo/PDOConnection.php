@@ -217,7 +217,7 @@ abstract class PDOConnection implements Connection, PDOExceptionMapper, Logger
     /**
      * @param $sequence_name auto-sequence name (or NULL for e.g. MySQL which supports only one auto-key)
      */
-    public function lastInsertId(?string $sequence_name = null): string|int|null
+    public function lastInsertId(string|null $sequence_name = null): string|int|null
     {
         $id = $this->pdo->lastInsertId($sequence_name);
         

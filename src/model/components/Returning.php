@@ -52,7 +52,7 @@ trait Returning
      *
      * @return $this
      */
-    public function returningValue($expr, $name = null, $type = null): static
+    public function returningValue(string $expr, string|null $name = null, Type|string|null $type = null): static
     {
         $this->return_vars->addValue($expr, $name, $type);
 

@@ -72,7 +72,7 @@ interface Connection
      *
      * @return string|int|null the last auto-generated ID (usually an integer, could be a string for UUIDs, etc.)
      */
-    public function lastInsertId(?string $sequence_name = null): string|int|null;
+    public function lastInsertId(string|null $sequence_name = null): string|int|null;
 
     /**
      * Add a `Logger` instance, which will be notified when a query is executed.
